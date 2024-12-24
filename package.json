@@ -1,0 +1,15 @@
+{
+  "name": "chat_plus",
+  "version": "1.0.0",
+  "description": "mify桌面版",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "author": "Ma Chaojin",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.2.1"
+  }
+}
