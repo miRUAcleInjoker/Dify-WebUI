@@ -746,10 +746,10 @@ class ChatApp {
         messages.forEach(message => {
             // 创建AI响应消息并使用 Markdown 渲染
             if (message.answer) {
-                const botMessageDiv = this.appendMessage('', false);
-                botMessageDiv.querySelector('.message-content').innerHTML = marked.parse(message.answer);
                 const userMessageDiv = this.appendMessage('', true);
                 userMessageDiv.querySelector('.message-content').innerHTML = marked.parse(message.query);
+                const botMessageDiv = this.appendMessage('', false);
+                botMessageDiv.querySelector('.message-content').innerHTML = marked.parse(message.answer); 
             }
         });
         
