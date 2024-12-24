@@ -190,7 +190,7 @@ class ChatApp {
         // 处理消息内容
         if (isUser) {
             // 用户消息直接显示
-            messageContent.textContent = content;
+            messageContent.innerHTML = marked.parse(content);
             messageContent.classList.add('show-content');
         } else {
              // 机器人消息需要分割并添加 span
@@ -370,7 +370,6 @@ class ChatApp {
         
         const message = this.userInput.value.trim();
         if (!message && !this.currentUploadedFile) return;
-
         // 显示用户消息
         this.appendMessage(message, true);
         this.userInput.value = '';
@@ -543,6 +542,7 @@ class ChatApp {
     }
 
     renderConversations(messages) {
+        messages.sort((a, b) => b.created_at - a.created_at);
         this.conversationItems.innerHTML = ''; // 清除现有列表
         messages.forEach(message => {
             const item = document.createElement('div');
