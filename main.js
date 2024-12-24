@@ -1,7 +1,7 @@
 // main.js
 const { app, Menu, BrowserWindow } = require('electron')
 const path = require('node:path')
-
+// require('update-electron-app')()
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -17,7 +17,7 @@ const createWindow = () => {
   Menu.setApplicationMenu(null);
 
   // 打开开发工具
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 }
 
 // 这段程序将会在 Electron 结束初始化

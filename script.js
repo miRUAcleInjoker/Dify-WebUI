@@ -40,12 +40,7 @@ class ChatApp {
         this.userAvatar = document.getElementById('userAvatar');
         this.userNameDisplay = document.getElementById('userName');
         
-        // 从 localStorage 加载配置
-        setTimeout(() => {
-            this.loadSettings();
-            this.initSettingsHandlers();
-        }, 0);
-        
+        this.loadSettings();
         // 初始化设置相关的事件监听
         this.initSettingsHandlers();
         this.init();
@@ -896,28 +891,37 @@ class ChatApp {
         this.user = newUserId;
 
         alert('设置已保存');
-        this.toggleSettingsPage();
+        this.chatContainer.style.display = 'none';
+        this.welcomePage.style.display = 'flex';
+        this.settingsPage.style.display = 'none';
     }
 
     toggleSettingsPage() {
+        // 获取当前显示状态
         const isSettingsVisible = this.settingsPage.style.display === 'flex';
-        this.settingsPage.style.display = isSettingsVisible ? 'none' : 'flex';
-        this.welcomePage.style.display = isSettingsVisible ? 'flex' : 'none';
+        
+        // 先隐藏所有页面
         this.chatContainer.style.display = 'none';
-
-        // 从 localStorage 重新加载设置以确保显示最新值
+        this.welcomePage.style.display = 'none';
+        this.settingsPage.style.display = 'none';
+        
         if (!isSettingsVisible) {
-            // 如果是打开设置页面，刷新表单数据
+            // 显示设置页面
+            this.settingsPage.style.display = 'flex';
+            // 加载设置
             this.loadSettings();
             
             // 更新主题选择器的激活状态
             document.querySelectorAll('.theme-option').forEach(option => {
                 option.classList.toggle('active', option.dataset.theme === this.currentTheme);
             });
+        }else{
+            // 显示欢迎页面
+            this.welcomePage.style.display = 'flex';
         }
     }
 }
-    
+
 // 初始化应用并使其全局可用（为了处理预览图片的删除）
 let chatApp;
 document.addEventListener('DOMContentLoaded', () => {
