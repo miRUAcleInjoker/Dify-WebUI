@@ -165,62 +165,101 @@ class ChatApp {
     appendMessage(content, isUser = false, parent = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${isUser ? 'user' : 'bot'} new`;
-        
+    
         // 添加头像
         const avatar = document.createElement('img');
         avatar.className = 'avatar';
         if (isUser) {
+            setTimeout(() => {
+                messageDiv.classList.add('show');
+            }, 10);
             avatar.src = `https://api.dicebear.com/7.x/adventurer/svg?seed=${this.userName}`;  // 用户默认头像
             messageDiv.setAttribute('data-user', this.userName);
         } else {
             avatar.src = 'https://api.dicebear.com/7.x/bottts/svg?seed=bot';  // 机器人默认头像
         }
         messageDiv.appendChild(avatar);
-        
+    
         // 创建一个包装器来包含消息内容和建议
         const contentWrapper = document.createElement('div');
         contentWrapper.className = 'message-content-wrapper';
-        
+    
         const messageContent = document.createElement('div');
         messageContent.className = 'message-content';
-        
+    
+        // 处理消息内容
         if (isUser) {
+            // 用户消息直接显示
             messageContent.textContent = content;
+            messageContent.classList.add('show-content');
         } else {
-            messageContent.innerHTML = content ? marked.parse(content) : '';
+             // 机器人消息需要分割并添加 span
+            const p = document.createElement('p');
+            if(content) {
+                const words = content.split('');
+                words.forEach(word => {
+                    const span = document.createElement('span');
+                    span.textContent = word;
+                    p.appendChild(span);
+                });
+            }
+            messageContent.appendChild(p);
+            messageContent.innerHTML = marked.parse(messageContent.innerHTML);
+    
+            //  逐字显示机器人消息
+            this.showContent(messageContent);
         }
-        
+    
+    
         contentWrapper.appendChild(messageContent);
-        
+    
         // 为机器人消息添加建议容器
         if (!isUser) {
             const suggestionsContainer = document.createElement('div');
             suggestionsContainer.className = 'suggestions-container';
             contentWrapper.appendChild(suggestionsContainer);
         }
-        
+    
         messageDiv.appendChild(contentWrapper);
-        
+    
         // 添加时间戳
-        const time = new Date().toLocaleTimeString('zh-CN', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
+        const time = new Date().toLocaleTimeString('zh-CN', {
+            hour: '2-digit',
+            minute: '2-digit'
         });
         messageDiv.setAttribute('data-time', time);
-        
+    
         if (parent) {
             parent.appendChild(messageDiv);
         } else {
             this.chatMessages.appendChild(messageDiv);
             this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
         }
-        
+    
         setTimeout(() => {
             messageDiv.classList.remove('new');
         }, 500);
+    
+         setTimeout(() => {
+            messageDiv.classList.add('show');
+        }, 10);
         
         return messageDiv;
     }
+     showContent(messageContent) {
+            const spans = messageContent.querySelectorAll('p span');
+            let delay = 0;
+            spans.forEach((span) => {
+                setTimeout(() => {
+                    span.style.opacity = 1;
+                }, delay);
+                delay += 20; // 调整延迟时间，控制文字出现速度
+            });
+             // 所有文字显示完毕，添加 show-content class
+            setTimeout(() => {
+                messageContent.classList.add('show-content');
+            }, delay);
+        }
 
     async handleFileSelect(event) {
         const file = event.target.files[0];
@@ -387,8 +426,7 @@ class ChatApp {
                     break;
                 }
                 
-                // 添加打字机效果
-                botMessageDiv.classList.add('typing');
+                botMessageDiv.classList.add('show');
                 const chunk = decoder.decode(value);
                 const lines = chunk.split('\n');
                 
@@ -453,7 +491,7 @@ class ChatApp {
             console.error('发送消息失败:', error);
             botMessageDiv.querySelector('.message-content').textContent = '抱歉，发生了错误。请稍后重试。';
         }
-        this.textToAudio(this.lastMessageId);
+        // this.textToAudio(this.lastMessageId);
         
         await this.loadConversations();
 
@@ -708,10 +746,10 @@ class ChatApp {
         messages.forEach(message => {
             // 创建AI响应消息并使用 Markdown 渲染
             if (message.answer) {
-                const userDiv = this.appendMessage(message.query, true, fragment);
-                userDiv.querySelector('.message-content').innerHTML = marked.parse(message.query);
-                const botDiv = this.appendMessage(message.answer, false, fragment);
-                botDiv.querySelector('.message-content').innerHTML = marked.parse(message.answer);
+                const botMessageDiv = this.appendMessage('', false);
+                botMessageDiv.querySelector('.message-content').innerHTML = marked.parse(message.answer);
+                const userMessageDiv = this.appendMessage('', true);
+                userMessageDiv.querySelector('.message-content').innerHTML = marked.parse(message.query);
             }
         });
         
@@ -733,6 +771,7 @@ class ChatApp {
             this.userInput.value = initialMessage;
             this.sendMessage();
         }
+        this.loadConversations();
     }
 
     toggleMobileSidebar() {

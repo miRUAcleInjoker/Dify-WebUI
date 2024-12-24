@@ -14,7 +14,7 @@
     --hover-transform: translateY(-2px);
     --hover-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     --animation-duration: 0.3s;
-    --avatar-size: 40px;  /* 新增：头像大小 */
+    --avatar-size: 50px;  /* 新增：头像大小 */
     --avatar-margin: 8px; /* 新增：头像边距 */
     --settings-width: 500px;
     --theme-color-default: #10a37f;
@@ -149,27 +149,51 @@ body {
 }
 
 .message {
+    /* 使用 flex 布局，设置为行排列 */
     display: flex;
-    flex-direction: row; /* 改为横向排列以支持头像 */
-    align-items: flex-start; /* 确保头像和内容顶部对齐 */
-    padding: 0 1rem;
+    flex-direction: row;
+    /* 子元素在交叉轴上对齐方式设为顶部对齐 */
+    align-items: flex-start;
+    /* 左右内边距 1rem，使内容不贴边 */
+    padding: 0 2rem;
+    /* 消息间的下边距 1rem */
     margin-bottom: 1rem;
-    animation: fadeIn 0.3s ease;
-    max-width: 85%;  /* 保持最大宽度限制 */
-    width: fit-content; /* 修改：根据内容自适应宽度 */
-    position: relative; /* 添加相对定位 */
-    animation: messageSlideIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+    /* 最大宽度限制为容器的 85% */
+    max-width: 85%;
+    /* 宽度由内容决定 */
+    width: fit-content;
+    /* 用于定位时间戳等绝对定位元素 */
+    position: relative;
+    /* 删除初始透明度和过渡效果 */
+    /* opacity: 0; */
+    /* transition: opacity 0.3s ease; */
+    min-height: 60px; /* 添加最小高度防止抖动 */
 }
 
+/* 显示消息时的样式 */
+.message.show {
+    /* 设置消息的透明度为完全不透明 */
+    opacity: 1;
+    /* 将消息的垂直位置设置为初始位置 */
+    transform: translateY(0);
+}
+
+/* 机器人消息的样式 */
 .message.bot {
+    /* 将消息对齐到容器的起始位置 */
     align-self: flex-start;
+    /* 自动设置右边距以确保消息靠左对齐 */
     margin-right: auto;
 }
 
+/* 用户消息的样式 */
 .message.user {
+    /* 将消息对齐到容器的结束位置 */
     align-self: flex-end;
+    /* 自动设置左边距以确保消息靠右对齐 */
     margin-left: auto;
-    flex-direction: row-reverse; /* 用户消息头像在右边 */
+    /* 将消息内容的排列方向设置为从右到左 */
+    flex-direction: row-reverse;
 }
 
 /* 新增：头像样式 */
@@ -182,8 +206,8 @@ body {
 }
 
 .message-content-wrapper {
-    flex: 0 1 auto; /* 修改：允许内容收缩 */
-    min-width: 200px; /* 添加：设置最小宽度 */
+    flex: 0 1 auto;
+    min-width: 200px;
     max-width: calc(100% - var(--avatar-size) - (var(--avatar-margin) * 2));
 }
 
@@ -191,19 +215,59 @@ body {
     max-width: 100%;
     overflow-wrap: break-word;
     line-height: 1.6;
-    width: auto; /* 修改：自适应内容宽度 */
-    min-width: 100%; /* 确保至少和wrapper一样宽 */
+    width: auto; 
+    min-width: 100%; 
     padding: 1rem;
     border-radius: var(--message-radius);
     box-shadow: var(--message-shadow);
     position: relative;
     overflow: hidden;
-    transition: all var(--animation-duration) ease;
+    opacity: 0; 
+    transition: all 0.3s ease, opacity 0.3s ease;
 }
 
+/* 显示消息内容时的样式 */
+.message-content.show-content {
+    opacity: 1;
+}
+
+/* 消息内容段落的样式 */
 .message-content p {
     margin: 0.5rem 0;
     line-height: 1.6;
+    white-space: pre-wrap;
+    overflow: hidden;
+    width: 100%;
+    display: block;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+/* 显示消息内容段落时的样式 */
+.message-content.show-content p {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 消息内容段落中span元素的样式 */
+.message-content p span {
+    display: inline;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInDown 0.4s ease forwards;
+}
+
+/* 定义fadeInDown动画 */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .message-content h1, 
@@ -238,7 +302,7 @@ body {
     position: relative;
     background: #f6f8fa;
     border-radius: 6px;
-    padding: 1.5rem 1rem 1rem; /* 增加顶部内边距，为复制按钮留出空间 */
+    padding: 1.5rem 1rem 1rem; /* 调整内边距 */
     margin: 1rem 0;
     overflow-x: auto;
     width: 100%;
@@ -728,7 +792,6 @@ button:hover {
 
 .loading, .error, .no-conversations {
     padding: 1rem;
-    text-align: center;
     color: #666;
     font-size: 0.9rem;
 }
@@ -975,12 +1038,21 @@ button:hover {
 @keyframes messageSlideIn {
     from {
         opacity: 0;
-        transform: translateY(20px) scale(0.98);
+        transform: translateY(-20px);
     }
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
     }
+}
+
+.message.new {
+    animation: messageSlideIn 0.3s ease-out forwards;
+}
+
+/* 添加消息堆叠动画延迟 */
+.message:nth-child(n+1) {
+    animation-delay: calc(0.1s * var(--message-index, 0));
 }
 
 .settings-button {

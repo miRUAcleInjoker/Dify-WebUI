@@ -5,7 +5,7 @@ module.exports = {
         config: {
           repository: {
             owner: 'machaojin1917939763',
-            name: 'chat_plus'
+            name: 'MiChat'
           },
           prerelease: false,
           draft: true

@@ -5,11 +5,12 @@ const path = require('node:path')
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1000,
+    width: 1200,
     height: 800,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
-    }
+    },
+    icon: 'logo.png' // 设置窗口图标
   })
 
   // 加载 index.html
@@ -17,7 +18,7 @@ const createWindow = () => {
   Menu.setApplicationMenu(null);
 
   // 打开开发工具
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 }
 
 // 这段程序将会在 Electron 结束初始化
