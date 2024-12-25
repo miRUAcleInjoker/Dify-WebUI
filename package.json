@@ -1,26 +1,61 @@
 {
   "name": "MiChat",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "小米政企助手",
   "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/machaojin1917939763/chat_plus.git"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
-    "publish": "electron-forge publish"
+    "build": "electron-builder --win",
+    "publish": "electron-builder --win -p always",
+    "package": "electron-builder --dir",
+    "make": "electron-builder"
   },
   "author": "Ma Chaojin",
   "license": "MIT",
   "devDependencies": {
+    "@electron-forge/cli": "^7.6.0",
+    "@electron-forge/maker-deb": "^7.6.0",
+    "@electron-forge/maker-rpm": "^7.6.0",
+    "@electron-forge/maker-squirrel": "^7.6.0",
+    "@electron-forge/maker-zip": "^7.6.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.6.0",
+    "@electron-forge/plugin-fuses": "^7.6.0",
     "@electron-forge/publisher-github": "^7.6.0",
-    "electron": "^33.2.1"
+    "@electron/fuses": "^1.8.0",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
   },
   "dependencies": {
-    "electron-forge": "^5.2.4",
+    "electron-log": "^5.2.4",
+    "electron-squirrel-startup": "^1.0.1",
+    "electron-updater": "^6.3.9",
     "update-electron-app": "^3.1.0"
   },
   "build": {
-    "icon": "xiaomi.ico",
-    "icon": "path/to/icon.icns",
-    "icon": "path/to/icon.png"
+    "appId": "com.machaojin.michat",
+    "productName": "MiChat",
+    "publish": [{
+      "provider": "github",
+      "owner": "machaojin1917939763",
+      "repo": "chat_plus"
+    }],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "build/icons/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "MiChat"
+    }
   }
 }

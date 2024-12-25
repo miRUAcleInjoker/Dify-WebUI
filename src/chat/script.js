@@ -116,7 +116,9 @@ class ChatApp {
         });
         this.uploadButton.addEventListener('click', () => this.fileInput.click());
         this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
-        
+
+        this.userInput.addEventListener('input', () => this.adjustTextareaHeight(this.userInput));
+        this.welcomeUserInput.addEventListener('input', () => this.adjustTextareaHeight(this.welcomeUserInput));
         
         // 添加新对话按钮事件
         this.newChatButton.addEventListener('click', () => this.startNewChat());
@@ -161,6 +163,11 @@ class ChatApp {
         });
         this.welcomeUploadButton.addEventListener('click', () => this.welcomeFileInput.click());
         this.welcomeFileInput.addEventListener('change', (e) => this.handleWelcomeFileSelect(e));
+    }
+
+    adjustTextareaHeight(textarea) {
+        textarea.style.height = 'auto'; // 重置高度
+        textarea.style.height = `${textarea.scrollHeight}px`; // 根据内容调整高度
     }
 
     appendMessage(content, isUser = false, parent = null) {
@@ -302,12 +309,14 @@ class ChatApp {
                     <button class="remove-button" onclick="chatApp.removeAttachment()">×</button>
                 </div>
             `;
+            this.attachmentPreview.style.display = 'block'; // 显示预览
         };
         reader.readAsDataURL(file);
     }
 
     removeAttachment() {
         this.attachmentPreview.innerHTML = '';
+        this.attachmentPreview.style.display = 'none'; // 隐藏预览
         this.currentUploadedFile = null;
         this.fileInput.value = '';
     }
@@ -374,7 +383,9 @@ class ChatApp {
         // 显示用户消息
         this.appendMessage(message, true);
         this.userInput.value = '';
-
+        this.userInput.style.height = 'auto'; // 发送消息后重置高度
+        this.welcomeUserInput.style.height = 'auto'; // 发送消息后重置高度
+        this.removeAttachment(); // 发送消息后移除附件预览
         // 准备发送数据
         const sendData = {
             query: message,
