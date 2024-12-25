@@ -39,6 +39,7 @@ class ChatApp {
         this.userName = localStorage.getItem('userName') || '未设置用户名';
         this.userAvatar = document.getElementById('userAvatar');
         this.userNameDisplay = document.getElementById('userName');
+        this.toggleSettingsStates = null;
         
         this.loadSettings();
         // 初始化设置相关的事件监听
@@ -572,6 +573,10 @@ class ChatApp {
                 this.switchConversation(message.id);
             });
 
+            if (message.id === this.currentConversationId) {
+                item.classList.add('active');
+            }
+
             this.conversationItems.appendChild(item);
         });
     }
@@ -930,33 +935,55 @@ class ChatApp {
         this.user = newUserId;
 
         alert('设置已保存');
-        this.chatContainer.style.display = 'none';
-        this.welcomePage.style.display = 'flex';
         this.settingsPage.style.display = 'none';
+        if (this.toggleSettingsStates) {
+            if (this.toggleSettingsStates.chatContainer.wasVisible) {
+                this.chatContainer.style.display = 'flex';
+            } else {
+                this.welcomePage.style.display = 'flex';
+            }
+        }else {
+            this.welcomePage.style.display = 'flex';
+        }
     }
 
     toggleSettingsPage() {
         // 获取当前显示状态
         const isSettingsVisible = this.settingsPage.style.display === 'flex';
-        
-        // 先隐藏所有页面
-        this.chatContainer.style.display = 'none';
-        this.welcomePage.style.display = 'none';
-        this.settingsPage.style.display = 'none';
-        
         if (!isSettingsVisible) {
+            // 保存当前状态
+            this.toggleSettingsStates = {
+                chatContainer: {
+                    display: this.chatContainer.style.display,
+                    wasVisible: this.chatContainer.style.display === 'flex'
+                },
+                welcomePage: {
+                    display: this.welcomePage.style.display,
+                    wasVisible: this.welcomePage.style.display === 'flex'
+                }
+            };
+            // 隐藏其他页面
+            this.chatContainer.style.display = 'none';
+            this.welcomePage.style.display = 'none';
             // 显示设置页面
             this.settingsPage.style.display = 'flex';
             // 加载设置
             this.loadSettings();
-            
             // 更新主题选择器的激活状态
             document.querySelectorAll('.theme-option').forEach(option => {
                 option.classList.toggle('active', option.dataset.theme === this.currentTheme);
             });
-        }else{
-            // 显示欢迎页面
-            this.welcomePage.style.display = 'flex';
+        } else {
+            // 隐藏设置页面
+            this.settingsPage.style.display = 'none';
+            // 恢复之前的状态
+            if (this.toggleSettingsStates) {
+                if (this.toggleSettingsStates.chatContainer.wasVisible) {
+                    this.chatContainer.style.display = 'flex';
+                } else {
+                    this.welcomePage.style.display = 'flex';
+                }
+            }
         }
     }
 }
