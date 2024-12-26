@@ -97,8 +97,7 @@ const createWindow = () => {
       partition: 'persist:main',
       disableHardwareAcceleration: true,
       session: {
-        cachePath: cacheDir,
-        clearCache: true
+        cachePath: cacheDir
       }
     }
   })
@@ -106,12 +105,6 @@ const createWindow = () => {
   // 配置session
   const ses = mainWindow.webContents.session
   ses.clearCache()
-    .then(() => {
-      log.info('Cache cleared successfully')
-      return ses.clearStorageData({
-        storages: ['appcache', 'filesystem', 'indexdb', 'localstorage', 'shadercache', 'websql', 'serviceworkers', 'cachestorage'],
-      })
-    })
     .then(() => {
       log.info('Storage cleared successfully')
       mainWindow.loadFile('src/chat/index.html')

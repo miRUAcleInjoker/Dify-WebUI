@@ -780,7 +780,7 @@ class ChatApp {
         this.chatMessages.innerHTML = '';
         
         this.welcomePage.style.display = 'flex';
-        this.chatContainer.style.display = 'flex';
+        this.chatContainer.style.display = 'none';
         
         // 如果有初始消息，则自动发送
         if (initialMessage) {
