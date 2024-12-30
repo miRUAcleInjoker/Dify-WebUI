@@ -7,20 +7,18 @@
     "type": "git",
     "url": "https://github.com/machaojin1917939763/chat_plus.git"
   },
-  {
-    "scripts": {
-      "start": "electron .",
-      "build": "electron-builder -mwl", 
-      "build:win": "electron-builder --win",
-      "build:mac": "electron-builder --mac",
-      "build:linux": "electron-builder --linux",
-      "publish": "electron-builder -mwl -p always",
-      "publish:win": "electron-builder --win -p always",
-      "publish:mac": "electron-builder --mac -p always",
-      "publish:linux": "electron-builder --linux -p always",
-      "package": "electron-builder --dir",
-      "make": "electron-builder"
-    }
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder -mwl",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:linux": "electron-builder --linux",
+    "publish": "electron-builder -mwl -p always",
+    "publish:win": "electron-builder --win -p always",
+    "publish:mac": "electron-builder --mac -p always",
+    "publish:linux": "electron-builder --linux -p always",
+    "package": "electron-builder --dir",
+    "make": "electron-builder"
   },
   "author": "Ma Chaojin",
   "license": "MIT",
