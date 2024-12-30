@@ -2,6 +2,7 @@
   "name": "MiChat",
   "version": "3.0.9",
   "description": "小米政企助手",
+  "email": "machaojin@xiaomi.com",
   "main": "main.js",
   "repository": {
     "type": "git",
