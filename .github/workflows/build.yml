@@ -5,6 +5,12 @@ on:
     tags:
       - 'v*'
 
+# 添加权限配置
+permissions:
+  contents: write # 用于创建 release 和上传构建文件
+  issues: write
+  pull-requests: write
+
 jobs:
   release:
     runs-on: ${{ matrix.os }}
@@ -29,6 +35,7 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
+                 
             ${{ runner.os }}-node-
 
       - name: Install Dependencies
@@ -37,7 +44,8 @@ jobs:
       # Linux 依赖
       - name: Install Linux Dependencies
         if: matrix.os == 'ubuntu-latest'
-        run: |        
+        run: |
+                 
           sudo dpkg --add-architecture i386
           sudo apt-get update
           sudo apt-get install -y wine64 wine32 rpm
@@ -46,20 +54,26 @@ jobs:
       # Windows 构建
       - name: Build/release Windows
         if: matrix.os == 'windows-latest'
-        env:
-          GH_TOKEN: ${{ secrets.github_token }}
-        run: npm run publish:win
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          args: --win
 
       # macOS 构建
       - name: Build/release MacOS
         if: matrix.os == 'macos-latest'
-        env:
-          GH_TOKEN: ${{ secrets.github_token }}
-        run: npm run publish:mac
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          args: --mac
 
       # Linux 构建
       - name: Build/release Linux
         if: matrix.os == 'ubuntu-latest'
-        env:
-          GH_TOKEN: ${{ secrets.github_token }}
-        run: npm run publish:linux
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          args: --linux
