@@ -50,12 +50,23 @@
       "target": ["nsis"],
       "icon": "build/icons/icon.ico"
     },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    },
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": ["dmg", "zip"]
+    },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "MiChat"
-    }
+    },
+    "category": "Development"
   }
 }

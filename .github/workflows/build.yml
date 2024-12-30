@@ -1,0 +1,53 @@
+name: Build/release
+
+# 添加权限配置
+permissions:
+    contents: write # 用于创建 release 和上传构建文件
+    packages: write # 如果需要发布包
+    issues: write   # 如果需要操作 issues
+
+on:
+  push:
+    tags:
+      - 'v*'
+  # 可以添加以下配置用于测试（可选）
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+      fail-fast: false  # 添加这行确保一个平台失败不影响其他平台
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      # 添加缓存以加快构建速度
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |         
+            ${{ runner.os }}-node-
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build/release Electron app
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
