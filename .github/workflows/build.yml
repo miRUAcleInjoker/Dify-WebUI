@@ -57,6 +57,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
           args: --win
+          run: npm run publish:win
 
       # macOS 构建
       - name: Build/release MacOS
@@ -66,6 +67,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
           args: --mac
+          run: npm run publish:mac
 
       # Linux 构建
       - name: Build/release Linux
@@ -75,3 +77,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
           args: --linux
+          run: npm run publish:linux
