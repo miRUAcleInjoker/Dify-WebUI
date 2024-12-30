@@ -28,40 +28,38 @@ jobs:
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |    
+          restore-keys: |
             ${{ runner.os }}-node-
 
       - name: Install Dependencies
         run: npm install
 
-      # Linux 依赖安装
+      # Linux 依赖
       - name: Install Linux Dependencies
         if: matrix.os == 'ubuntu-latest'
-        run: |      
+        run: |        
+          sudo dpkg --add-architecture i386
           sudo apt-get update
-          sudo apt-get install -y rpm
+          sudo apt-get install -y wine64 wine32 rpm
+          sudo apt-get install -y --no-install-recommends libopenjp2-tools
 
-      # 根据操作系统选择构建命令
+      # Windows 构建
       - name: Build/release Windows
         if: matrix.os == 'windows-latest'
-        uses: samuelmeuli/action-electron-builder@v1
-        with:
-          github_token: ${{ secrets.github_token }}
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-          args: --win
+        env:
+          GH_TOKEN: ${{ secrets.github_token }}
+        run: npm run publish:win
 
+      # macOS 构建
       - name: Build/release MacOS
         if: matrix.os == 'macos-latest'
-        uses: samuelmeuli/action-electron-builder@v1
-        with:
-          github_token: ${{ secrets.github_token }}
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-          args: --mac
+        env:
+          GH_TOKEN: ${{ secrets.github_token }}
+        run: npm run publish:mac
 
+      # Linux 构建
       - name: Build/release Linux
         if: matrix.os == 'ubuntu-latest'
-        uses: samuelmeuli/action-electron-builder@v1
-        with:
-          github_token: ${{ secrets.github_token }}
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-          args: --linux
+        env:
+          GH_TOKEN: ${{ secrets.github_token }}
+        run: npm run publish:linux
