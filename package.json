@@ -2,7 +2,6 @@
   "name": "MiChat",
   "version": "3.0.10",
   "description": "小米政企助手",
-  "email": "machaojin@xiaomi.com",
   "main": "main.js",
   "repository": {
     "type": "git",
@@ -21,7 +20,10 @@
     "package": "electron-builder --dir",
     "make": "electron-builder"
   },
-  "author": "Ma Chaojin",
+  "author": {
+    "name": "Ma Chaojin",
+    "email": "machaojin@xiaomi.com"
+  },
   "license": "MIT",
   "devDependencies": {
     "@electron-forge/cli": "^7.6.0",
