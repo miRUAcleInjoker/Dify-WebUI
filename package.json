@@ -14,9 +14,9 @@
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux",
     "publish": "electron-builder -mwl -p always",
-    "publish:win": "electron-builder --win -p always",
-    "publish:mac": "electron-builder --mac -p always",
-    "publish:linux": "electron-builder --linux -p always",
+    "publish:win": "electron-builder --win -p always --verbose",
+  "publish:mac": "electron-builder --mac -p always --verbose",
+  "publish:linux": "electron-builder --linux -p always --verbose",
     "package": "electron-builder --dir",
     "make": "electron-builder"
   },
