@@ -58,7 +58,8 @@
       "target": [
         "AppImage",
         "deb"
-      ]
+      ],
+      "category": "Development"
     },
     "mac": {
       "category": "public.app-category.productivity",
@@ -73,7 +74,6 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "MiChat"
-    },
-    "category": "Development"
+    }
   }
 }
