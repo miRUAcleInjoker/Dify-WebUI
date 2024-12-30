@@ -34,8 +34,7 @@ jobs:
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-                 
+          restore-keys: |    
             ${{ runner.os }}-node-
 
       - name: Install Dependencies
@@ -44,8 +43,7 @@ jobs:
       # Linux 依赖
       - name: Install Linux Dependencies
         if: matrix.os == 'ubuntu-latest'
-        run: |
-                 
+        run: |  
           sudo dpkg --add-architecture i386
           sudo apt-get update
           sudo apt-get install -y wine64 wine32 rpm
