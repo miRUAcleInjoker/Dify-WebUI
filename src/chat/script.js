@@ -40,20 +40,61 @@ class ChatApp {
         this.userAvatar = document.getElementById('userAvatar');
         this.userNameDisplay = document.getElementById('userName');
         this.toggleSettingsStates = null;
-        
+
         this.loadSettings();
         // 初始化设置相关的事件监听
         this.initSettingsHandlers();
         this.init();
-        
+        this.themes = ['github', 'monokai', 'dracula', 'solarized'];
+
         // 配置 marked
+        this.initialize();
+    }
+
+    // 可以添加一个初始化方法
+    initialize() {
         this.configureMarked();
+        // 监听 DOM 变化，为新添加的代码块添加事件监听器
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.addedNodes.length) {
+                    document.querySelectorAll('.code-block:not(.initialized)').forEach(block => {
+                        const toggleBtn = block.querySelector('.toggle-button');
+                        const searchBtn = block.querySelector('.search-button');
+                        const copyBtn = block.querySelector('.copy-button');
+                        const viewBtn = block.querySelector('.view-button');
+                        const searchInput = block.querySelector('.search-input');
+                        if (toggleBtn) {
+                            toggleBtn.addEventListener('click', this.toggleCode);
+                        }
+                        if (searchBtn) {
+                            searchBtn.addEventListener('click', this.showSearchInput);
+                        }
+                        if (copyBtn) {
+                            copyBtn.addEventListener('click', this.copyCode);
+                        }
+                        if (viewBtn) {
+                            viewBtn.addEventListener('click', this.viewHtmlCode);
+                        }
+                        if (searchInput) {
+                            searchInput.addEventListener('input', (e) => this.searchInCode(e.target));
+                        }
+                        block.classList.add('initialized');
+                    });
+                }
+            });
+        });
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
     }
 
     configureMarked() {
         // 配置 marked 选项
         marked.setOptions({
-            highlight: function(code, lang) {
+            highlight: (code, lang) => {
                 if (lang && hljs.getLanguage(lang)) {
                     return hljs.highlight(code, { language: lang }).value;
                 }
@@ -62,45 +103,228 @@ class ChatApp {
             breaks: true,
             gfm: true,
             headerIds: true,
-            mangle: false
+            mangle: false,
+            pedantic: false,
+            sanitize: false,
+            smartLists: true,
+            smartypants: true
         });
-
         // 自定义渲染器
         const renderer = new marked.Renderer();
-        
-        // 自定义代码块渲染
+        // 重写代码块渲染
         renderer.code = (code, language) => {
-            const validLanguage = hljs.getLanguage(language) ? language : 'plaintext';
-            const highlightedCode = hljs.highlight(code, { language: validLanguage }).value;
-            
-            return `
-                <pre><div class="code-toolbar">
-                    <button class="copy-button" onclick="chatApp.copyCode(this, \`${code.replace(/`/g, '\\`')}\`)">复制代码</button>
-                </div><code class="language-${validLanguage}">${highlightedCode}</code></pre>
-            `;
-        };
+            const highlightedCode = hljs.highlight(code, {
+                language: language || 'plaintext'
+            }).value;
+            // 添加行号
+            const numberedCode = this.addLineNumbers(highlightedCode);
 
+            // 返回代码块 HTML
+            return this.createCollapsibleCode(numberedCode, language);
+        };
         marked.use({ renderer });
+    } catch(error) {
+        console.error('Error configuring marked:', error);
     }
 
-    copyCode(button, code) {
-        navigator.clipboard.writeText(code).then(() => {
-            button.textContent = '已复制';
-            button.classList.add('copied');
-            setTimeout(() => {
-                button.textContent = '复制代码';
-                button.classList.remove('copied');
-            }, 2000);
-        });
+    addLineNumbers(code) {
+        try {
+            const lines = code.split('\n');
+            return lines.map((line, index) =>
+                `<div class="line">
+             
+                    <span class="line-number">${index + 1}</span>
+                    <span class="line-content">${line}</span>
+                 </div>`
+            ).join('');
+        } catch (error) {
+            console.error('Error adding line numbers:', error);
+            return code;
+        }
+    }
+
+    createCollapsibleCode(code, language) {
+        try {
+            // 创建代码块的 HTML 结构
+            const template = ` 
+                <div class="code-block collapsible">
+                    <div class="code-header">
+                        <span class="language-badge">${language || 'plaintext'}</span>
+                        <div class="code-actions">
+                            <button class="toggle-button">
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <button class="copy-button">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                            ${language === 'html' ? `
+                                <button class="view-button">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                            `:''}
+                        </div>
+                    </div>
+                    <div class="code-content">
+                        <pre><code class="language-${language || 'plaintext'}">${code}</code></pre>
+                    </div>
+                </div>`;
+
+            // 创建一个函数来初始化事件监听器
+            const initializeCodeBlock = () => {
+                // 查找所有没有初始化的代码块
+                document.querySelectorAll('.code-block:not(.initialized)').forEach(block => {
+                    // 添加事件监听器
+                    const toggleBtn = block.querySelector('.toggle-button');
+                    const copyBtn = block.querySelector('.copy-button');
+                    const viewBtn = block.querySelector('.view-button');
+                    if (toggleBtn) {
+                        toggleBtn.addEventListener('click', this.toggleCode);
+                    }
+                    if (copyBtn) {
+                        copyBtn.addEventListener('click', this.copyCode);
+                    }
+                    if (viewBtn) {
+                        viewBtn.addEventListener('click', this.viewHtmlCode);
+                    }
+                    // 标记为已初始化
+                    block.classList.add('initialized');
+                });
+            };
+            // 添加到 DOM 后初始化事件监听器
+            setTimeout(initializeCodeBlock, 0);
+            return template;
+        } catch (error) {
+            console.error('Error creating collapsible code:', error);
+            return code;
+        }
+    }
+    findAncestor(element, selector) {
+        while (element && element.parentElement) {
+            element = element.parentElement;
+            if (element.matches(selector)) return element;
+        }
+        return null;
+    }
+
+    toggleCode(event) {
+        try {
+            console.log('Toggle button clicked');
+            const button = event.currentTarget;
+            const codeBlock = button.closest ? button.closest('.code-block') :
+                this.findAncestor(button, '.code-block');
+
+            if (!codeBlock) {
+                console.error('Code block not found');
+                return;
+            }
+            const content = codeBlock.querySelector('.code-content');
+            if (!content) {
+                console.error('Code content not found');
+                return;
+            }
+            const isVisible = content.style.display !== 'none';
+            content.style.display = isVisible ? 'none' : 'block';
+
+            const icon = button.querySelector('i');
+            if (icon) {
+                icon.className = isVisible ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+            }
+        } catch (error) {
+            console.error('Error in toggleCode:', error);
+        }
+    }
+
+    findParentWithClass(element, className) {
+        let current = element;
+        while (current && current !== document) {
+            if (current.classList && current.classList.contains(className)) {
+                return current;
+            }
+            current = current.parentNode;
+        }
+        return null;
+    }
+
+    copyCode(event) {
+        try {
+            const button = event.currentTarget;
+            const codeBlock = button.closest('.code-block');
+            if (!codeBlock) return;
+            
+            // 获取所有代码内容元素（排除行号）
+            const codeLines = codeBlock.querySelectorAll('.line-content');
+            if (!codeLines.length) return;
+            // 将所有代码行内容合并，并去除可能的首尾空格
+            const codeText = Array.from(codeLines)
+                .map(line => line.textContent)
+                .join('\n')
+                .trim();
+            navigator.clipboard.writeText(codeText).then(() => {
+                button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                setTimeout(() => {
+                    button.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                button.innerHTML = '<i class="fas fa-times"></i> Error!';
+            });
+        } catch (error) {
+            console.error('Error in copyCode:', error);
+        }
+    }
+    viewHtmlCode(event) {
+        try {
+            const button = event.currentTarget;
+            const codeBlock = button.closest('.code-block');
+            if (!codeBlock) {
+                console.error('Code block not found');
+                return;
+            }
+
+            // 获取所有代码内容元素（排除行号）
+            const codeLines = codeBlock.querySelectorAll('.line-content');
+            if (!codeLines.length) {
+                console.error('No code content found');
+                return;
+            }
+
+            // 将所有代码行内容合并
+            const htmlContent = Array.from(codeLines)
+                .map(line => line.textContent)
+                .join('\n')
+                .trim();
+
+            // 创建新窗口并添加增强的 HTML 结构
+            const newWindow = window.open();
+            newWindow.document.write(htmlContent);
+            // 添加成功提示
+            console.log('HTML preview opened in new window');
+        } catch (error) {
+            console.error('Error in viewHtmlCode:', error);
+            // 可以添加用户提示
+            alert('Failed to open HTML preview. Please check the console for details.');
+        }
+    }
+    changeTheme(theme) {
+        try {
+            if (!this.themes.includes(theme)) return;
+
+            document.querySelectorAll('.code-block').forEach(block => {
+                this.themes.forEach(t => block.classList.remove(t));
+                block.classList.add(theme);
+            });
+        } catch (error) {
+            console.error('Error changing theme:', error);
+        }
     }
 
     async init() {
         // 先绑定事件监听器
         this.bindEventListeners();
-        
+
         // 立即加载历史对话
         await this.loadConversations();
-        
+
         // 标记初始化完成
         this.initialized = true;
     }
@@ -119,30 +343,30 @@ class ChatApp {
 
         this.userInput.addEventListener('input', () => this.adjustTextareaHeight(this.userInput));
         this.welcomeUserInput.addEventListener('input', () => this.adjustTextareaHeight(this.welcomeUserInput));
-        
+
         // 添加新对话按钮事件
         this.newChatButton.addEventListener('click', () => this.startNewChat());
-        
+
         // 添加侧边栏切换按钮事件
         this.toggleSidebarButton.addEventListener('click', () => this.toggleSidebar());
-        
+
         // 添加示例建议点击事件
         document.querySelectorAll('.welcome-suggestion-items button').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 this.startNewChat(e.target.textContent.replace(/["]/g, ''));
             });
         });
-        
+
         // 添加移动端侧边栏控制
         this.menuButton.addEventListener('click', () => this.toggleMobileSidebar());
         this.overlay.addEventListener('click', () => this.toggleMobileSidebar());
-        
+
         // 添加窗口大小变化监听
         window.addEventListener('resize', () => {
             this.isMobile = window.innerWidth <= 768;
             this.updateSidebarState();
         });
-        
+
         // 在移动端点击对话项后自动隐藏侧边栏
         this.conversationItems.addEventListener('click', () => {
             if (this.isMobile) {
@@ -152,7 +376,7 @@ class ChatApp {
 
         // 添加显示侧边栏按钮事件
         this.showSidebarButton.addEventListener('click', () => this.showSidebar());
-        
+
         // 欢迎页面输入框事件
         this.welcomeSendButton.addEventListener('click', () => this.sendWelcomeMessage());
         this.welcomeUserInput.addEventListener('keypress', (e) => {
@@ -173,7 +397,7 @@ class ChatApp {
     appendMessage(content, isUser = false, parent = null) {
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${isUser ? 'user' : 'bot'} new`;
-    
+
         // 添加头像
         const avatar = document.createElement('img');
         avatar.className = 'avatar';
@@ -187,23 +411,23 @@ class ChatApp {
             avatar.src = 'https://api.dicebear.com/7.x/bottts/svg?seed=bot';  // 机器人默认头像
         }
         messageDiv.appendChild(avatar);
-    
+
         // 创建一个包装器来包含消息内容和建议
         const contentWrapper = document.createElement('div');
         contentWrapper.className = 'message-content-wrapper';
-    
+
         const messageContent = document.createElement('div');
         messageContent.className = 'message-content';
-    
+
         // 处理消息内容
         if (isUser) {
             // 用户消息直接显示
             messageContent.innerHTML = marked.parse(content);
             messageContent.classList.add('show-content');
         } else {
-             // 机器人消息需要分割并添加 span
+            // 机器人消息需要分割并添加 span
             const p = document.createElement('p');
-            if(content) {
+            if (content) {
                 const words = content.split('');
                 words.forEach(word => {
                     const span = document.createElement('span');
@@ -213,61 +437,61 @@ class ChatApp {
             }
             messageContent.appendChild(p);
             messageContent.innerHTML = marked.parse(messageContent.innerHTML);
-    
+
             //  逐字显示机器人消息
             this.showContent(messageContent);
         }
-    
-    
+
+
         contentWrapper.appendChild(messageContent);
-    
+
         // 为机器人消息添加建议容器
         if (!isUser) {
             const suggestionsContainer = document.createElement('div');
             suggestionsContainer.className = 'suggestions-container';
             contentWrapper.appendChild(suggestionsContainer);
         }
-    
+
         messageDiv.appendChild(contentWrapper);
-    
+
         // 添加时间戳
         const time = new Date().toLocaleTimeString('zh-CN', {
             hour: '2-digit',
             minute: '2-digit'
         });
         messageDiv.setAttribute('data-time', time);
-    
+
         if (parent) {
             parent.appendChild(messageDiv);
         } else {
             this.chatMessages.appendChild(messageDiv);
             this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
         }
-    
+
         setTimeout(() => {
             messageDiv.classList.remove('new');
         }, 500);
-    
-         setTimeout(() => {
+
+        setTimeout(() => {
             messageDiv.classList.add('show');
         }, 10);
-        
+
         return messageDiv;
     }
-     showContent(messageContent) {
-            const spans = messageContent.querySelectorAll('p span');
-            let delay = 0;
-            spans.forEach((span) => {
-                setTimeout(() => {
-                    span.style.opacity = 1;
-                }, delay);
-                delay += 20; // 调整延迟时间，控制文字出现速度
-            });
-             // 所有文字显示完毕，添加 show-content class
+    showContent(messageContent) {
+        const spans = messageContent.querySelectorAll('p span');
+        let delay = 0;
+        spans.forEach((span) => {
             setTimeout(() => {
-                messageContent.classList.add('show-content');
+                span.style.opacity = 1;
             }, delay);
-        }
+            delay += 20; // 调整延迟时间，控制文字出现速度
+        });
+        // 所有文字显示完毕，添加 show-content class
+        setTimeout(() => {
+            messageContent.classList.add('show-content');
+        }, delay);
+    }
 
     async handleFileSelect(event) {
         const file = event.target.files[0];
@@ -323,7 +547,7 @@ class ChatApp {
 
     async loadSuggestions(messageDiv) {
         if (!this.lastMessageId) return;
-        
+
         try {
             const response = await fetch(
                 `${this.baseUrl}/messages/${this.lastMessageId}/suggested?user=${this.user}`,
@@ -350,7 +574,7 @@ class ChatApp {
                     });
                     suggestionsContainer.appendChild(btn);
                 });
-                
+
                 // 滚动到建议列表可见
                 setTimeout(() => {
                     messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -369,15 +593,15 @@ class ChatApp {
     }
 
     async sendMessage() {
-        
+
         // 隐藏欢迎页面，显示聊天界面
         this.welcomePage.style.display = 'none';
         this.chatContainer.style.display = 'flex';
         if (!this.initialized) return;
-        
+
         // 清除所有现有建议
         this.clearAllSuggestions();
-        
+
         const message = this.userInput.value.trim();
         if (!message && !this.currentUploadedFile) return;
         // 显示用户消息
@@ -425,9 +649,9 @@ class ChatApp {
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let messageFiles = [];
-            
+
             while (true) {
-                const {done, value} = await reader.read();
+                const { done, value } = await reader.read();
                 if (done) {
                     // 移除加载状态，保持位置
                     botMessageDiv.classList.remove('loading');
@@ -436,11 +660,11 @@ class ChatApp {
                     await this.loadSuggestions(botMessageDiv);
                     break;
                 }
-                
+
                 botMessageDiv.classList.add('show');
                 const chunk = decoder.decode(value);
                 const lines = chunk.split('\n');
-                
+
                 for (const line of lines) {
                     if (line.startsWith('data: ')) {
                         try {
@@ -486,7 +710,7 @@ class ChatApp {
                                     }
                                     break;
                             }
-                            
+
                             // 更新消息内容
                             const formattedContent = marked.parse(fullResponse);
                             botMessageDiv.querySelector('.message-content').innerHTML = formattedContent;
@@ -503,7 +727,7 @@ class ChatApp {
             botMessageDiv.querySelector('.message-content').textContent = '抱歉，发生了错误。请稍后重试。';
         }
         // this.textToAudio(this.lastMessageId);
-        
+
         await this.loadConversations();
 
         // 在消息发送时隐藏欢迎页面
@@ -511,7 +735,7 @@ class ChatApp {
         this.chatContainer.style.display = 'flex';
     }
 
-      arrayBufferToBase64(buffer) {
+    arrayBufferToBase64(buffer) {
         let binary = '';
         const bytes = new Uint8Array(buffer);
         const len = bytes.byteLength;
@@ -536,10 +760,10 @@ class ChatApp {
             );
 
             const data = await response.json();
-            
+
             // 清除加载状态
             this.conversationItems.innerHTML = '';
-            
+
             if (data.data && data.data.length > 0) {
                 this.renderConversations(data.data);
                 this.hasMore = data.has_more;
@@ -661,7 +885,7 @@ class ChatApp {
             };
 
             const response = await fetch(
-            `${this.baseUrl}/text-to-audio`, {
+                `${this.baseUrl}/text-to-audio`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${this.apiKey}`,
@@ -679,14 +903,14 @@ class ChatApp {
         try {
             // 将字节码转换为 Base64 字符串
             const base64String = this.arrayBufferToBase64(audioData);
-      
+
             const audio = new Audio();
             audio.src = `data:audio/mpeg;base64,${base64String}`;
-      
+
             audio.addEventListener('error', (e) => {
                 console.error('音频加载失败:', e.target.error);
             });
-      
+
             return audio.play().catch((error) => {
                 console.error('播放音频失败:', error);
                 // 尝试使用备用音频格式 (WAV)
@@ -700,13 +924,13 @@ class ChatApp {
 
     async switchConversation(conversationId) {
         if (conversationId === this.currentConversationId) return;
-        
+
         this.currentConversationId = conversationId;
         this.firstMessageId = null;
         this.hasMore = true;
         this.chatMessages.innerHTML = '';
         await this.loadMoreMessages();
-        
+
         // 更新选中状态
         document.querySelectorAll('.conversation-item').forEach(item => {
             item.classList.remove('active');
@@ -714,7 +938,7 @@ class ChatApp {
                 item.classList.add('active');
             }
         });
-        
+
         // 确保切换到聊天界面
         this.welcomePage.style.display = 'none';
         this.chatContainer.style.display = 'flex';
@@ -745,7 +969,7 @@ class ChatApp {
 
             const data = await response.json();
             this.hasMore = data.has_more;
-            
+
             if (data.data.length > 0) {
                 this.firstMessageId = data.data[0].id;
                 this.renderHistoryMessages(data.data);
@@ -765,23 +989,23 @@ class ChatApp {
                 const userMessageDiv = this.appendMessage('', true);
                 userMessageDiv.querySelector('.message-content').innerHTML = marked.parse(message.query);
                 const botMessageDiv = this.appendMessage('', false);
-                botMessageDiv.querySelector('.message-content').innerHTML = marked.parse(message.answer); 
+                botMessageDiv.querySelector('.message-content').innerHTML = marked.parse(message.answer);
             }
         });
-        
+
         // 在现有消息前插入历史消息
         this.chatMessages.insertBefore(fragment, this.chatMessages.firstChild);
     }
-    
+
     startNewChat(initialMessage = '') {
         this.currentConversationId = '';
         this.firstMessageId = null;
         this.lastMessageId = null;
         this.chatMessages.innerHTML = '';
-        
+
         this.welcomePage.style.display = 'flex';
         this.chatContainer.style.display = 'none';
-        
+
         // 如果有初始消息，则自动发送
         if (initialMessage) {
             this.userInput.value = initialMessage;
@@ -821,7 +1045,7 @@ class ChatApp {
     sendWelcomeMessage() {
         const message = this.welcomeUserInput.value.trim();
         if (!message && !this.currentUploadedFile) return;
-        
+
         this.startNewChat();
         this.userInput.value = message;
         this.sendMessage();
@@ -847,7 +1071,7 @@ class ChatApp {
         document.getElementById('apiKey').value = this.apiKey;
         document.getElementById('baseUrl').value = this.baseUrl;
         document.getElementById('userId').value = this.user;
-        
+
         // 确保主题选择器正确显示当前主题
         const savedTheme = localStorage.getItem('theme') || 'default';
         this.applyTheme(savedTheme);
@@ -877,7 +1101,7 @@ class ChatApp {
                 this.applyTheme(theme);
             });
         });
-        
+
         // 更新主题选择器事件监听
         document.querySelectorAll('.theme-option').forEach(option => {
             option.addEventListener('click', (e) => {
@@ -895,16 +1119,26 @@ class ChatApp {
             purple: 'var(--theme-color-purple)',
             red: 'var(--theme-color-red)',
             orange: 'var(--theme-color-orange)',
-            green: 'var(--theme-color-green)'
+            green: 'var(--theme-color-green)',
+            pink: 'var(--theme-color-pink)',
+            yellow: 'var(--theme-color-yellow)',
+            indigo: 'var(--theme-color-indigo)',
+            cyan: 'var(--theme-color-cyan)',
+            sky: 'var(--theme-color-sky)',
+            lime: 'var(--theme-color-lime)',
+            amber: 'var(--theme-color-amber)',
+            emerald: 'var(--theme-color-emerald)',
+            rose: 'var(--theme-color-rose)',
+            fuchsia: 'var(--theme-color-fuchsia)'
         };
-        
+
         root.style.setProperty('--primary-color', themeColors[theme]);
-        
+
         // 更新主题选择器的激活状态
         document.querySelectorAll('.theme-option').forEach(option => {
             option.classList.toggle('active', option.dataset.theme === theme);
         });
-        
+
         this.currentTheme = theme;
         localStorage.setItem('theme', theme);
     }
@@ -916,13 +1150,13 @@ class ChatApp {
 
     saveSettings() {
         const newUserName = document.getElementById('userNameInput').value.trim();
-        
+
         if (newUserName) {
             this.userName = newUserName;
             localStorage.setItem('userName', newUserName);
             this.updateUserInfo();
         }
-        
+
         // 保存主题设置
         localStorage.setItem('theme', this.currentTheme);
 
@@ -953,7 +1187,7 @@ class ChatApp {
             } else {
                 this.welcomePage.style.display = 'flex';
             }
-        }else {
+        } else {
             this.welcomePage.style.display = 'flex';
         }
     }
