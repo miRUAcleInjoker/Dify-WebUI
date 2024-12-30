@@ -39,13 +39,12 @@ class ChatApp {
         this.userName = localStorage.getItem('userName') || '未设置用户名';
         this.userAvatar = document.getElementById('userAvatar');
         this.userNameDisplay = document.getElementById('userName');
-        this.toggleSettingsStates = null;
+        this.toggleSettingsStates = null; this.settingsFormInputs = this.settingsForm.querySelectorAll('input');
 
         this.loadSettings();
         // 初始化设置相关的事件监听
         this.initSettingsHandlers();
         this.init();
-        this.themes = ['github', 'monokai', 'dracula', 'solarized'];
 
         // 配置 marked
         this.initialize();
@@ -60,24 +59,16 @@ class ChatApp {
                 if (mutation.addedNodes.length) {
                     document.querySelectorAll('.code-block:not(.initialized)').forEach(block => {
                         const toggleBtn = block.querySelector('.toggle-button');
-                        const searchBtn = block.querySelector('.search-button');
                         const copyBtn = block.querySelector('.copy-button');
                         const viewBtn = block.querySelector('.view-button');
-                        const searchInput = block.querySelector('.search-input');
                         if (toggleBtn) {
                             toggleBtn.addEventListener('click', this.toggleCode);
-                        }
-                        if (searchBtn) {
-                            searchBtn.addEventListener('click', this.showSearchInput);
                         }
                         if (copyBtn) {
                             copyBtn.addEventListener('click', this.copyCode);
                         }
                         if (viewBtn) {
                             viewBtn.addEventListener('click', this.viewHtmlCode);
-                        }
-                        if (searchInput) {
-                            searchInput.addEventListener('input', (e) => this.searchInCode(e.target));
                         }
                         block.classList.add('initialized');
                     });
@@ -161,7 +152,7 @@ class ChatApp {
                                 <button class="view-button">
                                     <i class="fas fa-eye"></i> View
                                 </button>
-                            `:''}
+                            `: ''}
                         </div>
                     </div>
                     <div class="code-content">
@@ -250,7 +241,7 @@ class ChatApp {
             const button = event.currentTarget;
             const codeBlock = button.closest('.code-block');
             if (!codeBlock) return;
-            
+
             // 获取所有代码内容元素（排除行号）
             const codeLines = codeBlock.querySelectorAll('.line-content');
             if (!codeLines.length) return;
@@ -276,45 +267,25 @@ class ChatApp {
         try {
             const button = event.currentTarget;
             const codeBlock = button.closest('.code-block');
-            if (!codeBlock) {
-                console.error('Code block not found');
-                return;
-            }
+            if (!codeBlock) return;
+            const code = codeBlock.querySelector('code');
+            if (!code) return;
 
-            // 获取所有代码内容元素（排除行号）
-            const codeLines = codeBlock.querySelectorAll('.line-content');
-            if (!codeLines.length) {
-                console.error('No code content found');
-                return;
-            }
+            // 创建一个临时的 DOM 解析器
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(code.textContent, 'text/html');
+            // 移除所有 line-number 类的元素
+            const lineNumbers = doc.querySelectorAll('.line-number');
+            lineNumbers.forEach(element => element.remove());
 
-            // 将所有代码行内容合并
-            const htmlContent = Array.from(codeLines)
-                .map(line => line.textContent)
-                .join('\n')
-                .trim();
-
-            // 创建新窗口并添加增强的 HTML 结构
+            // 获取处理后的 HTML
+            const cleanedHtml = doc.body.innerHTML;
+            console.log(cleanedHtml);
             const newWindow = window.open();
-            newWindow.document.write(htmlContent);
-            // 添加成功提示
-            console.log('HTML preview opened in new window');
+            newWindow.document.write(cleanedHtml);
+            newWindow.document.close();
         } catch (error) {
             console.error('Error in viewHtmlCode:', error);
-            // 可以添加用户提示
-            alert('Failed to open HTML preview. Please check the console for details.');
-        }
-    }
-    changeTheme(theme) {
-        try {
-            if (!this.themes.includes(theme)) return;
-
-            document.querySelectorAll('.code-block').forEach(block => {
-                this.themes.forEach(t => block.classList.remove(t));
-                block.classList.add(theme);
-            });
-        } catch (error) {
-            console.error('Error changing theme:', error);
         }
     }
 
@@ -1190,10 +1161,16 @@ class ChatApp {
         } else {
             this.welcomePage.style.display = 'flex';
         }
+        //将settings页面的所有状态恢复到初始状态
+        this.settingsFormInputs.forEach(input => input.setAttribute('disabled', 'true'));
+        this.settingsPage.style.display = 'none';
+        //移除输入框中所有的值
+        this.settingsFormInputs.forEach(input => input.value = '');
     }
 
     toggleSettingsPage() {
         // 获取当前显示状态
+        this.settingsFormInputs.forEach(input => input.setAttribute('disabled', 'true'));
         const isSettingsVisible = this.settingsPage.style.display === 'flex';
         if (!isSettingsVisible) {
             // 保存当前状态
