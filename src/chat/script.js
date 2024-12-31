@@ -617,7 +617,7 @@ class ChatApp {
             parent.appendChild(messageDiv);
         } else {
             this.chatMessages.appendChild(messageDiv);
-            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            this.scrollToBottom();
         }
 
         setTimeout(() => {
@@ -741,6 +741,14 @@ class ChatApp {
         });
     }
 
+    scrollToBottom() {
+        const scrollOptions = {
+            top: this.chatMessages.scrollHeight,
+            behavior: 'smooth'
+        };
+        this.chatMessages.scrollTo(scrollOptions);
+    }
+
     async sendMessage() {
         // 隐藏欢迎页面，显示聊天界面
         this.welcomePage.style.display = 'none';
@@ -819,10 +827,7 @@ class ChatApp {
                                     botMessageDiv.querySelector('.message-content').innerHTML = formattedContent;
                                     this.lastMessageId = data.message_id;
                                     this.currentConversationId = data.conversation_id;
-                                    // 滚动到建议列表可见
-                                    setTimeout(() => {
-                                        botMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                                    }, 100);
+                                    this.scrollToBottom();
                                     break;
 
                                 case 'agent_thought':
@@ -858,6 +863,7 @@ class ChatApp {
                             // 更新消息内容
                             const formattedContent = marked.parse(fullResponse);
                             botMessageDiv.querySelector('.message-content').innerHTML = formattedContent;
+                            this.scrollToBottom();
                         } catch (e) {
                             console.error('解析响应数据失败:', e);
                         }
