@@ -39,8 +39,15 @@ class ChatApp {
         this.userName = localStorage.getItem('userName') || '未设置用户名';
         this.userAvatar = document.getElementById('userAvatar');
         this.userNameDisplay = document.getElementById('userName');
-        this.toggleSettingsStates = null; this.settingsFormInputs = this.settingsForm.querySelectorAll('input');
-
+        this.toggleSettingsStates = null;
+        this.settingsFormInputs = this.settingsForm.querySelectorAll('input');
+        this.micButton = document.getElementById('micButton');
+        this.waveContainer = document.getElementById('waveContainer');
+        this.statusText = document.getElementById('statusText');
+        this.chatBody = document.getElementById('chatBody');
+        this.isRecording = false;
+        this.isBotReplying = false;
+        this.voiceContainer = document.getElementById('voiceContainer');
         this.loadSettings();
         // 初始化设置相关的事件监听
         this.initSettingsHandlers();
@@ -48,6 +55,52 @@ class ChatApp {
 
         // 配置 marked
         this.initialize();
+
+    }
+
+    startRecording() {
+        this.waveContainer.style.display = 'flex';
+        this.chatBody.classList.add('recording');
+        this.statusText.textContent = '正在聆听...';
+        this.appendMessage('你好', true);
+        document.querySelectorAll('.wave').forEach((wave, index) => {
+            wave.style.animationDuration = `${2 + Math.random() * 0.5}s`;
+            wave.style.animationDelay = `${index * 0.8}s`;
+        });
+    }
+
+    stopRecording() {
+        this.waveContainer.style.display = 'none';
+        this.chatBody.classList.remove('recording');
+        this.statusText.textContent = '正在处理语音...';
+    }
+
+    simulateBotReply() {
+        this.isBotReplying = true;
+        setTimeout(() => {
+            this.waveContainer.style.display = 'flex';
+            this.chatBody.classList.add('bot-replying');
+            this.statusText.innerHTML = '正在回复中<div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+            this.appendMessage('我是人机', false);
+            // 模拟回复完成
+            setTimeout(() => {
+                this.waveContainer.style.display = 'none';
+                this.chatBody.classList.remove('bot-replying');
+                this.statusText.textContent = '点击麦克风开始录音';
+                isBotReplying = false;
+            }, 30000); // 3秒后完成回复
+        }, 1000); // 1秒后开始回复
+    }
+
+    updateWaveHeights() {
+        if (isRecording) {
+            document.querySelectorAll('.wave').forEach(wave => {
+                // 每次变化幅度更小，使动画更平滑
+                const height = 25 + Math.random() * 30;  // 调整波形高度范围
+                wave.style.height = `${height}px`;
+            });
+        }
+        setTimeout(() => requestAnimationFrame(updateWaveHeights), 50);
     }
 
     // 可以添加一个初始化方法
@@ -80,6 +133,22 @@ class ChatApp {
             subtree: true
         });
 
+    }
+
+    toggleVoiceInterface() {
+        console.log('toggleVoiceInterface');
+        const show = this.voiceContainer.style.display === 'none';
+        console.log('show', show);
+        if (show) {
+            this.voiceContainer.style.display = 'flex';
+            this.welcomePage.style.display = 'none';
+            this.chatContainer.style.display = 'flex';
+            //this.voiceContainer变透明，覆盖在this.chatContainer上面
+            this.chatContainer.style.opacity = 1;
+            this.voiceContainer.style.opacity = 1;
+        } else {
+            this.voiceContainer.style.display = 'none';
+        }
     }
 
     configureMarked() {
@@ -123,7 +192,6 @@ class ChatApp {
             const lines = code.split('\n');
             return lines.map((line, index) =>
                 `<div class="line">
-             
                     <span class="line-number">${index + 1}</span>
                     <span class="line-content">${line}</span>
                  </div>`
@@ -358,6 +426,23 @@ class ChatApp {
         });
         this.welcomeUploadButton.addEventListener('click', () => this.welcomeFileInput.click());
         this.welcomeFileInput.addEventListener('change', (e) => this.handleWelcomeFileSelect(e));
+
+        document.getElementById('micPButton').addEventListener('click', () => {
+            this.toggleVoiceInterface();
+        });
+
+
+        this.micButton.addEventListener('click', () => {
+            if (this.isBotReplying) return; // 如果机器人正在回复，禁用点击
+            this.isRecording = !this.isRecording;
+            if (this.isRecording) {
+                this.startRecording();
+            } else {
+                this.stopRecording();
+                // 模拟机器人回复
+                this.simulateBotReply();
+            }
+        });
     }
 
     adjustTextareaHeight(textarea) {
