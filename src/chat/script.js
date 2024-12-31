@@ -40,6 +40,7 @@ class ChatApp {
         this.userAvatar = document.getElementById('userAvatar');
         this.userNameDisplay = document.getElementById('userName');
         this.toggleSettingsStates = null;
+        this.toggleVoiceStates = null;
         this.settingsFormInputs = this.settingsForm.querySelectorAll('input');
         this.micButton = document.getElementById('micButton');
         this.waveContainer = document.getElementById('waveContainer');
@@ -48,6 +49,10 @@ class ChatApp {
         this.isRecording = false;
         this.isBotReplying = false;
         this.voiceContainer = document.getElementById('voiceContainer');
+        this.mediaRecorder = null;
+        this.audioChunks = [];
+        this.currentAudioFile = null;  // 添加新属性存储当前对话文件
+        this.audioStatus = false;
         this.loadSettings();
         // 初始化设置相关的事件监听
         this.initSettingsHandlers();
@@ -56,40 +61,98 @@ class ChatApp {
         // 配置 marked
         this.initialize();
 
+
     }
 
-    startRecording() {
-        this.waveContainer.style.display = 'flex';
-        this.chatBody.classList.add('recording');
-        this.statusText.textContent = '正在聆听...';
-        this.appendMessage('你好', true);
-        document.querySelectorAll('.wave').forEach((wave, index) => {
-            wave.style.animationDuration = `${2 + Math.random() * 0.5}s`;
-            wave.style.animationDelay = `${index * 0.8}s`;
-        });
+    async startRecording() {
+        try {
+            this.waveContainer.style.display = 'flex';
+            this.chatBody.classList.add('recording');
+            this.statusText.textContent = '正在对话...';
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                throw new Error('浏览器不支持对话功能');
+            }
+
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            this.mediaRecorder = new MediaRecorder(stream);
+            this.audioChunks = [];
+
+            this.mediaRecorder.ondataavailable = (event) => {
+                this.audioChunks.push(event.data);
+            };
+
+            this.mediaRecorder.start();
+            this.isRecording = true;
+            document.querySelectorAll('.wave').forEach((wave, index) => {
+                wave.style.animationDuration = `${2 + Math.random() * 0.5}s`;
+                wave.style.animationDelay = `${index * 0.8}s`;
+            });
+        } catch (error) {
+            console.error('对话启动失败:', error);
+            this.statusText.textContent = '对话失败: ' + error.message;
+            this.isRecording = false;
+        }
     }
 
-    stopRecording() {
-        this.waveContainer.style.display = 'none';
-        this.chatBody.classList.remove('recording');
-        this.statusText.textContent = '正在处理语音...';
+    async stopRecording() {
+        try {
+            this.waveContainer.style.display = 'none';
+            this.chatBody.classList.remove('recording');
+            this.statusText.textContent = '正在处理...';
+            return new Promise((resolve) => {
+                this.mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                    this.audioChunks = [];
+                    const fileName = `recording-${new Date().getTime()}.wav`;
+                    this.currentAudioFile = new File([audioBlob], fileName, { type: 'audio/wav' });
+                    await this.uploadAudioFile(this.currentAudioFile);
+                    this.statusText.textContent = '等待回复';
+                    setTimeout(() => {
+                        this.statusText.textContent = '点击麦克风开始说话';
+                    }, 2000);
+                    resolve();
+                };
+
+                this.mediaRecorder.stop();
+                this.mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            });
+        } catch (error) {
+            console.error('停止对话失败:', error);
+            this.statusText.textContent = '对话失败: ' + error.message;
+        }
+    }
+
+    async uploadAudioFile(file) {
+        // 创建FormData对象
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('user', this.user);
+        try {
+            const response = await fetch(`${this.baseUrl}/audio-to-text`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.apiKey}`
+                },
+                body: formData
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            this.userInput.value = data.text;
+            this.sendMessage();
+        } catch (error) {
+            console.error('Error:', error);
+            throw error;
+        }
     }
 
     simulateBotReply() {
         this.isBotReplying = true;
-        setTimeout(() => {
-            this.waveContainer.style.display = 'flex';
-            this.chatBody.classList.add('bot-replying');
-            this.statusText.innerHTML = '正在回复中<div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
-            this.appendMessage('我是人机', false);
-            // 模拟回复完成
-            setTimeout(() => {
-                this.waveContainer.style.display = 'none';
-                this.chatBody.classList.remove('bot-replying');
-                this.statusText.textContent = '点击麦克风开始录音';
-                isBotReplying = false;
-            }, 30000); // 3秒后完成回复
-        }, 1000); // 1秒后开始回复
+        this.waveContainer.style.display = 'flex';
+        this.chatBody.classList.add('bot-replying');
+        this.statusText.innerHTML = '正在回复中<div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
     }
 
     updateWaveHeights() {
@@ -136,56 +199,82 @@ class ChatApp {
     }
 
     toggleVoiceInterface() {
-        console.log('toggleVoiceInterface');
         const show = this.voiceContainer.style.display === 'none';
         console.log('show', show);
         if (show) {
+            console.log('voice interface');
+            this.toggleVoiceStates = {
+                welcomePage: this.welcomePage.style.display,
+                chatContainer: this.chatContainer.style.display,
+            }
             this.voiceContainer.style.display = 'flex';
             this.welcomePage.style.display = 'none';
             this.chatContainer.style.display = 'flex';
-            //this.voiceContainer变透明，覆盖在this.chatContainer上面
-            this.chatContainer.style.opacity = 1;
-            this.voiceContainer.style.opacity = 1;
+            this.audioStatus = true;
         } else {
+            console.log('Hiding voice interface');
             this.voiceContainer.style.display = 'none';
+            this.welcomePage.style.display = this.toggleVoiceStates.welcomePage;
+            this.chatContainer.style.display = this.toggleVoiceStates.chatContainer;
+            this.audioStatus = false;
         }
     }
 
     configureMarked() {
-        // 配置 marked 选项
-        marked.setOptions({
-            highlight: (code, lang) => {
-                if (lang && hljs.getLanguage(lang)) {
-                    return hljs.highlight(code, { language: lang }).value;
-                }
-                return hljs.highlightAuto(code).value;
-            },
-            breaks: true,
-            gfm: true,
-            headerIds: true,
-            mangle: false,
-            pedantic: false,
-            sanitize: false,
-            smartLists: true,
-            smartypants: true
-        });
-        // 自定义渲染器
-        const renderer = new marked.Renderer();
-        // 重写代码块渲染
-        renderer.code = (code, language) => {
-            const highlightedCode = hljs.highlight(code, {
-                language: language || 'plaintext'
-            }).value;
-            // 添加行号
-            const numberedCode = this.addLineNumbers(highlightedCode);
-
-            // 返回代码块 HTML
-            return this.createCollapsibleCode(numberedCode, language);
-        };
-        marked.use({ renderer });
-    } catch(error) {
-        console.error('Error configuring marked:', error);
-    }
+            try {
+                // 配置 marked 选项
+                marked.setOptions({
+                    highlight: (code, lang) => {
+                        try {
+                            // 处理未指定语言的情况
+                            if (!lang) return hljs.highlightAuto(code).value;
+                            
+                            // 检查语言是否支持
+                            if (hljs.getLanguage(lang)) {
+                                return hljs.highlight(code, { language: lang }).value;
+                            } else {
+                                // 不支持的语言降级为普通文本
+                                return hljs.highlightAuto(code).value;
+                            }
+                        } catch (err) {
+                            console.warn('Highlight error:', err);
+                            return code; // 降级返回原始代码
+                        }
+                    },
+                    breaks: true,
+                    gfm: true,
+                    headerIds: true,
+                    mangle: false,
+                    pedantic: false,
+                    sanitize: false,
+                    smartLists: true,
+                    smartypants: true
+                });
+        
+                // 自定义渲染器
+                const renderer = new marked.Renderer();
+                renderer.code = (code, language) => {
+                    try {
+                        const lang = language || 'plaintext';
+                        const highlightedCode = hljs.highlight(code, {
+                            language: lang,
+                            ignoreIllegals: true // 忽略不合法的语言标识
+                        }).value;
+                        
+                        // 添加行号
+                        const numberedCode = this.addLineNumbers(highlightedCode);
+                        return this.createCollapsibleCode(numberedCode, lang);
+                    } catch (err) {
+                        console.warn('Code block render error:', err);
+                        return this.createCollapsibleCode(code, 'plaintext');
+                    }
+                };
+        
+                marked.use({ renderer });
+            } catch(error) {
+                console.error('Error configuring marked:', error);
+            }
+        }
 
     addLineNumbers(code) {
         try {
@@ -427,20 +516,23 @@ class ChatApp {
         this.welcomeUploadButton.addEventListener('click', () => this.welcomeFileInput.click());
         this.welcomeFileInput.addEventListener('change', (e) => this.handleWelcomeFileSelect(e));
 
-        document.getElementById('micPButton').addEventListener('click', () => {
-            this.toggleVoiceInterface();
+        const micButtons = document.getElementsByClassName('mic-p-button');
+        Array.from(micButtons).forEach(button => {
+            button.addEventListener('click', () => {
+                this.toggleVoiceInterface();
+            });
         });
 
 
-        this.micButton.addEventListener('click', () => {
-            if (this.isBotReplying) return; // 如果机器人正在回复，禁用点击
-            this.isRecording = !this.isRecording;
-            if (this.isRecording) {
-                this.startRecording();
+        this.micButton.addEventListener('click', async () => {
+            if (this.isBotReplying) return;
+            if (!this.isRecording) {
+                await this.startRecording();
+                
             } else {
-                this.stopRecording();
-                // 模拟机器人回复
+                await this.stopRecording();
                 this.simulateBotReply();
+                this.isRecording = false;
             }
         });
     }
@@ -464,7 +556,7 @@ class ChatApp {
             avatar.src = `https://api.dicebear.com/7.x/adventurer/svg?seed=${this.userName}`;  // 用户默认头像
             messageDiv.setAttribute('data-user', this.userName);
         } else {
-            avatar.src = 'https://api.dicebear.com/7.x/bottts/svg?seed=bot';  // 机器人默认头像
+            avatar.src = '../../xiao-mi.ico';  // 机器人默认头像
         }
         messageDiv.appendChild(avatar);
 
@@ -496,6 +588,10 @@ class ChatApp {
 
             //  逐字显示机器人消息
             this.showContent(messageContent);
+            // 滚动到消息底部
+            setTimeout(() => {
+                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            }, 1);
         }
 
 
@@ -614,7 +710,6 @@ class ChatApp {
                     }
                 }
             );
-
             const data = await response.json();
             if (data.result === 'success' && data.data) {
                 const suggestionsContainer = messageDiv.querySelector('.suggestions-container');
@@ -630,7 +725,6 @@ class ChatApp {
                     });
                     suggestionsContainer.appendChild(btn);
                 });
-
                 // 滚动到建议列表可见
                 setTimeout(() => {
                     messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -640,7 +734,6 @@ class ChatApp {
             console.error('获取建议失败:', error);
         }
     }
-
     clearAllSuggestions() {
         const allSuggestions = document.querySelectorAll('.suggestions-container');
         allSuggestions.forEach(container => {
@@ -649,16 +742,13 @@ class ChatApp {
     }
 
     async sendMessage() {
-
         // 隐藏欢迎页面，显示聊天界面
         this.welcomePage.style.display = 'none';
         this.chatContainer.style.display = 'flex';
         if (!this.initialized) return;
-
         // 清除所有现有建议
         this.clearAllSuggestions();
-
-        const message = this.userInput.value.trim();
+        let message = this.userInput.value.trim();
         if (!message && !this.currentUploadedFile) return;
         // 显示用户消息
         this.appendMessage(message, true);
@@ -666,7 +756,10 @@ class ChatApp {
         this.userInput.style.height = 'auto'; // 发送消息后重置高度
         this.welcomeUserInput.style.height = 'auto'; // 发送消息后重置高度
         this.removeAttachment(); // 发送消息后移除附件预览
-        // 准备发送数据
+        if (this.audioStatus) {
+            message = `你好GPT，我正在进行语音对话。请以友善的态度简要回答我的问题，并保持回答精炼。
+                        以下是我的问题：${message}`;
+        }
         const sendData = {
             query: message,
             response_mode: 'streaming',
@@ -674,7 +767,6 @@ class ChatApp {
             user: this.user,
             inputs: {}
         };
-
         // 如果有附件，添加到发送数据中
         if (this.currentUploadedFile) {
             sendData.files = [{
@@ -684,7 +776,6 @@ class ChatApp {
             }];
             this.removeAttachment();
         }
-
         // 创建机器人响应的消息容器
         const botMessageDiv = this.appendMessage('', false);
         // 添加加载状态，但保持位置固定
@@ -701,11 +792,9 @@ class ChatApp {
                 },
                 body: JSON.stringify(sendData)
             });
-
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             let messageFiles = [];
-
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) {
@@ -716,11 +805,9 @@ class ChatApp {
                     await this.loadSuggestions(botMessageDiv);
                     break;
                 }
-
                 botMessageDiv.classList.add('show');
                 const chunk = decoder.decode(value);
                 const lines = chunk.split('\n');
-
                 for (const line of lines) {
                     if (line.startsWith('data: ')) {
                         try {
@@ -733,7 +820,9 @@ class ChatApp {
                                     this.lastMessageId = data.message_id;
                                     this.currentConversationId = data.conversation_id;
                                     // 滚动到建议列表可见
-                                    botMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                    setTimeout(() => {
+                                        botMessageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                    }, 100);
                                     break;
 
                                 case 'agent_thought':
@@ -766,7 +855,6 @@ class ChatApp {
                                     }
                                     break;
                             }
-
                             // 更新消息内容
                             const formattedContent = marked.parse(fullResponse);
                             botMessageDiv.querySelector('.message-content').innerHTML = formattedContent;
@@ -778,14 +866,13 @@ class ChatApp {
             }
         } catch (error) {
             botMessageDiv.classList.remove('loading');
-            // ...rest of error handling...
             console.error('发送消息失败:', error);
             botMessageDiv.querySelector('.message-content').textContent = '抱歉，发生了错误。请稍后重试。';
         }
-        // this.textToAudio(this.lastMessageId);
-
+        if(this.audioStatus){
+            this.textToAudio(this.lastMessageId);
+        }
         await this.loadConversations();
-
         // 在消息发送时隐藏欢迎页面
         this.welcomePage.style.display = 'none';
         this.chatContainer.style.display = 'flex';
@@ -814,12 +901,9 @@ class ChatApp {
                     }
                 }
             );
-
             const data = await response.json();
-
             // 清除加载状态
             this.conversationItems.innerHTML = '';
-
             if (data.data && data.data.length > 0) {
                 this.renderConversations(data.data);
                 this.hasMore = data.has_more;
@@ -840,7 +924,6 @@ class ChatApp {
             const item = document.createElement('div');
             item.className = 'conversation-item';
             item.dataset.conversationId = message.id;
-
             const time = new Date(message.created_at * 1000).toLocaleString();
             item.innerHTML = `
                 <div class="conversation-content">
@@ -851,30 +934,25 @@ class ChatApp {
                     <i class="fas fa-trash"></i>
                 </button>
             `;
-
             // 给删除按钮添加事件监听
             const deleteBtn = item.querySelector('.delete-btn');
             deleteBtn.addEventListener('click', (e) => {
                 e.stopPropagation(); // 阻止事件冒泡
                 this.deleteConversation(message.id);
             });
-
             // 给会话项添加点击事件
             item.querySelector('.conversation-content').addEventListener('click', () => {
                 this.switchConversation(message.id);
             });
-
             if (message.id === this.currentConversationId) {
                 item.classList.add('active');
             }
-
             this.conversationItems.appendChild(item);
         });
     }
 
     async deleteConversation(conversationId) {
         if (!confirm('确定要删除这个会话吗？')) return;
-
         try {
             const response = await fetch(
                 `${this.baseUrl}/conversations/${conversationId}`,
@@ -887,7 +965,6 @@ class ChatApp {
                     body: JSON.stringify({ user: this.user })
                 }
             );
-
             const data = await response.json();
             if (data.result === 'success') {
                 // 如果删除的是当前会话，重置状态并显示欢迎页面
@@ -907,12 +984,12 @@ class ChatApp {
             alert('删除会话失败，请重试');
         }
     }
+
     async audioToText(file) {
         try {
             const formData = new FormData();
             formData.append('file', file);
             formData.append('user', this.user);
-
             const response = await fetch(`${this.baseUrl}/audio-to-text`, {
                 method: 'POST',
                 headers: {
@@ -920,10 +997,10 @@ class ChatApp {
                 },
                 body: formData
             });
-
             const result = await response.json();
             if (result.result === 'success') {
-                return result.text;
+                this.userInput.value = result.text;
+                this.sendMessage();
             } else {
                 throw new Error('Audio to text conversion failed');
             }
@@ -936,10 +1013,9 @@ class ChatApp {
     async textToAudio(messageId) {
         try {
             const requestBody = {
-                user: this.user,
+                user: this.user, 
                 message_id: messageId
             };
-
             const response = await fetch(
                 `${this.baseUrl}/text-to-audio`, {
                 method: 'POST',
@@ -949,7 +1025,38 @@ class ChatApp {
                 },
                 body: JSON.stringify(requestBody),
             });
-            this.playAudio(await response.arrayBuffer());
+
+            // 创建 MediaSource 实例
+            const mediaSource = new MediaSource();
+            const audio = new Audio();
+            audio.src = URL.createObjectURL(mediaSource);
+
+            mediaSource.addEventListener('sourceopen', async () => {
+                // 创建 SourceBuffer
+                const sourceBuffer = mediaSource.addSourceBuffer('audio/mpeg');
+                const reader = response.body.getReader();
+                // 读取流数据
+                while (true) {
+                    const {done, value} = await reader.read();
+                    if (done) break;
+                    // 等待前一个数据添加完成
+                    if (sourceBuffer.updating) {
+                        await new Promise(resolve => {
+                            sourceBuffer.addEventListener('updateend', resolve, {once: true});
+                        });
+                    }
+                    // 添加新的音频数据
+                    sourceBuffer.appendBuffer(value);
+                }
+                mediaSource.endOfStream();
+            });
+            // 播放音频
+            await audio.play();
+            //回复完成
+            this.waveContainer.style.display = 'none';
+            this.chatBody.classList.remove('bot-replying');
+            this.statusText.textContent = '点击麦克风开始对话';
+            this.isBotReplying = false;
         } catch (error) {
             console.error('文字转语音失败:', error);
         }
@@ -957,19 +1064,22 @@ class ChatApp {
 
     playAudio(audioData) {
         try {
-            // 将字节码转换为 Base64 字符串
+            // 如果是ArrayBuffer直接创建blob
+            if(audioData instanceof ArrayBuffer) {
+                const blob = new Blob([audioData], {type: 'audio/mpeg'});
+                const audio = new Audio(URL.createObjectURL(blob));
+                return audio.play();
+            }
+            
+            // 保留base64处理逻辑作为备用
             const base64String = this.arrayBufferToBase64(audioData);
-
             const audio = new Audio();
             audio.src = `data:audio/mpeg;base64,${base64String}`;
-
             audio.addEventListener('error', (e) => {
                 console.error('音频加载失败:', e.target.error);
             });
-
             return audio.play().catch((error) => {
                 console.error('播放音频失败:', error);
-                // 尝试使用备用音频格式 (WAV)
                 audio.src = `data:audio/wav;base64,${base64String}`;
                 return audio.play();
             });
@@ -1295,7 +1405,6 @@ class ChatApp {
     }
 }
 
-// 初始化应用并使其全局可用（为了处理预览图片的删除）
 let chatApp;
 document.addEventListener('DOMContentLoaded', () => {
     chatApp = new ChatApp();
