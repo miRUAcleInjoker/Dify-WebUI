@@ -403,12 +403,17 @@ body {
 }
 
 .input-container {
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    padding: 1.5rem;
-    display: flex;
-    gap: 0.5rem;
+    position: fixed;  /* Fixed position to stick to bottom */
+    bottom: 0;       /* Align to bottom */
+    left: var(--sidebar-width); /* Account for sidebar */
+    right: 0;        /* Stretch to right edge */
+    width: auto;     /* Width controlled by left/right */
+    border: 1px solid #e5e5e5;
+    border-radius: 0.75rem 0.75rem 0 0; /* Rounded top corners only */
     background: var(--bg-color);
-    backdrop-filter: blur(12px);
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    z-index: 100;
 }
 
 textarea {
@@ -642,15 +647,26 @@ button:hover {
 .toggle-sidebar-button {
     background: transparent;
     color: var(--text-color);
-    padding: 0.5rem;
+    padding: 0.75rem;
     border-radius: 0.5rem;
     cursor: pointer;
     opacity: 0.7;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .toggle-sidebar-button:hover {
     background: var(--message-bg);
     opacity: 1;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.toggle-sidebar-button:active {
+    transform: translateY(0);
+    box-shadow: none;
 }
 
 .main-content {
