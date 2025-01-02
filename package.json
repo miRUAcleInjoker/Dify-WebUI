@@ -60,7 +60,8 @@
     "win": {
       "target": [
         {
-          "target": "nsis"
+          "target": "nsis",
+          "arch": ["x64"]
         }
       ],
       "icon": "build/icons/icon.ico"
@@ -91,7 +92,11 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "MiChat"
+      "shortcutName": "MiChat",
+      "installerIcon": "build/icons/icon.ico",
+      "uninstallerIcon": "build/icons/icon.ico",
+      "installerHeaderIcon": "build/icons/icon.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
     },
     "dmg": {
       "contents": [
