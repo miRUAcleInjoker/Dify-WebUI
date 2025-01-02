@@ -249,6 +249,8 @@ body {
 /* 显示消息内容时的样式 */
 .message-content.show-content {
     opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.4s ease, transform 0.4s ease; /* 添加过渡效果 */
 }
 
 /* 消息内容段落的样式 */
@@ -273,9 +275,9 @@ body {
 /* 消息内容段落中span元素的样式 */
 .message-content p span {
     display: inline;
-    opacity: 0;
-    transform: translateY(10px);
-    animation: fadeInDown 0.4s ease forwards;
+    opacity: 1; /* 直接显示 */
+    transform: translateY(0); /* 取消动画 */
+    /* animation: fadeInDown 0.4s ease forwards; */
 }
 
 /* 定义fadeInDown动画 */
@@ -309,7 +311,7 @@ body {
 }
 
 .message-content code {
-    font-family: 'Fira Code', monospace;
+    font-family: 'Fira Code', 'Cascadia Code', 'Source Code Pro', Consolas, Monaco, 'Courier New', monospace;
     font-size: 0.9em;
     padding: 0.2em 0.4em;
     background: rgba(0, 0, 0, 0.05);
@@ -335,7 +337,6 @@ body {
     white-space: pre;
     display: block;
     overflow-x: auto;
-    color: #d4d4d4;
     tab-size: 4;
 }
 
