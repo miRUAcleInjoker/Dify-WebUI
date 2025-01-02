@@ -636,7 +636,7 @@ button:hover {
 }
 
 .new-chat-button:hover {
-    background-color: #0e8e6d;
+    background-color: var(--primary-color);
 }
 
 .toggle-sidebar-button {
@@ -770,11 +770,22 @@ button:hover {
 }
 
 .welcome-page .input-container {
+    position: fixed;  /* Fixed position to stick to bottom */
+    bottom: 0;       /* Align to bottom */
+    left: var(--sidebar-width); /* Account for sidebar */
+    right: 0;        /* Stretch to right edge */
+    width: auto;     /* Width controlled by left/right */
     border: 1px solid #e5e5e5;
-    border-radius: 0.75rem;
-    margin-top: 2rem;
+    border-radius: 0.75rem 0.75rem 0 0; /* Rounded top corners only */
     background: var(--bg-color);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    z-index: 100;
+}
+
+/* When sidebar is collapsed */
+.sidebar-collapsed .welcome-page .input-container {
+    left: 0;
 }
 
 @media (max-width: 768px) {
@@ -1256,7 +1267,7 @@ button:hover {
 }
 
 .save-button:hover {
-    background: #0e8e6d;
+    background: var(--primary-color);
     transform: translateY(-1px);
 }
 
@@ -1323,7 +1334,7 @@ button:hover {
 .code-actions button {
     padding: 4px 8px;
     border: none;
-    background: #4CAF50;
+    background: var(--primary-color);
     color: white;
     border-radius: 3px;
     cursor: pointer;
@@ -1331,7 +1342,7 @@ button:hover {
 }
 
 .code-actions button:hover {
-    background: #45a049;
+    background: color-mix(in srgb, var(--primary-color) 85%, white);
 }
 
 .line {
