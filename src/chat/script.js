@@ -636,12 +636,11 @@ class ChatApp {
 
             //  逐字显示机器人消息
             this.showContent(messageContent);
-            // 滚动到消息底部
-            setTimeout(() => {
-                this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-            }, 1);
+            messageContent.addEventListener("mouseenter",()=>{
+                console.log("mouseenter")
+            })
+            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
         }
-
 
         contentWrapper.appendChild(messageContent);
 
@@ -653,13 +652,6 @@ class ChatApp {
         }
 
         messageDiv.appendChild(contentWrapper);
-    
-        // 添加时间戳
-        // const time = new Date().toLocaleTimeString('zh-CN', {
-        //     hour: '2-digit',
-        //     minute: '2-digit'
-        // });
-        // messageDiv.setAttribute('data-time', time);
 
         if (parent) {
             parent.appendChild(messageDiv);
@@ -678,6 +670,7 @@ class ChatApp {
 
         return messageDiv;
     }
+
     showContent(messageContent) {
         const spans = messageContent.querySelectorAll('p span');
         let delay = 0;
