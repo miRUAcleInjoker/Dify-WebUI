@@ -41,7 +41,6 @@ class ChatApp {
         this.userNameDisplay = document.getElementById('userName');
         this.toggleSettingsStates = null;
         this.toggleVoiceStates = null;
-        this.settingsFormInputs = this.settingsForm.querySelectorAll('input');
         this.micButton = document.getElementById('micButton');
         this.waveContainer = document.getElementById('waveContainer');
         this.statusText = document.getElementById('statusText');
@@ -53,14 +52,55 @@ class ChatApp {
         this.audioChunks = [];
         this.currentAudioFile = null; 
         this.audioStatus = false;
+        //弹窗
+        this.confirmBtn = document.getElementById("confirmBtn");
+        this.cancelBtn = document.getElementById("cancelBtn");
+        this.tipPage = document.getElementById("tipPage");
+        // 获取消息元素
+        this.modalMessage = document.getElementById("modal-message");
         this.loadSettings();
         this.initSettingsHandlers();
-        this.init();
-
         // 配置 marked
         this.initialize();
+        this.init();
 
+    }
 
+    showInfoPage(message, confirmBtn = "", cancelBtn = "") {
+        return new Promise((resolve) => {
+            this.tipPage.style.display = "flex";
+            this.modalMessage.innerText = message;
+            this.confirmBtn.value = confirmBtn;
+            this.cancelBtn.value = cancelBtn;
+            const confirmHandler = () => {
+                this.tipPage.style.display = "none";
+                this.confirmBtn.removeEventListener("click", confirmHandler);
+                this.cancelBtn.removeEventListener("click", cancelHandler);
+                resolve(true);  // 用户点击确认
+            };
+    
+            const cancelHandler = () => {
+                this.tipPage.style.display = "none";
+                this.confirmBtn.removeEventListener("click", confirmHandler);
+                this.cancelBtn.removeEventListener("click", cancelHandler);
+                resolve(false);  // 用户点击取消
+            };
+            
+            this.confirmBtn.addEventListener("click", confirmHandler);
+            this.cancelBtn.addEventListener("click", cancelHandler);
+
+            if(cancelBtn == "" && cancelBtn == ""){
+                this.confirmBtn.style.display = "none";
+                this.cancelBtn.style.display = "none";
+                //  倒计时3s后关闭
+                setTimeout(() => {
+                    this.tipPage.style.display = "none";
+                    this.confirmBtn.removeEventListener("click", confirmHandler);
+                    this.cancelBtn.removeEventListener("click", cancelHandler);
+                    resolve(true);  // 用户点击确认
+                }, 3000);
+            }
+        });
     }
 
     async startRecording() {
@@ -453,6 +493,16 @@ class ChatApp {
 
         // 标记初始化完成
         this.initialized = true;
+        //检查apikey
+        if (!this.apiKey) {
+            const apiState = await this.showInfoPage("请输入apikey","确实","取消").then(result => {
+                if (result) {
+                    this.toggleSettingsPage();
+                }else{
+                    return;
+                }
+            });
+        } 
     }
 
     bindEventListeners() {
@@ -603,13 +653,13 @@ class ChatApp {
         }
 
         messageDiv.appendChild(contentWrapper);
-
+    
         // 添加时间戳
-        const time = new Date().toLocaleTimeString('zh-CN', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        messageDiv.setAttribute('data-time', time);
+        // const time = new Date().toLocaleTimeString('zh-CN', {
+        //     hour: '2-digit',
+        //     minute: '2-digit'
+        // });
+        // messageDiv.setAttribute('data-time', time);
 
         if (parent) {
             parent.appendChild(messageDiv);
@@ -670,7 +720,14 @@ class ChatApp {
             }
         } catch (error) {
             console.error('上传文件失败:', error);
-            alert('文件上传失败，请重试');
+            this.showInfoPage("文件上传失败，请重试!")
+                .then(userConfirmed => {
+                    if (userConfirmed) {
+                        console.log("用户确认了操作");
+                    } else {
+                        console.log("用户取消了操作");
+                    }
+                })
         }
     }
 
@@ -724,9 +781,7 @@ class ChatApp {
                     suggestionsContainer.appendChild(btn);
                 });
                 // 滚动到建议列表可见
-                setTimeout(() => {
-                    messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                }, 100);
+                messageDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         } catch (error) {
             console.error('获取建议失败:', error);
@@ -985,7 +1040,8 @@ class ChatApp {
             }
         } catch (error) {
             console.error('删除会话失败:', error);
-            alert('删除会话失败，请重试');
+            const userConfirmed = await this.showInfoPage('删除会话失败，请重试')
+            
         }
     }
 
@@ -1318,7 +1374,8 @@ class ChatApp {
         this.userAvatar.src = `https://api.dicebear.com/7.x/adventurer/svg?seed=${this.userName}`;
     }
 
-    saveSettings() {
+    async saveSettings() {
+        const userConfirmed = this.showInfoPage("设置已保存")
         const newUserName = document.getElementById('userNameInput').value.trim();
 
         if (newUserName) {
@@ -1335,7 +1392,7 @@ class ChatApp {
         const newUserId = document.getElementById('userId').value.trim();
 
         if (!newApiKey || !newBaseUrl || !newUserId) {
-            alert('所有字段都必须填写');
+            const userConfirmed = await this.showInfoPage("所有字段都必须填写")
             return;
         }
 
@@ -1349,7 +1406,6 @@ class ChatApp {
         this.baseUrl = newBaseUrl;
         this.user = newUserId;
 
-        alert('设置已保存');
         this.settingsPage.style.display = 'none';
         if (this.toggleSettingsStates) {
             if (this.toggleSettingsStates.chatContainer.wasVisible) {
@@ -1360,16 +1416,11 @@ class ChatApp {
         } else {
             this.welcomePage.style.display = 'flex';
         }
-        //将settings页面的所有状态恢复到初始状态
-        this.settingsFormInputs.forEach(input => input.setAttribute('disabled', 'true'));
         this.settingsPage.style.display = 'none';
-        //移除输入框中所有的值
-        this.settingsFormInputs.forEach(input => input.value = '');
     }
 
     toggleSettingsPage() {
         // 获取当前显示状态
-        this.settingsFormInputs.forEach(input => input.setAttribute('disabled', 'true'));
         const isSettingsVisible = this.settingsPage.style.display === 'flex';
         if (!isSettingsVisible) {
             // 保存当前状态

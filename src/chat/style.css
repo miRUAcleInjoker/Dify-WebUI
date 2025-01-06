@@ -14,8 +14,10 @@
     --hover-transform: translateY(-3px);
     --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
     --animation-duration: 0.4s;
-    --avatar-size: 50px;  /* 新增：头像大小 */
-    --avatar-margin: 8px; /* 新增：头像边距 */
+    --avatar-size: 50px;
+    /* 新增：头像大小 */
+    --avatar-margin: 8px;
+    /* 新增：头像边距 */
     --settings-width: 500px;
     --theme-color-default: #10a37f;
     --theme-color-blue: #2d7fea;
@@ -51,7 +53,7 @@ body {
 
 .app-container {
     display: flex;
-    height: 100vh;
+    height: 95vh;
     width: 100%;
 }
 
@@ -63,7 +65,8 @@ body {
 }
 
 .conversation-header {
-    padding: 0.75rem 1rem;  /* 调整内边距 */
+    padding: 0.75rem 1rem;
+    /* 调整内边距 */
     font-weight: bold;
     border-bottom: 1px solid #e5e5e5;
     font-size: 0.95rem;
@@ -86,22 +89,25 @@ body {
     white-space: nowrap;
     background: transparent;
     transition: all 0.2s ease;
-    font-size: 0.9rem;  /* 减小字体大小 */
+    font-size: 0.9rem;
+    /* 减小字体大小 */
     line-height: 1.4;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    gap: 8px;  /* 添加间距 */
+    gap: 8px;
+    /* 添加间距 */
 }
 
 .conversation-content {
     flex: 1;
-    min-width: 0;  /* 允许flex项目收缩到比内容更小 */
+    min-width: 0;
+    /* 允许flex项目收缩到比内容更小 */
     cursor: pointer;
 }
 
-.conversation-content > div:first-child {
+.conversation-content>div:first-child {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -116,7 +122,8 @@ body {
     cursor: pointer;
     opacity: 0.7;
     transition: opacity 0.2s;
-    flex-shrink: 0;  /* 防止按钮被压缩 */
+    flex-shrink: 0;
+    /* 防止按钮被压缩 */
 }
 
 .delete-btn:hover {
@@ -137,7 +144,8 @@ body {
 }
 
 .conversation-item .time {
-    font-size: 0.75rem;  /* 减小时间字体大小 */
+    font-size: 0.75rem;
+    /* 减小时间字体大小 */
     color: #666;
     margin-top: 0.25rem;
 }
@@ -153,10 +161,73 @@ body {
 
 .chat-messages {
     position: relative;
-    flex: 1;
+    flex: 1 1 auto;
     overflow-y: auto;
-    padding: 1rem;
+    overflow-x: hidden;
+    padding: 1rem 1.5rem;
     background: var(--bg-color);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+    
+    /* 添加滚动条样式 */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
+    border: 2px solid var(--theme-color-blue);
+}
+
+/* 添加消息容器的样式 */
+.chat-messages .message {
+    margin-bottom: 8rem;
+    padding: 0.75rem;
+    border-radius: 8px;
+    max-width: 70%;
+    word-wrap: break-word;
+}
+
+.chat-messages .message.sent {
+    background-color: var(--theme-color-light-blue);
+    align-self: flex-end;
+    margin-left: auto;
+}
+
+.chat-messages .message.received {
+    background-color: var(--theme-color-grey);
+    align-self: flex-start;
+    margin-right: auto;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .chat-messages {
+        padding: 0.75rem;
+    }
+    
+    .chat-messages .message {
+        max-width: 90%;
+    }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.chat-messages .message {
+    animation: fadeIn 0.3s ease-out;
 }
 
 .message {
@@ -178,7 +249,8 @@ body {
     /* 删除初始透明度和过渡效果 */
     /* opacity: 0; */
     /* transition: opacity 0.3s ease; */
-    min-height: 60px; /* 添加最小高度防止抖动 */
+    min-height: 60px;
+    /* 添加最小高度防止抖动 */
 }
 
 /* 显示消息时的样式 */
@@ -233,14 +305,14 @@ body {
     max-width: 100%;
     overflow-wrap: break-word;
     line-height: 1.6;
-    width: auto; 
-    min-width: 100%; 
+    width: auto;
+    min-width: 100%;
     padding: 1rem;
     border-radius: var(--message-radius);
     box-shadow: var(--message-shadow);
     position: relative;
     overflow: hidden;
-    opacity: 0; 
+    opacity: 0;
     transition: all 0.3s ease, opacity 0.3s ease;
     border: 1px solid rgba(0, 0, 0, 0.04);
     backdrop-filter: blur(8px);
@@ -250,7 +322,8 @@ body {
 .message-content.show-content {
     opacity: 1;
     transform: translateY(0);
-    transition: opacity 0.4s ease, transform 0.4s ease; /* 添加过渡效果 */
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    /* 添加过渡效果 */
 }
 
 /* 消息内容段落的样式 */
@@ -275,8 +348,10 @@ body {
 /* 消息内容段落中span元素的样式 */
 .message-content p span {
     display: inline;
-    opacity: 1; /* 直接显示 */
-    transform: translateY(0); /* 取消动画 */
+    opacity: 1;
+    /* 直接显示 */
+    transform: translateY(0);
+    /* 取消动画 */
 }
 
 /* 定义fadeInDown动画 */
@@ -285,21 +360,22 @@ body {
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
     }
 }
 
-.message-content h1, 
-.message-content h2, 
-.message-content h3, 
+.message-content h1,
+.message-content h2,
+.message-content h3,
 .message-content h4 {
     margin: 1rem 0 0.5rem;
     line-height: 1.4;
 }
 
-.message-content ul, 
+.message-content ul,
 .message-content ol {
     margin: 0.5rem 0;
     padding-left: 1.5rem;
@@ -315,8 +391,10 @@ body {
     padding: 0.2em 0.4em;
     background: rgba(0, 0, 0, 0.05);
     border-radius: 3px;
-    white-space: pre-wrap; /* 允许代码换行 */
-    word-break: break-all; /* 确保长字符串会换行 */
+    white-space: pre-wrap;
+    /* 允许代码换行 */
+    word-break: break-all;
+    /* 确保长字符串会换行 */
 }
 
 .message-content pre {
@@ -403,13 +481,13 @@ body {
 }
 
 .input-container {
-    position: fixed;  /* Fixed position to stick to bottom */
-    bottom: 0;       /* Align to bottom */
-    left: var(--sidebar-width); /* Account for sidebar */
-    right: 0;        /* Stretch to right edge */
-    width: auto;     /* Width controlled by left/right */
+    position: fixed;
+    bottom: 0;
+    left: var(--sidebar-width);
+    right: 0;
+    width: auto;
     border: 1px solid #e5e5e5;
-    border-radius: 0.75rem 0.75rem 0 0; /* Rounded top corners only */
+    border-radius: 0.75rem 0.75rem 0 0;
     background: var(--bg-color);
     box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
     padding: 1rem;
@@ -421,12 +499,14 @@ textarea {
     padding: 0.75rem;
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 0.5rem;
-    resize: none; /* 禁止用户手动调整 */
+    resize: none;
+    /* 禁止用户手动调整 */
     font-family: inherit;
     font-size: 1rem;
     outline: none;
     min-height: 20px;
-    max-height: 200px; /* 最大高度 */
+    max-height: 200px;
+    /* 最大高度 */
     overflow-y: auto;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(8px);
@@ -469,13 +549,27 @@ button:hover {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @keyframes typing {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .typing-indicator {
@@ -494,9 +588,20 @@ button:hover {
 }
 
 @keyframes typing-dot {
-    0%, 20% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-    80%, 100% { transform: translateY(0); }
+
+    0%,
+    20% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
+
+    80%,
+    100% {
+        transform: translateY(0);
+    }
 }
 
 .input-group {
@@ -519,7 +624,8 @@ button:hover {
 
 .attachment-preview {
     position: absolute;
-    bottom: 100%; /* 使其漂浮在输入框上方 */
+    bottom: 100%;
+    /* 使其漂浮在输入框上方 */
     left: 0;
     width: 100%;
     background: white;
@@ -528,7 +634,8 @@ button:hover {
     padding: 0.5rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     z-index: 10;
-    display: none; /* 默认隐藏 */
+    display: none;
+    /* 默认隐藏 */
 }
 
 .preview-image {
@@ -618,7 +725,8 @@ button:hover {
 }
 
 .sidebar-header {
-    padding: 0.75rem;  /* 调整内边距 */
+    padding: 0.75rem;
+    /* 调整内边距 */
     display: flex;
     gap: 0.5rem;
     align-items: center;
@@ -674,6 +782,10 @@ button:hover {
     flex: 1;
     transition: margin-left 0.3s ease;
     min-width: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .main-content.sidebar-collapsed {
@@ -786,13 +898,19 @@ button:hover {
 }
 
 .welcome-page .input-container {
-    position: fixed;  /* Fixed position to stick to bottom */
-    bottom: 0;       /* Align to bottom */
-    left: var(--sidebar-width); /* Account for sidebar */
-    right: 0;        /* Stretch to right edge */
-    width: auto;     /* Width controlled by left/right */
+    position: fixed;
+    /* Fixed position to stick to bottom */
+    bottom: 0;
+    /* Align to bottom */
+    left: var(--sidebar-width);
+    /* Account for sidebar */
+    right: 0;
+    /* Stretch to right edge */
+    width: auto;
+    /* Width controlled by left/right */
     border: 1px solid #e5e5e5;
-    border-radius: 0.75rem 0.75rem 0 0; /* Rounded top corners only */
+    border-radius: 0.75rem 0.75rem 0 0;
+    /* Rounded top corners only */
     background: var(--bg-color);
     box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.05);
     padding: 1rem;
@@ -844,11 +962,11 @@ button:hover {
     .suggestions-group {
         min-width: 100%;
     }
-    
+
     .show-sidebar-button.visible {
         display: flex;
     }
-    
+
     .welcome-input-container {
         padding: 0 1rem;
     }
@@ -870,7 +988,9 @@ button:hover {
     background: transparent;
 }
 
-.loading, .error, .no-conversations {
+.loading,
+.error,
+.no-conversations {
     padding: 1rem;
     color: #666;
     font-size: 0.9rem;
@@ -898,7 +1018,9 @@ button:hover {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .message-content a {
@@ -998,10 +1120,9 @@ button:hover {
 
 .message.user .message-content {
     border-radius: var(--message-radius) var(--message-radius) 0 var(--message-radius);
-    background: linear-gradient(135deg, 
-        var(--primary-color), 
-        color-mix(in srgb, var(--primary-color) 85%, #000)
-    );
+    background: linear-gradient(135deg,
+            var(--primary-color),
+            color-mix(in srgb, var(--primary-color) 85%, #000));
     color: white;
     box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
 }
@@ -1033,9 +1154,17 @@ button:hover {
 }
 
 @keyframes sendPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 #sendButton:active {
@@ -1043,8 +1172,13 @@ button:hover {
 }
 
 @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
 }
 
 .message.bot.loading {
@@ -1052,11 +1186,10 @@ button:hover {
 }
 
 .message.bot.loading .message-content {
-    background: linear-gradient(90deg, 
-        #f7f7f8 0%, 
-        #ffffff 50%, 
-        #f7f7f8 100%
-    );
+    background: linear-gradient(90deg,
+            #f7f7f8 0%,
+            #ffffff 50%,
+            #f7f7f8 100%);
     background-size: 200% 100%;
     animation: shimmer 1.5s infinite linear;
     position: relative;
@@ -1071,22 +1204,34 @@ button:hover {
     right: 0;
     bottom: 0;
     background: linear-gradient(90deg,
-        transparent,
-        rgba(255, 255, 255, 0.6),
-        transparent
-    );
+            transparent,
+            rgba(255, 255, 255, 0.6),
+            transparent);
     animation: shimmerOverlay 1.5s infinite;
 }
 
 @keyframes shimmerOverlay {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+    0% {
+        transform: translateX(-100%);
+    }
+
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 @keyframes typingPulse {
-    0% { box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); }
-    50% { box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); }
-    100% { box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); }
+    0% {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    50% {
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    100% {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
 }
 
 .typing-indicator {
@@ -1107,23 +1252,51 @@ button:hover {
     animation: typingBounce 1.4s infinite;
 }
 
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
 
 @keyframes typingBounce {
-    0%, 60%, 100% { transform: translateY(0); }
-    30% { transform: translateY(-4px); }
+
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+    }
+
+    30% {
+        transform: translateY(-4px);
+    }
 }
 
 @keyframes copiedPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 @keyframes newMessage {
-    0% { transform: translateY(20px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
+    0% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .message.new {
@@ -1135,6 +1308,7 @@ button:hover {
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1159,7 +1333,8 @@ button:hover {
     cursor: pointer;
     opacity: 0.7;
     transition: all 0.2s;
-    margin-left: auto; /* Add this line to push button to right */
+    margin-left: auto;
+    /* Add this line to push button to right */
 }
 
 .settings-button:hover {
@@ -1168,9 +1343,11 @@ button:hover {
 }
 
 .settings-page {
-    position: fixed;  /* 改为fixed定位 */
+    position: fixed;
+    /* 改为fixed定位 */
     top: 0;
-    left: var(--sidebar-width);  /* 添加左侧偏移 */
+    left: var(--sidebar-width);
+    /* 添加左侧偏移 */
     right: 0;
     bottom: 0;
     display: flex;
@@ -1178,12 +1355,14 @@ button:hover {
     align-items: center;
     padding: 2rem;
     background: var(--bg-color);
-    z-index: 1000;     
-    overflow-y: auto;  /* 添加滚动 */
+    z-index: 1000;
+    overflow-y: auto;
+    /* 添加滚动 */
 }
 
 .main-content.sidebar-collapsed .settings-page {
-    left: 0;  /* 当侧边栏收起时调整位置 */
+    left: 0;
+    /* 当侧边栏收起时调整位置 */
 }
 
 .settings-content {
@@ -1311,11 +1490,15 @@ button:hover {
     font-size: 0.95rem;
 }
 
-.button, .new-chat-button, .save-button {
+.button,
+.new-chat-button,
+.save-button {
     background-color: var(--primary-color);
 }
 
-.button:hover, .new-chat-button:hover, .save-button:hover {
+.button:hover,
+.new-chat-button:hover,
+.save-button:hover {
     background-color: color-mix(in srgb, var(--primary-color) 85%, black);
 }
 
@@ -1396,8 +1579,10 @@ pre {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: rgba(255, 255, 255, 0.85); /* 改为半透明背景 */
-    backdrop-filter: blur(8px); /* 添加毛玻璃效果 */
+    background-color: rgba(255, 255, 255, 0.85);
+    /* 改为半透明背景 */
+    backdrop-filter: blur(8px);
+    /* 添加毛玻璃效果 */
     border-radius: 1.5rem;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
     padding: 2rem;
@@ -1412,7 +1597,8 @@ pre {
     padding: 2rem;
     width: fit-content;
     margin: 0;
-    background-color: transparent; /* 移除背景色 */
+    background-color: transparent;
+    /* 移除背景色 */
 }
 
 .mic-button {
@@ -1459,9 +1645,11 @@ pre {
         transform: scale(1);
         opacity: 0.5;
     }
+
     50% {
         opacity: 0;
     }
+
     100% {
         transform: scale(2);
         opacity: 0;
@@ -1483,17 +1671,21 @@ pre {
     height: 30px;
     background: linear-gradient(to top, #10a37f, #11b88e);
     border-radius: 4px;
-    animation: waveform 1.0s infinite ease-in-out;  /* 从1.2s改为2s */
+    animation: waveform 1.0s infinite ease-in-out;
+    /* 从1.2s改为2s */
     transform-origin: bottom;
     box-shadow: 0 2px 6px rgba(16, 163, 127, 0.2);
 }
 
 @keyframes waveform {
-    0%, 100% { 
-        transform: scaleY(0.2); 
+
+    0%,
+    100% {
+        transform: scaleY(0.2);
         opacity: 0.5;
     }
-    50% { 
+
+    50% {
         transform: scaleY(1);
         opacity: 1;
     }
@@ -1516,31 +1708,39 @@ pre {
 
 /* 添加新的动态波浪效果 */
 .wave:nth-child(odd) {
-    animation-delay: 0.8s;  /* 从0.4s改为0.8s */
+    animation-delay: 0.8s;
+    /* 从0.4s改为0.8s */
 }
 
 .wave:nth-child(even) {
-    animation-delay: 1.6s;  /* 从0.8s改为1.6s */
+    animation-delay: 1.6s;
+    /* 从0.8s改为1.6s */
 }
 
 .status-text {
     margin-top: 25px;
-    font-size: 1.1em; /* 增大字体 */
-    color: #000000; /* 加深文字颜色 */
-    font-weight: 600; /* 加粗 */
-    text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    font-size: 1.1em;
+    /* 增大字体 */
+    color: #000000;
+    /* 加深文字颜色 */
+    font-weight: 600;
+    /* 加粗 */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     gap: 8px;
-    letter-spacing: 0.02em; /* 增加字间距 */
+    letter-spacing: 0.02em;
+    /* 增加字间距 */
 }
 
 .mic-icon {
-    width: 36px; /* 增大图标 */
+    width: 36px;
+    /* 增大图标 */
     height: 36px;
     fill: #ffffff;
-    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); /* 添加图标阴影 */
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    /* 添加图标阴影 */
 }
 
 /* 添加机器人回复状态样式 */
@@ -1570,11 +1770,95 @@ pre {
     animation: typingDot 1.4s infinite ease-in-out;
 }
 
-.typing-dot:nth-child(1) { animation-delay: 0s; }
-.typing-dot:nth-child(2) { animation-delay: 0.2s; }
-.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+.typing-dot:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
 
 @keyframes typingDot {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.5); }
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.5);
+    }
+}
+
+/* 弹窗背景 */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999999; /* 使用非常高的 z-index 值 */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* 防止滚动 */
+    background-color: rgba(0, 0, 0, 0.4);
+    pointer-events: auto;
+    will-change: opacity;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+}
+
+.modal.show {
+    display: block; /* 确保显示 */
+    opacity: 1;
+}
+
+/* 弹窗内容 */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 8px; /* 添加圆角 */
+    width: 80%;
+    max-width: 400px;
+    text-align: center;
+    z-index: 10000000; /* 比 modal 更高的 z-index */
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 添加阴影 */
+}
+
+/* 按钮样式 */
+.btn {
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+    border: none;
+    color: white;
+    border-radius: 4px; /* 添加圆角 */
+    transition: background-color 0.2s ease; /* 添加过渡效果 */
+}
+
+.confirm-btn {
+    background-color: var(--primary-color);
+}
+
+.confirm-btn:hover {
+    background-color: var(--primary-color-dark, #45a049); /* 添加悬停效果 */
+}
+
+.cancel-btn {
+    background-color: #f44336;
+}
+
+.cancel-btn:hover {
+    background-color: #d32f2f; /* 添加悬停效果 */
+}
+
+/* 防止页面滚动 */
+body.modal-open {
+    overflow: hidden;
 }
