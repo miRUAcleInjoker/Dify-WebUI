@@ -165,7 +165,7 @@ body {
     overflow-y: auto;
     padding: 1rem;
     background: var(--bg-color);
-    margin-bottom: 9rem;
+    margin-bottom: 5rem;
 }
 
 .message {
