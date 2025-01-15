@@ -66,7 +66,8 @@
           ]
         }
       ],
-      "icon": "build/icons/icon.ico"
+      "icon": "build/icons/icon.ico",
+      "timeStampServer": "http://timestamp.digicert.com"
     },
     "linux": {
       "target": [
