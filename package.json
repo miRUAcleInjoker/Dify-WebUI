@@ -47,6 +47,7 @@
   "build": {
     "appId": "com.machaojin.michat",
     "productName": "MiChat",
+    "copyright": "Copyright © 2024 Ma Chaojin",
     "publish": [
       {
         "provider": "github",
