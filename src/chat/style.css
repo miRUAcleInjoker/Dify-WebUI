@@ -801,8 +801,6 @@ button:hover {
     z-index: 1001;
     background: var(--primary-color);
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
     justify-content: center;
     align-items: center;
     cursor: pointer;
@@ -817,8 +815,6 @@ button:hover {
     z-index: 1001;
     background: var(--primary-color);
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
     justify-content: center;
     align-items: center;
     cursor: pointer;
