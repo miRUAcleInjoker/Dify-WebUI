@@ -1264,7 +1264,7 @@ class ChatApp {
     sendWelcomeMessage() {
         const message = this.welcomeUserInput.value.trim();
         if (!message && !this.currentUploadedFile) return;
-
+        this.welcomeUserInput.value = '';
         this.startNewChat();
         this.userInput.value = message;
         this.sendMessage();
@@ -1279,9 +1279,9 @@ class ChatApp {
 
     loadSettings() {
         // 从 localStorage 加载配置，如果没有则使用默认值
-        this.apiKey = localStorage.getItem('apiKey') || 'app-7BDgTOmgbJZrzGWIQ8OjFZ6Y';
-        this.baseUrl = localStorage.getItem('baseUrl') || 'https://mify-be.pt.xiaomi.com/api/v1';
-        this.user = localStorage.getItem('userId') || 'chat-app';
+        this.apiKey = localStorage.getItem('apiKey') || '';
+        this.baseUrl = localStorage.getItem('baseUrl') || 'https://api.dify.ai';
+        this.user = localStorage.getItem('userId') || '';
         document.getElementById('userNameInput').value = this.userName;
         this.applyTheme(this.currentTheme);
         this.updateUserInfo();
