@@ -604,7 +604,7 @@ class ChatApp {
             avatar.src = `https://api.dicebear.com/7.x/adventurer/svg?seed=${this.userName}`;  // 用户默认头像
             messageDiv.setAttribute('data-user', this.userName);
         } else {
-            avatar.src = '../../xiao-mi.ico';  // 机器人默认头像
+            avatar.src = '../../openai.svg';  // 机器人默认头像
         }
         messageDiv.appendChild(avatar);
 
