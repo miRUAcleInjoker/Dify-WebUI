@@ -52,6 +52,7 @@ class ChatApp {
         this.audioChunks = [];
         this.currentAudioFile = null; 
         this.audioStatus = false;
+        this.appName = 'DifyWebUI';
         //弹窗
         this.confirmBtn = document.getElementById("confirmBtn");
         this.cancelBtn = document.getElementById("cancelBtn");
@@ -64,6 +65,7 @@ class ChatApp {
         this.initialize();
         this.init();
         this.loadWelcomeMessage();
+
 
     }
 
@@ -939,6 +941,23 @@ class ChatApp {
         return btoa(binary);
     }
 
+    async getAppInfo(){
+        const response = await fetch(
+            `${this.baseUrl}/info?user=${this.user}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${this.apiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+        const data = await response.json();
+        console.log(data.name);
+        if (data) {
+            this.appName = data.name;
+        }
+    }
+
     async loadConversations() {
         try {
             // 显示加载状态
@@ -1162,10 +1181,12 @@ class ChatApp {
         this.chatContainer.style.display = 'flex';
     }
 
-    loadWelcomeMessage(){
+    async loadWelcomeMessage(){
+        await this.getAppInfo();
         const welcomeMessage = document.getElementsByTagName('h1')[0];
         welcomeMessage.innerText = '';
-        this.typeWriter(`Hi, ${this.userName}, I'm DifyWebUI. How can I help you?`,welcomeMessage);
+        this.typeWriter(`Hi, ${this.userName}, I'm ${this.appName}. How can I help you?`,welcomeMessage);
+        
     }
 
     async loadMoreMessages() {
