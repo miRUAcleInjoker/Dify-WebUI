@@ -63,6 +63,7 @@ class ChatApp {
         // 配置 marked
         this.initialize();
         this.init();
+        this.loadWelcomeMessage();
 
     }
 
@@ -487,10 +488,8 @@ class ChatApp {
     async init() {
         // 先绑定事件监听器
         this.bindEventListeners();
-
         // 立即加载历史对话
         await this.loadConversations();
-
         // 标记初始化完成
         this.initialized = true;
         //检查apikey
@@ -1163,6 +1162,12 @@ class ChatApp {
         this.chatContainer.style.display = 'flex';
     }
 
+    loadWelcomeMessage(){
+        const welcomeMessage = document.getElementsByTagName('h1')[0];
+        welcomeMessage.innerText = '';
+        this.typeWriter(`Hi, ${this.userName}, I'm DifyWebUI. How can I help you?`,welcomeMessage);
+    }
+
     async loadMoreMessages() {
         if (this.isLoadingHistory) return;
         this.isLoadingHistory = true;
@@ -1224,6 +1229,7 @@ class ChatApp {
 
         this.welcomePage.style.display = 'flex';
         this.chatContainer.style.display = 'none';
+        this.loadWelcomeMessage();
 
         // 如果有初始消息，则自动发送
         if (initialMessage) {
@@ -1411,6 +1417,18 @@ class ChatApp {
         }
         this.settingsPage.style.display = 'none';
     }
+
+    typeWriter(text, element, speed = 50) {
+        let i = 0;
+        function type() {
+          if (i < text.length) {
+            element.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+          }
+        }
+        type();
+      }
 
     toggleSettingsPage() {
         // 获取当前显示状态

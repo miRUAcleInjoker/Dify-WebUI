@@ -1796,3 +1796,8 @@ pre {
 body.modal-open {
     overflow: hidden;
 }
+.main-content .welcomePage .welcome-content h1{
+    font-family: monospace;
+    font-size: 20px;
+    white-space: pre-wrap
+}
