@@ -1475,3 +1475,4 @@ let chatApp;
 document.addEventListener('DOMContentLoaded', () => {
     chatApp = new ChatApp();
 });
+
