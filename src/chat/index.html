@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DifyWebUI</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="../../favicon.png" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- 添加 highlight.js 样式 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/googlecode.min.css"/>
+    <!-- 添加代码字体 -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+
+<body>
+    <!-- 添加汉堡菜单按钮 -->
+    <button id="menuButton" class="menu-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+    </button>
+
+    <button id="showSidebarButton" class="show-sidebar-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+    </button>
+
+    <!-- 添加遮罩层 -->
+    <div id="overlay" class="overlay"></div>
+
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <button id="newChatButton" class="new-chat-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                        <path fill="none" d="M0 0h24v24H0z" />
+                        <path fill="currentColor" d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" />
+                    </svg>
+                    新对话
+                </button>
+                <button id="toggleSidebarButton" class="toggle-sidebar-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                        <path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+                    </svg>
+                </button>
+            </div>
+            <div class="conversation-list" id="conversationList">
+                <div class="conversation-header">历史对话</div>
+                <div class="conversation-items" id="conversationItems">
+                    <!-- 对话列表将在这里动态添加 -->
+                </div>
+            </div>
+            <div class="user-info">
+                <img id="userAvatar" class="user-avatar" src="https://api.dicebear.com/7.x/adventurer/svg?seed=user"
+                    alt="用户头像">
+                <span id="userName" class="user-name">未设置用户名</span>
+                <button id="settingsButton" class="settings-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
+                        <path fill="currentColor"
+                            d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <div class="main-content">
+            <div id="welcomePage" class="welcome-page">
+                <div class="welcome-content">
+                    <h1>今天有什么能帮助你的呢？</h1>
+                    <div class="welcome-suggestions">
+                        <div class="suggestions-group">
+                            <h2>代码示例</h2>
+                            <div class="welcome-suggestion-items">
+                                <button>"写一个快速排序算法"</button>
+                                <button>"解释设计模式中的工厂模式"</button>
+                                <button>"如何解决JavaScript中的内存泄漏"</button>
+                            </div>
+                        </div>
+                        <div class="suggestions-group">
+                            <h2>开发工具</h2>
+                            <div class="welcome-suggestion-items">
+                                <button>Git常用命令</button>
+                                <button>Docker基础教程</button>
+                                <button>VS Code快捷键</button>
+                            </div>
+                        </div>
+                        <div class="suggestions-group">
+                            <h2>框架学习</h2>
+                            <div class="welcome-suggestion-items">
+                                <button>React基础入门</button>
+                                <button>Vue3新特性介绍</button>
+                                <button>SpringBoot实战</button>
+                            </div>
+                        </div>
+                        <div class="suggestions-group">
+                            <h2>数据库</h2>
+                            <div class="welcome-suggestion-items">
+                                <button>MySQL性能优化</button>
+                                <button>Redis缓存策略</button>
+                                <button>MongoDB最佳实践</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="welcome-input-container">
+                        <div class="input-container">
+                            <div class="attachment-preview" id="welcomeAttachmentPreview"></div>
+                            <div class="input-group">
+                                <button id="welcomeUploadButton" class="upload-button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                                        <path fill="none" d="M0 0h24v24H0z" />
+                                        <path fill="currentColor"
+                                            d="M21 15v3h3v2h-3v3h-2v-3h-3v-2h3v-3h2zm-10 3H5v-3H3v3a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-3h-2v3zm-7-9h12V7H4v2zm14-6H4a2 2 0 0 0-2 2h16a2 2 0 0 0-2-2z" />
+                                    </svg>
+                                </button>
+                                <input type="file" id="welcomeFileInput"
+                                    accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" style="display: none">
+
+                                <textarea id="welcomeUserInput" placeholder="输入消息..." rows="1"></textarea>
+                                <button id="welcomeSendButton">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                                        <path fill="none" d="M0 0h24v24H0z" />
+                                        <path fill="currentColor"
+                                            d="M3.4 20.4l17.45-7.48c.81-.35.81-1.49 0-1.84L3.4 3.6c-.66-.29-1.39.2-1.39.91L2 9.12c0 .5.37.93.87.99L17 12 2.87 13.88c-.5.07-.87.5-.87 1l.01 4.61c0 .71.73 1.2 1.39.91z" />
+                                    </svg>
+                                </button>
+                                <button id="micPButton" class="mic-p-button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                                        <path fill="none" d="M0 0h24v24H0z"/>
+                                        <path fill="currentColor" d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="chatContainer" class="chat-container" style="display: none;">
+                <div class="chat-messages" id="chatMessages"></div>
+                <div class="input-container">
+                    <div class="attachment-preview" id="attachmentPreview"></div>
+                    <div class="input-group">
+                        <button id="uploadButton" class="upload-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                                <path fill="none" d="M0 0h24v24H0z" />
+                                <path fill="currentColor"
+                                    d="M21 15v3h3v2h-3v3h-2v-3h-3v-2h3v-3h2zm-10 3H5v-3H3v3a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-3h-2v3zm-7-9h12V7H4v2zm14-6H4a2 2 0 0 0-2 2h16a2 2 0 0 0-2-2z" />
+                            </svg>
+                        </button>
+                        <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                            style="display: none">
+                        <textarea id="userInput" placeholder="输入消息..." rows="1"></textarea>
+                        <button id="sendButton">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                                <path fill="none" d="M0 0h24v24H0z" />
+                                <path fill="currentColor"
+                                    d="M3.4 20.4l17.45-7.48c.81-.35.81-1.49 0-1.84L3.4 3.6c-.66-.29-1.39.2-1.39.91L2 9.12c0 .5.37.93.87.99L17 12 2.87 13.88c-.5.07-.87.5-.87 1l.01 4.61c0 .71.73 1.2 1.39.91z" />
+                            </svg>
+                        </button>
+                        <button id="micPButton" class="mic-p-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                                <path fill="none" d="M0 0h24v24H0z"/>
+                                <path fill="currentColor" d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.91-3c-.49 0-.9.36-.98.85C16.52 14.2 14.47 16 12 16s-4.52-1.8-4.93-4.15c-.08-.49-.49-.85-.98-.85-.61 0-1.09.54-1 1.14.49 3 2.89 5.35 5.91 5.78V20c0 .55.45 1 1 1s1-.45 1-1v-2.08c3.02-.43 5.42-2.78 5.91-5.78.1-.6-.39-1.14-1-1.14z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="voiceContainer" class="voice-container" style="display: none;">
+                <div class="chat-body" id="chatBody">
+                    <div class="mic-button" id="micButton">
+                        <svg class="mic-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                        </svg>
+                    </div>
+                    <div class="wave-container" id="waveContainer" style="display: none;">
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                    </div>
+                    <div class="status-text" id="statusText">
+                        点击麦克风开始对话
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="settingsPage" class="settings-page" style="display: none;">
+                <div class="settings-content">
+                    <h2>设置</h2>
+                    <form id="settingsForm" class="settings-form">
+                        <div class="form-group">
+                            <label for="apiKey">API Key</label>
+                            <input type="text" id="apiKey" name="apiKey" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="baseUrl">Base URL</label>
+                            <input type="url" id="baseUrl" name="baseUrl" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userId">User ID</label>
+                            <input type="text" id="userId" name="userId" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="userName">用户名</label>
+                            <input type="text" id="userNameInput" name="userName" required>
+                        </div>
+                        <div class="form-group">
+                            <label>主题色</label>
+                            <div class="theme-selector">
+                                <div class="theme-option active" data-theme="default"
+                                    style="background-color: #10a37f;"></div>
+                                <div class="theme-option" data-theme="blue" style="background-color: #2d7fea;"></div>
+                                <div class="theme-option" data-theme="purple" style="background-color: #7c3aed;"></div>
+                                <div class="theme-option" data-theme="red" style="background-color: #ef4444;"></div>
+                                <div class="theme-option" data-theme="orange" style="background-color: #f97316;"></div>
+                                <div class="theme-option" data-theme="green" style="background-color: #10b981;"></div>
+                                <div class="theme-option" data-theme="pink" style="background-color: #ec4899;"></div>
+                                <div class="theme-option" data-theme="yellow" style="background-color: #eab308;"></div>
+                                <div class="theme-option" data-theme="indigo" style="background-color: #6366f1;"></div>
+                                <div class="theme-option" data-theme="cyan" style="background-color: #06b6d4;"></div>
+                                <div class="theme-option" data-theme="sky" style="background-color: #0ea5e9;"></div>
+                                <div class="theme-option" data-theme="lime" style="background-color: #84cc16;"></div>
+                                <div class="theme-option" data-theme="amber" style="background-color: #f59e0b;"></div>
+                                <div class="theme-option" data-theme="emerald" style="background-color: #10b981;"></div>
+                                <div class="theme-option" data-theme="rose" style="background-color: #f43f5e;"></div>
+                                <div class="theme-option" data-theme="fuchsia" style="background-color: #d946ef;"></div>
+                            </div>
+                        </div>
+                        <button type="submit" class="save-button">保存设置</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="updateStatus"></div>
+    <!-- 添加必要的库 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
