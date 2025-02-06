@@ -605,7 +605,7 @@ class ChatApp {
             avatar.src = `https://api.dicebear.com/7.x/adventurer/svg?seed=${this.userName}`;  // 用户默认头像
             messageDiv.setAttribute('data-user', this.userName);
         } else {
-            avatar.src = '../../openai.svg';  // 机器人默认头像
+            avatar.src = '/openai.svg';  // 机器人默认头像
         }
         messageDiv.appendChild(avatar);
 
@@ -905,6 +905,14 @@ class ChatApp {
                                         // 处理文本转语音
                                         this.playAudio(data.audio);
                                     }
+                                    break;
+                                case 'message_end':
+                                     // 移除加载状态，保持位置
+                                    console.log('message_end');
+                                    botMessageDiv.classList.remove('loading');
+                                    const finalContent = marked.parse(fullResponse);
+                                    botMessageDiv.querySelector('.message-content').innerHTML = finalContent;
+                                    await this.loadSuggestions(botMessageDiv);
                                     break;
                             }
                             // 更新消息内容
@@ -1218,6 +1226,7 @@ class ChatApp {
             if (data.data.length > 0) {
                 this.firstMessageId = data.data[0].id;
                 this.renderHistoryMessages(data.data);
+                this.scrollToBottom();
             }
         } catch (error) {
             console.error('加载历史消息失败:', error);
@@ -1242,7 +1251,7 @@ class ChatApp {
         this.chatMessages.insertBefore(fragment, this.chatMessages.firstChild);
     }
 
-    startNewChat(initialMessage = '') {
+    async startNewChat(initialMessage = '') {
         this.currentConversationId = '';
         this.firstMessageId = null;
         this.lastMessageId = null;
@@ -1252,12 +1261,14 @@ class ChatApp {
         this.chatContainer.style.display = 'none';
         this.loadWelcomeMessage();
 
-        // 如果有初始消息，则自动发送
+        // 异步执行 loadConversations
         if (initialMessage) {
             this.userInput.value = initialMessage;
-            this.sendMessage();
+            await this.sendMessage(); // 等待消息发送完成
+            this.loadConversations(); // 异步加载会话列表
+        } else {
+            this.loadConversations(); // 直接异步加载会话列表
         }
-        this.loadConversations();
     }
 
     toggleMobileSidebar() {
