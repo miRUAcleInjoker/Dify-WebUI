@@ -1,42 +1,41 @@
 :root {
-    --primary-color: #10b981;
-    --bg-color: #ffffff;
-    --text-color: #1f2937;
-    --message-bg: #f9fafb;
-    --bot-message-bg: #f3f4f6;
+    --primary-color: linear-gradient(to right, #00c6ff, #0072ff, #00c6ff); /* 科技感蓝色 */
+    --bg-color: #f4f7fc; /* 明亮干净的背景色 */
+    --text-color: #2b2d42; /* 深灰色，易于阅读 */
+    --message-bg: #ffffff;
+    --bot-message-bg: #f4f7fc; /* 淡蓝背景，优雅且现代 */
     --user-message-bg: var(--primary-color);
-    --user-message-color: #ffffff;
+    --user-message-color: #111111;
     --sidebar-width: 300px;
     --sidebar-collapsed-width: 0px;
     --header-height: 60px;
-    --message-radius: 1.5rem;
-    --message-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-    --hover-transform: translateY(-3px);
-    --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-    --animation-duration: 0.4s;
-    --avatar-size: 50px;
-    /* 新增：头像大小 */
-    --avatar-margin: 8px;
-    /* 新增：头像边距 */
-    --settings-width: 500px;
-    --theme-color-default: #10a37f;
-    --theme-color-blue: #2d7fea;
-    --theme-color-purple: #7c3aed;
-    --theme-color-red: #ef4444;
-    --theme-color-orange: #f97316;
-    --theme-color-green: #10b981;
-    --theme-color-pink: #ec4899;
-    --theme-color-yellow: #eab308;
-    --theme-color-indigo: #6366f1;
-    --theme-color-cyan: #06b6d4;
-    --theme-color-sky: #0ea5e9;
-    --theme-color-lime: #84cc16;
-    --theme-color-amber: #f59e0b;
-    --theme-color-emerald: #10b981;
-    --theme-color-rose: #f43f5e;
-    --theme-color-fuchsia: #d946ef;
+    --message-radius: 1.2rem; /* 更圆润的圆角 */
+    --message-shadow: 0 4px 24px rgba(0, 0, 0, 0.08); /* 更柔和的阴影效果 */
+    --hover-transform: translateY(-5px); /* 更有动感的hover效果 */
+    --hover-shadow: 0 12px 32px rgba(0, 0, 0, 0.12); /* 更大的hover阴影 */
+    --animation-duration: 0.3s;
+    --avatar-size: 55px; /* 稍大的头像 */
+    --avatar-margin: 10px; /* 更宽松的头像边距 */
+    --settings-width: 450px; /* 稍微窄一点的设置宽度 */
+    --theme-color-default: linear-gradient(to right, #00c6ff, #0072ff, #6a5acd); /* 科技蓝到紫 */
+    --theme-color-blue: linear-gradient(to right, #0072ff, #1e3c72, #6a5acd); /* 深蓝到紫色 */
+    --theme-color-purple: linear-gradient(to right, #6a5acd, #9b4dca, #f05485); /* 紫色到粉红渐变 */
+    --theme-color-red: linear-gradient(to right, #f05485, #ff5e57, #f7a072); /* 温暖的红色渐变 */
+    --theme-color-orange: linear-gradient(to right, #ff5e57, #ff8e53, #ffbf00); /* 明亮的橙色渐变 */
+    --theme-color-green: linear-gradient(to right, #00c6ff, #32e0c2, #28a745); /* 清新的绿色 */
+    --theme-color-pink: linear-gradient(to right, #f7a072, #ff7eb9, #d946ef); /* 现代的粉色渐变 */
+    --theme-color-yellow: linear-gradient(to right, #ffbf00, #ffcc00, #f4d03f); /* 温暖的黄色 */
+    --theme-color-indigo: linear-gradient(to right, #6a5acd, #9b4dca, #4c3b5c); /* 紫色到深红的渐变 */
+    --theme-color-cyan: linear-gradient(to right, #32e0c2, #00b4d8, #4f96b5); /* 现代的青色渐变 */
+    --theme-color-sky: linear-gradient(to right, #00c6ff, #4c6ef5, #00d2b1); /* 天空蓝到青绿色 */
+    --theme-color-lime: linear-gradient(to right, #84cc16, #28a745, #00ff9d); /* 亮眼的绿色到青色 */
+    --theme-color-amber: linear-gradient(to right, #ffbf00, #ff8e53, #f59e0b); /* 现代的琥珀色 */
+    --theme-color-emerald: linear-gradient(to right, #10b981, #2d9a6b, #2db39e); /* 珊瑚绿到青绿色 */
+    --theme-color-rose: linear-gradient(to right, #f43f5e, #ff6b81, #ee5e6c); /* 玫瑰色的柔和渐变 */
+    --theme-color-fuchsia: linear-gradient(to right, #d946ef, #b56ef2, #9c50b3); /* 哑光紫粉渐变 */
     --current-theme: var(--theme-color-default);
 }
+
 
 * {
     margin: 0;
@@ -135,7 +134,7 @@ body {
 }
 
 .conversation-item.active {
-    background-color: var(--primary-color);
+    background-color: #000000;
     color: white;
 }
 
@@ -1054,12 +1053,16 @@ button:hover {
 
 .message.user .message-content {
     border-radius: var(--message-radius) var(--message-radius) 0 var(--message-radius);
-    background: linear-gradient(135deg,
-            var(--primary-color),
-            color-mix(in srgb, var(--primary-color) 85%, #000));
-    color: white;
-    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+    background: rgba(248, 247, 247, 0.9); /* 轻微透明，提高层次感 */
+    color: rgba(0, 0, 0, 0.85); /* 提高对比度，增强可读性 */
+    font-family: "Inter", "Segoe UI", sans-serif; /* 现代、清晰的字体 */
+    font-size: 16px; /* 适中字体，提升可读性 */
+    font-weight: 500; /* 略微加粗，使文字更清晰 */
+    line-height: 1.6; /* 增加行高，提高阅读体验 */
+    padding: 12px 16px; /* 适中内边距，保持舒适布局 */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* 轻微阴影，增加立体感 */
 }
+
 
 .message.bot .message-content {
     border-radius: var(--message-radius) var(--message-radius) var(--message-radius) 0;
@@ -1080,7 +1083,7 @@ button:hover {
 }
 
 .message.user .message-content:hover {
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+    box-shadow: 0 4px 12px rgba(8, 8, 8, 0.25);
 }
 
 .message.bot.typing .message-content {
@@ -1799,5 +1802,5 @@ body.modal-open {
 .main-content .welcomePage .welcome-content h1{
     font-family: monospace;
     font-size: 20px;
-    white-space: pre-wrap
+    white-space: pre-wrap;
 }

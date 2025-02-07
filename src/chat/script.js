@@ -217,15 +217,11 @@ class ChatApp {
                     document.querySelectorAll('.code-block:not(.initialized)').forEach(block => {
                         const toggleBtn = block.querySelector('.toggle-button');
                         const copyBtn = block.querySelector('.copy-button');
-                        const viewBtn = block.querySelector('.view-button');
                         if (toggleBtn) {
                             toggleBtn.addEventListener('click', this.toggleCode);
                         }
                         if (copyBtn) {
                             copyBtn.addEventListener('click', this.copyCode);
-                        }
-                        if (viewBtn) {
-                            viewBtn.addEventListener('click', this.viewHtmlCode);
                         }
                         block.classList.add('initialized');
                     });
@@ -261,62 +257,96 @@ class ChatApp {
         }
     }
 
-    configureMarked() {
+        configureMarked() {
+            // 配置常量定义
+            const MARKED_DEFAULTS = {
+                breaks: true,
+                gfm: true,
+                headerIds: false,
+                mangle: false,
+                pedantic: false,
+                sanitize: false,
+                smartLists: true,
+                smartypants: false,
+                xhtml: false
+            };
+        
+            // 高亮处理函数
+            const highlightCode = (code, lang = 'plaintext') => {
+                try {
+                    const validLang = hljs.getLanguage(lang) ? lang : null;
+                    return validLang 
+                        ? hljs.highlight(code, { language: validLang, ignoreIllegals: true }).value
+                        : hljs.highlightAuto(code).value;
+                } catch (error) {
+                    console.warn('Code highlighting failed:', error);
+                    return hljs.highlightAuto(code).value || code;
+                }
+            };
+        
             try {
-                // 配置 marked 选项
-                marked.setOptions({
-                    highlight: (code, lang) => {
-                        try {
-                            // 处理未指定语言的情况
-                            if (!lang) return hljs.highlightAuto(code).value;
-                            
-                            // 检查语言是否支持
-                            if (hljs.getLanguage(lang)) {
-                                return hljs.highlight(code, { language: lang }).value;
-                            } else {
-                                // 不支持的语言降级为普通文本
-                                return hljs.highlightAuto(code).value;
-                            }
-                        } catch (err) {
-                            console.warn('Highlight error:', err);
-                            return code; // 降级返回原始代码
-                        }
-                    },
-                    breaks: true,
-                    gfm: true,
-                    headerIds: true,
-                    mangle: false,
-                    pedantic: false,
-                    sanitize: false,
-                    smartLists: true,
-                    smartypants: true
-                });
+                // 配置 marked 基础选项
+                marked.setOptions(MARKED_DEFAULTS);
         
                 // 自定义渲染器
                 const renderer = new marked.Renderer();
-                renderer.code = (code, language) => {
-                    try {
-                        const lang = language || 'plaintext';
-                        const highlightedCode = hljs.highlight(code, {
-                            language: lang,
-                            ignoreIllegals: true // 忽略不合法的语言标识
-                        }).value;
-                        
-                        // 添加行号
-                        const numberedCode = this.addLineNumbers(highlightedCode);
-                        return this.createCollapsibleCode(numberedCode, lang);
-                    } catch (err) {
-                        console.warn('Code block render error:', err);
-                        return this.createCollapsibleCode(code, 'plaintext');
-                    }
+                
+                // 保留原始代码块处理逻辑
+                renderer.code = (code, lang) => {
+                    const highlighted = highlightCode(code, lang);
+                    const numbered = this.addLineNumbers(highlighted);
+                    return this.createCollapsibleCode(numbered, lang);
                 };
         
+                                const preprocess = (text) => {
+                    return text.replace(/<think>([\s\S]*?)<\/think>/g, (match, content) => {
+                        if (!content.trim()) return '';
+                        const tableContent = content.trim();
+                
+                        return `
+                            <details style="border: 1px solid #ddd; padding: 10px; border-radius: 8px; background-color: #f9f9f9; margin-bottom: 10px;">
+                                <summary style="font-size: 1.2em; font-weight: bold; color: #333; cursor: pointer;">
+                                    🧠 思考过程
+                                </summary>
+                                <div style="color: #555; font-style: italic; padding: 10px; background-color: #f4f4f4; border-radius: 5px; line-height: 1.5;">
+                                    ${tableContent}
+                                </div>
+                            </details>
+                            <div style="border: 1px solid #ddd; padding: 10px; border-radius: 8px; background-color: #f9f9f9; margin-bottom: 10px;">
+                            <span style="font-size: 1.2em; font-weight: bold; color: #333; cursor: pointer;">
+                                📌 正式回答
+                            </span>
+                            <div style="color: #000; padding: 10px; background-color: #f4f4f4; border-radius: 5px; line-height: 1.5;">`.trim();
+                                });
+                            };
+                       
+                
+                
+        
+                // 重写 marked 的解析方法
+                const originalParse = marked.parse;
+                marked.parse = (text, options) => {
+                    const preprocessed = preprocess(text);
+                    return originalParse.call(marked, preprocessed, {
+                        ...options,
+                        // 确保不会重复处理已转换的内容
+                        sanitize: false,
+                        silent: true
+                    });
+                };
+        
+                // 应用配置
                 marked.use({ renderer });
-            } catch(error) {
-                console.error('Error configuring marked:', error);
+        
+            } catch (error) {
+                console.error('Marked configuration failed:', error);
+                marked.setOptions({
+                    breaks: true,
+                    gfm: true,
+                    sanitize: true
+                });
             }
         }
-
     addLineNumbers(code) {
         try {
             const lines = code.split('\n');
@@ -344,13 +374,8 @@ class ChatApp {
                                 <i class="fas fa-chevron-down"></i>
                             </button>
                             <button class="copy-button">
-                                <i class="fas fa-copy"></i> Copy
+                                <i class="fas fa-copy"></i> 复制
                             </button>
-                            ${language === 'html' ? `
-                                <button class="view-button">
-                                    <i class="fas fa-eye"></i> View
-                                </button>
-                            `: ''}
                         </div>
                     </div>
                     <div class="code-content">
@@ -371,9 +396,6 @@ class ChatApp {
                     }
                     if (copyBtn) {
                         copyBtn.addEventListener('click', this.copyCode);
-                    }
-                    if (viewBtn) {
-                        viewBtn.addEventListener('click', this.viewHtmlCode);
                     }
                     // 标记为已初始化
                     block.classList.add('initialized');
@@ -459,31 +481,6 @@ class ChatApp {
             });
         } catch (error) {
             console.error('Error in copyCode:', error);
-        }
-    }
-    viewHtmlCode(event) {
-        try {
-            const button = event.currentTarget;
-            const codeBlock = button.closest('.code-block');
-            if (!codeBlock) return;
-            const code = codeBlock.querySelector('code');
-            if (!code) return;
-
-            // 创建一个临时的 DOM 解析器
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(code.textContent, 'text/html');
-            // 移除所有 line-number 类的元素
-            const lineNumbers = doc.querySelectorAll('.line-number');
-            lineNumbers.forEach(element => element.remove());
-
-            // 获取处理后的 HTML
-            const cleanedHtml = doc.body.innerHTML;
-            console.log(cleanedHtml);
-            const newWindow = window.open();
-            newWindow.document.write(cleanedHtml);
-            newWindow.document.close();
-        } catch (error) {
-            console.error('Error in viewHtmlCode:', error);
         }
     }
 
@@ -876,7 +873,7 @@ class ChatApp {
                                     this.currentConversationId = data.conversation_id;
                                     this.scrollToBottom();
                                     break;
-
+        
                                 case 'agent_thought':
                                     if (data.thought) {
                                         thought = data.thought;
@@ -892,14 +889,14 @@ class ChatApp {
                                         messageFiles = messageFiles.concat(data.message_files);
                                     }
                                     break;
-
+        
                                 case 'message_file':
                                     if (data.type === 'image') {
                                         const imageHtml = `\n\n![Generated Image](${data.url})\n\n`;
                                         fullResponse += imageHtml;
                                     }
                                     break;
-
+        
                                 case 'tts_message':
                                     if (data.audio) {
                                         // 处理文本转语音
@@ -921,6 +918,7 @@ class ChatApp {
                             this.scrollToBottom();
                         } catch (e) {
                             console.error('解析响应数据失败:', e);
+                            continue;
                         }
                     }
                 }
@@ -929,7 +927,7 @@ class ChatApp {
             botMessageDiv.classList.remove('loading');
             console.error('发送消息失败:', error);
             botMessageDiv.querySelector('.message-content').textContent = '抱歉，发生了错误。请稍后重试。';
-        }
+        }        
         if(this.audioStatus){
             this.textToAudio(this.lastMessageId);
         }
