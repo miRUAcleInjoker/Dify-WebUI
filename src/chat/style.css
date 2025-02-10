@@ -1053,7 +1053,7 @@ button:hover {
 
 .message.user .message-content {
     border-radius: var(--message-radius) var(--message-radius) 0 var(--message-radius);
-    background: linear-gradient(135deg, #ffffff, var(--user-message-bg));
+    background: linear-gradient(135deg, var(--user-message-bg), #ffffff);
     color: rgba(0, 0, 0, 0.85); /* 提高对比度，增强可读性 */
     font-family: "Inter", "Segoe UI", sans-serif; /* 现代、清晰的字体 */
     font-size: 16px; /* 适中字体，提升可读性 */
@@ -1066,7 +1066,7 @@ button:hover {
 
 .message.bot .message-content {
     border-radius: var(--message-radius) var(--message-radius) var(--message-radius) 0;
-    background: linear-gradient(135deg, var(--bot-message-bg), #ffffff);
+    background: linear-gradient(135deg, #ffffff, var(--bot-message-bg));
     border: 1px solid rgba(0, 0, 0, 0.05);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
