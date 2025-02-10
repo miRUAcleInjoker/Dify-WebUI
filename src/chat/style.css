@@ -3,8 +3,8 @@
     --bg-color: #f4f7fc; /* 明亮干净的背景色 */
     --text-color: #2b2d42; /* 深灰色，易于阅读 */
     --message-bg: #ffffff;
-    --bot-message-bg: #f4f7fc; /* 淡蓝背景，优雅且现代 */
-    --user-message-bg: var(--primary-color);
+    --bot-message-bg:  #E8F0FF; /* 淡蓝背景，优雅且现代 */
+    --user-message-bg: #D7E5F5;
     --user-message-color: #111111;
     --sidebar-width: 300px;
     --sidebar-collapsed-width: 0px;
@@ -14,10 +14,10 @@
     --hover-transform: translateY(-5px); /* 更有动感的hover效果 */
     --hover-shadow: 0 12px 32px rgba(0, 0, 0, 0.12); /* 更大的hover阴影 */
     --animation-duration: 0.3s;
-    --avatar-size: 55px; /* 稍大的头像 */
+    --avatar-size: 60px; /* 稍大的头像 */
     --avatar-margin: 10px; /* 更宽松的头像边距 */
-    --settings-width: 450px; /* 稍微窄一点的设置宽度 */
-    --theme-color-default: linear-gradient(to right, #00c6ff, #0072ff, #6a5acd); /* 科技蓝到紫 */
+    --settings-width: 500px; /* 稍微窄一点的设置宽度 */
+    --theme-color-default: #111111; /* 科技蓝到紫 */
     --theme-color-blue: linear-gradient(to right, #0072ff, #1e3c72, #6a5acd); /* 深蓝到紫色 */
     --theme-color-purple: linear-gradient(to right, #6a5acd, #9b4dca, #f05485); /* 紫色到粉红渐变 */
     --theme-color-red: linear-gradient(to right, #f05485, #ff5e57, #f7a072); /* 温暖的红色渐变 */
@@ -1053,7 +1053,7 @@ button:hover {
 
 .message.user .message-content {
     border-radius: var(--message-radius) var(--message-radius) 0 var(--message-radius);
-    background: rgba(248, 247, 247, 0.9); /* 轻微透明，提高层次感 */
+    background: linear-gradient(135deg, #ffffff, var(--user-message-bg));
     color: rgba(0, 0, 0, 0.85); /* 提高对比度，增强可读性 */
     font-family: "Inter", "Segoe UI", sans-serif; /* 现代、清晰的字体 */
     font-size: 16px; /* 适中字体，提升可读性 */
@@ -1066,7 +1066,7 @@ button:hover {
 
 .message.bot .message-content {
     border-radius: var(--message-radius) var(--message-radius) var(--message-radius) 0;
-    background: linear-gradient(135deg, #ffffff, var(--bot-message-bg));
+    background: linear-gradient(135deg, var(--bot-message-bg), #ffffff);
     border: 1px solid rgba(0, 0, 0, 0.05);
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
