@@ -702,31 +702,47 @@ class ChatApp {
         // 添加头像
         const avatar = document.createElement('img');
         avatar.className = 'avatar';
-        if (isUser) {
-            setTimeout(() => {
-                messageDiv.classList.add('show');
-            }, 10);
-            avatar.src = `https://api.dicebear.com/7.x/adventurer/svg?seed=${this.userName}`;  // 用户默认头像
-            messageDiv.setAttribute('data-user', this.userName);
-        } else {
-            avatar.src = '../../rebot.svg';  // 机器人默认头像
-        }
+        avatar.src = isUser 
+            ? `https://api.dicebear.com/7.x/adventurer/svg?seed=${this.userName}`
+            : '../../rebot.svg';
         messageDiv.appendChild(avatar);
 
-        // 创建一个包装器来包含消息内容和建议
+        // 创建包装器
         const contentWrapper = document.createElement('div');
         contentWrapper.className = 'message-content-wrapper';
 
+        // 创建消息内容
         const messageContent = document.createElement('div');
         messageContent.className = 'message-content';
 
-        // 处理消息内容
+        // 创建复制按钮
+        const messageActions = document.createElement('div');
+        messageActions.className = 'message-actions';
+        const copyButton = document.createElement('button');
+        copyButton.className = 'message-action-btn copy-btn';
+        copyButton.innerHTML = '<i class="fas fa-copy"></i> 复制';
+        copyButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.copyMessage(messageContent);
+        });
+        messageActions.appendChild(copyButton);
+        document.body.appendChild(messageActions); // 将按钮添加到 body
+
+        // 添加点击事件监听器
+        messageContent.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.showMessageActions(messageActions, e.clientX, e.clientY, messageContent);
+        });
+
+        // 添加内容容器
+        const contentContainer = document.createElement('div');
+        contentContainer.className = 'content-container';
+
         if (isUser) {
-            // 用户消息直接显示
-            messageContent.innerHTML = marked.parse(content);
+            contentContainer.innerHTML = marked.parse(content);
+            messageContent.appendChild(contentContainer);
             messageContent.classList.add('show-content');
         } else {
-            // 机器人消息需要分割并添加 span
             const p = document.createElement('p');
             if (content) {
                 const words = content.split('');
@@ -736,26 +752,15 @@ class ChatApp {
                     p.appendChild(span);
                 });
             }
-            messageContent.appendChild(p);
-            messageContent.innerHTML = marked.parse(messageContent.innerHTML);
+            contentContainer.appendChild(p);
+            messageContent.appendChild(contentContainer);
 
-            //  逐字显示机器人消息
+            const parsedContent = marked.parse(p.innerHTML);
+            p.innerHTML = parsedContent;
             this.showContent(messageContent);
-            messageContent.addEventListener("mouseenter",()=>{
-                console.log("mouseenter")
-            })
-            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
         }
 
         contentWrapper.appendChild(messageContent);
-
-        // 为机器人消息添加建议容器
-        if (!isUser) {
-            const suggestionsContainer = document.createElement('div');
-            suggestionsContainer.className = 'suggestions-container';
-            contentWrapper.appendChild(suggestionsContainer);
-        }
-
         messageDiv.appendChild(contentWrapper);
 
         if (parent) {
@@ -765,30 +770,30 @@ class ChatApp {
             this.scrollToBottom();
         }
 
-        setTimeout(() => {
-            messageDiv.classList.remove('new');
-        }, 500);
-
-        setTimeout(() => {
-            messageDiv.classList.add('show');
-        }, 10);
-
         return messageDiv;
     }
 
     showContent(messageContent) {
         const spans = messageContent.querySelectorAll('p span');
         let delay = 0;
+        
         spans.forEach((span) => {
             setTimeout(() => {
                 span.style.opacity = 1;
             }, delay);
-            delay += 20; // 调整延迟时间，控制文字出现速度
+            delay += 20;
         });
-        // 所有文字显示完毕，添加 show-content class
+
         setTimeout(() => {
             messageContent.classList.add('show-content');
-        }, delay);
+            const messageActions = messageContent.querySelector('.message-actions');
+            if (messageActions) {
+                messageActions.style.opacity = '0';
+                requestAnimationFrame(() => {
+                    messageActions.style.opacity = '1';
+                });
+            }
+        }, delay + 100);
     }
 
     async handleFileSelect(event) {
@@ -1918,6 +1923,86 @@ class ChatApp {
             localStorage.setItem('apiKey', app.apiKey);
             localStorage.setItem('baseUrl', app.baseUrl);
         }
+    }
+
+    copyMessage(messageContent) {
+        try {
+            // 获取内容容器中的HTML
+            const contentContainer = messageContent;
+            // 创建临时元素并复制HTML内容
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = contentContainer.innerHTML;
+            
+            // 获取处理后的HTML内容
+            const htmlContent = tempDiv.innerHTML;
+            
+            // 创建一个blob对象
+            const blob = new Blob([htmlContent], { type: 'text/html' });
+            
+            // 创建ClipboardItem对象
+            const data = new ClipboardItem({
+                'text/html': blob
+            });
+            
+            // 写入剪贴板
+            navigator.clipboard.write([data]).then(() => {
+                const copyBtn = document.querySelector('.message-actions .copy-btn');
+                if (copyBtn) {
+                    copyBtn.classList.add('copy-success');
+                    copyBtn.innerHTML = '<i class="fas fa-check"></i> 已复制';
+                    setTimeout(() => {
+                        copyBtn.classList.remove('copy-success');
+                        copyBtn.innerHTML = '<i class="fas fa-copy"></i> 复制';
+                        const messageActions = copyBtn.closest('.message-actions');
+                        if (messageActions) {
+                            messageActions.classList.remove('show');
+                        }
+                    }, 1000);
+                }
+            });
+        } catch (error) {
+            console.error('复制失败:', error);
+            this.showInfoPage("复制失败，请重试");
+        }
+    }
+
+    // 添加新方法来显示操作按钮
+    showMessageActions(messageActions, x, y, messageContent) {
+        // 隐藏所有其他的操作按钮
+        document.querySelectorAll('.message-actions').forEach(actions => {
+            if (actions !== messageActions) {
+                actions.classList.remove('show');
+            }
+        });
+
+        // 获取消息内容的位置信息
+        const rect = messageContent.getBoundingClientRect();
+        
+        // 设置按钮位置在消息内容的右侧
+        let posX = rect.right + 10; // 在消息右侧留出10px间距
+        let posY = rect.top + (rect.height / 2); // 垂直居中对齐
+        
+        // 如果按钮会超出右边界，则显示在左侧
+        if (posX + messageActions.offsetWidth > window.innerWidth) {
+            posX = rect.left - messageActions.offsetWidth - 10;
+        }
+
+        // 设置按钮位置
+        messageActions.style.left = `${posX}px`;
+        messageActions.style.top = `${posY}px`;
+        messageActions.classList.add('show');
+
+        // 点击其他地方时隐藏按钮
+        const hideActions = (e) => {
+            if (!messageActions.contains(e.target) && !messageContent.contains(e.target)) {
+                messageActions.classList.remove('show');
+                document.removeEventListener('click', hideActions);
+            }
+        };
+        
+        setTimeout(() => {
+            document.addEventListener('click', hideActions);
+        }, 0);
     }
 }
 
