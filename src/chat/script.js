@@ -59,50 +59,152 @@ class ChatApp {
         this.tipPage = document.getElementById("tipPage");
         // 获取消息元素
         this.modalMessage = document.getElementById("modal-message");
+        this.appCount = 1; // 用于跟踪应用数量
+        this.addAppButton = document.getElementById('addAppButton');
+        this.settingsContainer = document.getElementById('settingsContainer');
+        this.closeSettingsButton = document.getElementById('closeSettings');
+        this.settingsWrapper = document.getElementById('settingsWrapper');
+        this.prevButton = document.getElementById('prevButton');
+        this.nextButton = document.getElementById('nextButton');
+        this.currentSettingsIndex = 0;
+        this.appNameForApiKey = new Map();
+        this.settingsInitialized = false;
         this.loadSettings();
         this.initSettingsHandlers();
         // 配置 marked
         this.initialize();
         this.init();
         this.loadWelcomeMessage();
+        this.appSelectModal = document.getElementById('appSelectModal');
 
+        // 绑定新的事件处理器
+        this.addAppButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.addNewAppSettings();
+        });
+        
+        this.closeSettingsButton.addEventListener('click', () => {
+            this.toggleSettingsPage();
+        });
 
+        // 修改导航按钮事件绑定
+        this.prevButton.addEventListener('click', () => {
+            const currentPanel = this.getCurrentPanel();
+            const prevPanel = currentPanel.previousElementSibling;
+            if (prevPanel) {
+                this.scrollToPanel(prevPanel);
+            }
+        });
+
+        this.nextButton.addEventListener('click', () => {
+            const currentPanel = this.getCurrentPanel();
+            const nextPanel = currentPanel.nextElementSibling;
+            if (nextPanel) {
+                this.scrollToPanel(nextPanel);
+            }
+        });
+        
+        // 初始化按钮状态
+        this.updateNavigationButtons();
+
+        // 修改新对话按钮的事件监听
+        this.newChatButton.addEventListener('click', () => {
+            this.showAppSelector();
+        });
     }
 
-    showInfoPage(message, confirmBtn = "", cancelBtn = "") {
+    // 添加获取当前面板的方法
+    getCurrentPanel() {
+        const container = this.settingsContainer;
+        const panels = Array.from(this.settingsWrapper.children);
+        const containerCenter = container.scrollLeft + container.offsetWidth / 2;
+        
+        // 找到最接近容器中心的面板
+        return panels.reduce((closest, panel) => {
+            const panelCenter = panel.offsetLeft + panel.offsetWidth / 2;
+            const currentDistance = Math.abs(containerCenter - panelCenter);
+            const closestDistance = Math.abs(containerCenter - (closest.offsetLeft + closest.offsetWidth / 2));
+            return currentDistance < closestDistance ? panel : closest;
+        }, panels[0]);
+    }
+
+    // 修改滚动方法
+    scrollToPanel(panel) {
+        const container = this.settingsContainer;
+        const scrollLeft = panel.offsetLeft - (container.offsetWidth - panel.offsetWidth) / 2;
+        container.scrollTo({
+            left: scrollLeft,
+            behavior: 'smooth'
+        });
+        // 更新导航按钮状态
+        setTimeout(() => {
+            this.updateNavigationButtons();
+        }, 300);
+    }
+
+    // 修改导航按钮状态更新方法
+    updateNavigationButtons() {
+        const currentPanel = this.getCurrentPanel();
+        // 检查是否有前一个面板
+        this.prevButton.disabled = !currentPanel.previousElementSibling;
+        // 检查是否有下一个面板
+        this.nextButton.disabled = !currentPanel.nextElementSibling;
+        // 更新按钮可见性
+        this.prevButton.style.display = this.prevButton.disabled ? 'none' : 'flex';
+        this.nextButton.style.display = this.nextButton.disabled ? 'none' : 'flex';
+    }
+
+    showInfoPage(message, confirmBtn = "确定", cancelBtn = "取消") {
         return new Promise((resolve) => {
             this.tipPage.style.display = "flex";
             this.modalMessage.innerText = message;
-            this.confirmBtn.value = confirmBtn;
-            this.cancelBtn.value = cancelBtn;
+            
+            // 根据按钮文本决定是否显示按钮
+            const showButtons = confirmBtn !== "" || cancelBtn !== "";
+            const buttonContainer = this.tipPage.querySelector('.modal-buttons');
+            buttonContainer.style.display = showButtons ? 'flex' : 'none';
+
+            if (showButtons) {
+                this.confirmBtn.value = confirmBtn;
+                this.cancelBtn.value = cancelBtn;
+                
+                // 根据是否提供按钮文本来显示/隐藏按钮
+                this.confirmBtn.style.display = confirmBtn ? 'block' : 'none';
+                this.cancelBtn.style.display = cancelBtn ? 'block' : 'none';
+            }
+
             const confirmHandler = () => {
                 this.tipPage.style.display = "none";
                 this.confirmBtn.removeEventListener("click", confirmHandler);
                 this.cancelBtn.removeEventListener("click", cancelHandler);
-                resolve(true);  // 用户点击确认
+                resolve(true);
             };
-    
+
             const cancelHandler = () => {
                 this.tipPage.style.display = "none";
                 this.confirmBtn.removeEventListener("click", confirmHandler);
                 this.cancelBtn.removeEventListener("click", cancelHandler);
-                resolve(false);  // 用户点击取消
+                resolve(false);
             };
-            
+
             this.confirmBtn.addEventListener("click", confirmHandler);
             this.cancelBtn.addEventListener("click", cancelHandler);
 
-            if(cancelBtn == "" && cancelBtn == ""){
-                this.confirmBtn.style.display = "none";
-                this.cancelBtn.style.display = "none";
-                //  倒计时3s后关闭
+            // 如果没有按钮文本，3秒后自动关闭
+            if (!showButtons) {
                 setTimeout(() => {
                     this.tipPage.style.display = "none";
-                    this.confirmBtn.removeEventListener("click", confirmHandler);
-                    this.cancelBtn.removeEventListener("click", cancelHandler);
-                    resolve(true);  // 用户点击确认
+                    resolve(true);
                 }, 3000);
             }
+
+            // 点击遮罩层关闭弹窗
+            this.tipPage.addEventListener('click', (e) => {
+                if (e.target === this.tipPage) {
+                    this.tipPage.style.display = "none";
+                    resolve(false);
+                }
+            });
         });
     }
 
@@ -115,7 +217,6 @@ class ChatApp {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
                 throw new Error('浏览器不支持对话功能');
             }
-
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             this.mediaRecorder = new MediaRecorder(stream);
             this.audioChunks = [];
@@ -171,22 +272,32 @@ class ChatApp {
         formData.append('file', file);
         formData.append('user', this.user);
         try {
-            const response = await fetch(`${this.baseUrl}/audio-to-text`, {
+            const response = await fetch(`${this.baseUrl}/files/upload`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${this.apiKey}`
                 },
                 body: formData
             });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+
+            const result = await response.json();
+            if (result.id) {
+                this.currentUploadedFile = {
+                    id: result.id,
+                    name: result.name
+                };
+                this.showPreview(file);
             }
-            const data = await response.json();
-            this.userInput.value = data.text;
-            this.sendMessage();
         } catch (error) {
-            console.error('Error:', error);
-            throw error;
+            console.error('上传文件失败:', error);
+            this.showInfoPage("文件上传失败，请重试!")
+                .then(userConfirmed => {
+                    if (userConfirmed) {
+                        console.log("用户确认了操作");
+                    } else {
+                        console.log("用户取消了操作");
+                    }
+                })
         }
     }
 
@@ -319,10 +430,6 @@ class ChatApp {
                             <div style="color: #000; padding: 10px; background-color: #f4f4f4; border-radius: 5px; line-height: 1.5;">`.trim();
                                 });
                             };
-                       
-                
-                
-        
                 // 重写 marked 的解析方法
                 const originalParse = marked.parse;
                 marked.parse = (text, options) => {
@@ -519,7 +626,7 @@ class ChatApp {
         this.welcomeUserInput.addEventListener('input', () => this.adjustTextareaHeight(this.welcomeUserInput));
 
         // 添加新对话按钮事件
-        this.newChatButton.addEventListener('click', () => this.startNewChat());
+        this.newChatButton.addEventListener('click', () => this.showAppSelector());
 
         // 添加侧边栏切换按钮事件
         this.toggleSidebarButton.addEventListener('click', () => this.toggleSidebar());
@@ -947,20 +1054,21 @@ class ChatApp {
         return btoa(binary);
     }
 
-    async getAppInfo(){
+    async getAppInfo(apiKey = this.apiKey){
         const response = await fetch(
             `${this.baseUrl}/info?user=${this.user}`,
             {
                 headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
+                    'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json'
                 }
             }
         );
         const data = await response.json();
-        console.log(data.name);
         if (data) {
-            this.appName = data.name;
+            this.appNameForApiKey.set(apiKey,data.name)
+        }else{
+            this.appNameForApiKey.set(apiKey,"地址不对哦！！！")
         }
     }
 
@@ -1191,8 +1299,7 @@ class ChatApp {
         await this.getAppInfo();
         const welcomeMessage = document.getElementsByTagName('h1')[0];
         welcomeMessage.innerText = '';
-        this.typeWriter(`Hi, ${this.userName}, I'm ${this.appName}. How can I help you?`,welcomeMessage);
-        
+        this.typeWriter(`Hi, ${this.userName}, I'm ${this.appNameForApiKey.get(this.apiKey)}. How can I help you?`,welcomeMessage);
     }
 
     async loadMoreMessages() {
@@ -1257,15 +1364,14 @@ class ChatApp {
 
         this.welcomePage.style.display = 'flex';
         this.chatContainer.style.display = 'none';
-        this.loadWelcomeMessage();
+        await this.loadWelcomeMessage();
 
-        // 异步执行 loadConversations
         if (initialMessage) {
             this.userInput.value = initialMessage;
-            await this.sendMessage(); // 等待消息发送完成
-            this.loadConversations(); // 异步加载会话列表
+            await this.sendMessage();
+            this.loadConversations();
         } else {
-            this.loadConversations(); // 直接异步加载会话列表
+            this.loadConversations();
         }
     }
 
@@ -1322,7 +1428,7 @@ class ChatApp {
         this.applyTheme(this.currentTheme);
         this.updateUserInfo();
 
-        // 更新表单值
+        // 更新主应用表单值
         document.getElementById('apiKey').value = this.apiKey;
         document.getElementById('baseUrl').value = this.baseUrl;
         document.getElementById('userId').value = this.user;
@@ -1330,6 +1436,79 @@ class ChatApp {
         // 确保主题选择器正确显示当前主题
         const savedTheme = localStorage.getItem('theme') || 'default';
         this.applyTheme(savedTheme);
+
+        // 只在第一次加载时初始化子应用面板
+        if (!this.settingsInitialized) {
+            // 获取所有存储的子应用数量
+            let maxAppIndex = 1;
+            for (let i = 2; i <= 100; i++) {
+                const apiKey = localStorage.getItem(`apiKey_${i}`);
+                const baseUrl = localStorage.getItem(`baseUrl_${i}`);
+                if (!apiKey && !baseUrl) {
+                    break;
+                }
+                maxAppIndex = i;
+            }
+
+            // 更新应用计数
+            this.appCount = maxAppIndex;
+
+            // 恢复所有子应用设置面板
+            for(let i = 2; i <= this.appCount; i++) {
+                const apiKey = localStorage.getItem(`apiKey_${i}`);
+                const baseUrl = localStorage.getItem(`baseUrl_${i}`);
+                
+                if(apiKey || baseUrl) {
+                    const newSettingsContent = document.createElement('div');
+                    newSettingsContent.className = 'settings-content';
+                    if (i % 2 === 0) {
+                        newSettingsContent.classList.add('right-app');
+                        this.settingsWrapper.appendChild(newSettingsContent);
+                    } else {
+                        newSettingsContent.classList.add('left-app');
+                        this.settingsWrapper.insertBefore(newSettingsContent, this.settingsWrapper.firstChild);
+                    }
+
+                    // 获取应用名称
+                    this.getAppInfo(apiKey).then(() => {
+                        const appName = this.appNameForApiKey.get(apiKey) || `应用 ${i}`;
+                        newSettingsContent.innerHTML = `
+                            <div class="app-title">
+                                <h3>${appName}</h3>
+                                <button class="remove-app" onclick="chatApp.removeAppSettings(this)">删除</button>
+                            </div>
+                            <form class="settings-form">
+                                <div class="form-group">
+                                    <label for="apiKey${i}">API Key</label>
+                                    <input type="text" id="apiKey${i}" name="apiKey" value="${apiKey || ''}" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="baseUrl${i}">Base URL</label>
+                                    <input type="url" id="baseUrl${i}" name="baseUrl" value="${baseUrl || ''}" required>
+                                </div>
+                                <button type="submit" class="save-button">保存设置</button>
+                            </form>
+                        `;
+
+                        // 为新表单添加提交事件处理
+                        const form = newSettingsContent.querySelector('form');
+                        form.addEventListener('submit', (e) => {
+                            e.preventDefault();
+                            this.saveAppSettings(form, i);
+                        });
+
+                        setTimeout(() => {
+                            newSettingsContent.classList.add('show');
+                        }, 50 * i);
+                    });
+                }
+            }
+
+            this.settingsInitialized = true;
+        }
+
+        // 加载完成后更新导航按钮状态
+        this.updateNavigationButtons();
     }
 
     initSettingsHandlers() {
@@ -1434,18 +1613,6 @@ class ChatApp {
         this.apiKey = newApiKey;
         this.baseUrl = newBaseUrl;
         this.user = newUserId;
-
-        this.settingsPage.style.display = 'none';
-        if (this.toggleSettingsStates) {
-            if (this.toggleSettingsStates.chatContainer.wasVisible) {
-                this.chatContainer.style.display = 'flex';
-            } else {
-                this.welcomePage.style.display = 'flex';
-            }
-        } else {
-            this.welcomePage.style.display = 'flex';
-        }
-        this.settingsPage.style.display = 'none';
     }
 
     typeWriter(text, element, speed = 50) {
@@ -1497,6 +1664,259 @@ class ChatApp {
                     this.welcomePage.style.display = 'flex';
                 }
             }
+        }
+    }
+
+    addNewAppSettings() {
+        this.appCount++;
+        const newSettingsContent = document.createElement('div');
+        newSettingsContent.className = 'settings-content';
+
+        // 获取主应用面板
+        const mainSettings = this.settingsWrapper.querySelector('.main-settings');
+        
+        // 获取所有现有的子应用面板
+        const appPanels = Array.from(this.settingsWrapper.children).filter(
+            el => !el.classList.contains('main-settings')
+        );
+
+        // 根据应用数量决定添加到左侧还是右侧
+        const isEven = appPanels.length % 2 === 0;
+        
+        if (isEven) {
+            // 添加到右侧
+            newSettingsContent.classList.add('right-app');
+            // 找到主应用右侧的第一个面板（如果存在）
+            const firstRightPanel = mainSettings.nextElementSibling;
+            if (firstRightPanel) {
+                this.settingsWrapper.insertBefore(newSettingsContent, firstRightPanel);
+            } else {
+                this.settingsWrapper.appendChild(newSettingsContent);
+            }
+        } else {
+            // 添加到左侧
+            newSettingsContent.classList.add('left-app');
+            this.settingsWrapper.insertBefore(newSettingsContent, mainSettings);
+        }
+
+        newSettingsContent.innerHTML = `
+            <div class="app-title">
+                <h3>应用 ${this.appCount}</h3>
+                <button class="remove-app" onclick="chatApp.removeAppSettings(this)">删除</button>
+            </div>
+            <form class="settings-form">
+                <div class="form-group">
+                    <label for="apiKey${this.appCount}">API Key</label>
+                    <input type="text" id="apiKey${this.appCount}" name="apiKey" required>
+                </div>
+                <div class="form-group">
+                    <label for="baseUrl${this.appCount}">Base URL</label>
+                    <input type="url" id="baseUrl${this.appCount}" name="baseUrl" required>
+                </div>
+                <button type="submit" class="save-button">保存设置</button>
+            </form>
+        `;
+
+        // 为新表单添加提交事件处理
+        const form = newSettingsContent.querySelector('form');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.saveAppSettings(form, this.appCount);
+        });
+
+        // 添加动画效果
+        setTimeout(() => {
+            newSettingsContent.classList.add('show');
+            // 自动滚动到新添加的面板
+            this.scrollToPanel(newSettingsContent);
+        }, 50);
+
+        // 更新导航按钮状态
+        this.updateNavigationButtons();
+    }
+
+    removeAppSettings(button) {
+        const settingsContent = button.closest('.settings-content');
+        settingsContent.classList.remove('show');
+        
+        setTimeout(() => {
+            const isLastPanel = !settingsContent.nextElementSibling;
+            const targetPanel = isLastPanel ? 
+                settingsContent.previousElementSibling : 
+                settingsContent.nextElementSibling;
+            
+            settingsContent.remove();
+            this.appCount--;
+            
+            // 重新排列剩余的应用设置
+            const appSettings = Array.from(this.settingsWrapper.children).filter(
+                el => !el.classList.contains('main-settings')
+            );
+            
+            appSettings.forEach((app, index) => {
+                app.classList.remove('left-app', 'right-app');
+                if (index % 2 === 0) {
+                    app.classList.add('left-app');
+                } else {
+                    app.classList.add('right-app');
+                }
+            });
+            // 更新导航按钮状态
+            this.updateNavigationButtons();
+            // 滚动到相邻面板
+            if (targetPanel) {
+                this.scrollToPanel(targetPanel);
+            }
+        }, 300);
+
+        // 清除存储的数据
+        localStorage.removeItem(`apiKey_${this.appCount}`);
+        localStorage.removeItem(`baseUrl_${this.appCount}`);
+    }
+
+    saveAppSettings(form, appIndex) {
+        // 保存特定应用的设置
+        const apiKey = form.querySelector(`#apiKey${appIndex}`).value;
+        const baseUrl = form.querySelector(`#baseUrl${appIndex}`).value;
+        
+        // 验证输入
+        if (!apiKey || !baseUrl) {
+            this.showInfoPage("API Key 和 Base URL 都不能为空");
+            return;
+        }
+
+        // 保存到 localStorage
+        localStorage.setItem(`apiKey_${appIndex}`, apiKey);
+        localStorage.setItem(`baseUrl_${appIndex}`, baseUrl);
+
+        // 获取应用名称并更新标题
+        this.getAppInfo(apiKey).then(() => {
+            const appName = this.appNameForApiKey.get(apiKey);
+            // 找到当前表单所在的 settings-content
+            const settingsContent = form.closest('.settings-content');
+            const appTitle = settingsContent.querySelector('.app-title h3');
+            if (appTitle) {
+                appTitle.innerText = appName || `应用 ${appIndex}`;
+            }
+        });
+
+        this.showInfoPage("应用设置已保存");
+    }
+
+    // 显示应用选择器
+    async showAppSelector() {
+        try {
+            // 获取所有应用信息
+            const apps = await this.getAllApps();
+            
+            // 确保主应用名称已加载
+            if (this.apiKey && !this.appNameForApiKey.has(this.apiKey)) {
+                await this.getAppInfo(this.apiKey);
+            }
+
+            // 如果没有主应用也没有其他应用，显示提示
+            if (!this.apiKey && apps.length === 0) {
+                await this.showInfoPage("请先在设置中添加应用");
+                return;
+            }
+
+            const appList = document.getElementById('appList');
+            appList.innerHTML = ''; // 清空现有列表
+
+            // 添加主应用（如果存在）
+            if (this.apiKey && this.baseUrl) {
+                const mainAppItem = this.createAppItem({
+                    name: this.appNameForApiKey.get(this.apiKey) || '主应用',
+                    apiKey: this.apiKey,
+                    baseUrl: this.baseUrl,
+                    isMain: true
+                });
+                appList.appendChild(mainAppItem);
+            }
+
+            // 添加其他应用
+            apps.forEach(app => {
+                const appItem = this.createAppItem(app);
+                appList.appendChild(appItem);
+            });
+
+            // 显示弹窗
+            this.appSelectModal.style.display = 'flex';
+
+            // 添加点击遮罩层关闭弹窗的功能
+            const closeHandler = (e) => {
+                if (e.target === this.appSelectModal) {
+                    this.appSelectModal.style.display = 'none';
+                    this.appSelectModal.removeEventListener('click', closeHandler);
+                }
+            };
+            this.appSelectModal.addEventListener('click', closeHandler);
+        } catch (error) {
+            console.error('Error showing app selector:', error);
+            await this.showInfoPage("加载应用列表失败，请重试");
+        }
+    }
+
+    // 创建应用项
+    createAppItem(app) {
+        const div = document.createElement('div');
+        div.className = 'app-item';
+        if (app.isMain) {
+            div.classList.add('main-app');
+        }
+        
+        div.innerHTML = `
+            <h4>${app.name || '未命名应用'}</h4>
+            <div class="app-url">${app.baseUrl}</div>
+            ${app.isMain ? '<div class="app-badge">主应用</div>' : ''}
+        `;
+
+        div.addEventListener('click', async () => {
+            try {
+                await this.selectApp(app);
+                this.appSelectModal.style.display = 'none';
+                await this.startNewChat();
+            } catch (error) {
+                console.error('Error selecting app:', error);
+                await this.showInfoPage("切换应用失败，请重试");
+            }
+        });
+
+        return div;
+    }
+
+    // 获取所有应用信息
+    async getAllApps() {
+        const apps = [];
+        for (let i = 2; i <= this.appCount; i++) {
+            const apiKey = localStorage.getItem(`apiKey_${i}`);
+            const baseUrl = localStorage.getItem(`baseUrl_${i}`);
+            if (apiKey && baseUrl) {
+                // 确保应用名称已加载
+                if (!this.appNameForApiKey.has(apiKey)) {
+                    await this.getAppInfo(apiKey);
+                }
+                apps.push({
+                    name: this.appNameForApiKey.get(apiKey) || `应用 ${i}`,
+                    apiKey,
+                    baseUrl,
+                    index: i
+                });
+            }
+        }
+        return apps;
+    }
+
+    // 选择应用
+    async selectApp(app) {
+        if (!app.isMain) {
+            // 切换到选中的应用
+            this.apiKey = app.apiKey;
+            this.baseUrl = app.baseUrl;
+            // 保存到 localStorage
+            localStorage.setItem('lastUsedAppIndex', app.index);
+            localStorage.setItem('apiKey', app.apiKey);
+            localStorage.setItem('baseUrl', app.baseUrl);
         }
     }
 }
