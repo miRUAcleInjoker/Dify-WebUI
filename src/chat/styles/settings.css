@@ -1,6 +1,6 @@
 /* 修改设置页面的尺寸变量 */
 :root {
-    --settings-width: 600px;  /* 再增加一点宽度 */
+    --settings-width: 500px;  /* 再增加一点宽度 */
 }
 
 .settings-page {
@@ -9,7 +9,7 @@
     left: var(--sidebar-width);
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, #f5f7ff 0%, #ffffff 100%);
+    background: linear-gradient(135deg, #f6f7fa 0%, #cdcdce 100%);
     z-index: 1000;
     overflow: hidden;
     padding: 1rem;
@@ -27,13 +27,13 @@
     right: 0;
     bottom: 0;
     overflow: hidden;
-    max-width: 1400px;
+    max-width: 100%;
     margin: 0 auto;
 }
 
 .settings-wrapper {
     display: flex;
-    gap: 40px;
+    gap: 20px;
     align-items: center;
     position: relative;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -83,7 +83,7 @@
 .settings-form {
     display: flex;
     flex-direction: column;
-    gap: 2rem;  /* 增加表单元素间距 */
+    gap: 1rem;  /* 增加表单元素间距 */
 }
 
 .form-group {
@@ -230,7 +230,7 @@
 .main-settings .settings-form {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 2.5rem;  /* 增加网格间距 */
+    gap: 1.0rem;  /* 增加网格间距 */
 }
 
 .main-settings .form-group:has(.theme-selector) {
