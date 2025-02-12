@@ -1,0 +1,238 @@
+:root {
+    --primary-color: linear-gradient(to right, #00c6ff, #0072ff, #00c6ff);
+    --bg-color: #f4f7fc;
+    --text-color: #2b2d42;
+    --message-bg: #ffffff;
+    --bot-message-bg:  #E8F0FF;
+    --user-message-bg: #D7E5F5;
+    --user-message-color: #111111;
+    --sidebar-width: 300px;
+    --sidebar-collapsed-width: 0px;
+    --header-height: 50px;
+    --message-radius: 1.2rem;
+    --message-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    --hover-transform: translateY(-5px);
+    --hover-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    --animation-duration: 0.3s;
+    --avatar-size: 60px;
+    --avatar-margin: 10px;
+    --settings-width: 450px;
+    --primary-color-rgb: 16, 185, 129;
+    --animation-timing: cubic-bezier(0.4, 0, 0.2, 1);
+    --code-font-family: 'Fira Code', 'Cascadia Code', 'Source Code Pro', Consolas, Monaco, 'Courier New', monospace;
+    --animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    --message-max-width: 70%;
+    --message-min-width: 200px;
+    --user-info-height: 60px;
+    --user-avatar-size: 2.5rem;
+    --transition-timing: 0.3s ease;
+    --menu-button-size: 40px;
+    --z-index-sidebar: 1000;
+    --z-index-menu: 1001;
+    /* 基础字体设置 */
+    --font-family-base: "SF Pro Text", "SF Pro Display", "PingFang SC", "Microsoft YaHei", "Helvetica Neue", 
+                       -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, 
+                       "Noto Sans", Ubuntu, "Droid Sans", sans-serif;
+    --font-family-code: "JetBrains Mono", "SF Mono", "Cascadia Code", 
+                       "Fira Code", "Source Code Pro", monospace;
+    
+    /* 字体大小 */
+    --font-size-base: 16px;
+    --font-size-sm: 14px;
+    --font-size-lg: 18px;
+    --font-size-xl: 20px;
+    
+    /* 行高 */
+    --line-height-base: 1.7;
+    --line-height-tight: 1.4;
+    --line-height-relaxed: 1.8;
+    
+    /* 字重 */
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    
+    /* 字间距 */
+    --letter-spacing-base: 0.3px;
+    --letter-spacing-tight: -0.2px;
+    
+    /* 更新选中文本的颜色 */
+    --selection-bg: rgba(0, 108, 255, 0.15);  /* 浅蓝色背景 */
+    --selection-text: #1a1a1a;                /* 深灰色文字 */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    transition: background-color var(--transition-timing),
+                border-color var(--transition-timing),
+                color var(--transition-timing),
+                box-shadow var(--transition-timing);
+}
+
+body {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+    letter-spacing: var(--letter-spacing-base);
+    color: #2c3e50;
+    text-rendering: optimizeLegibility;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s var(--animation-timing);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 添加全局链接样式 */
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: color-mix(in srgb, var(--primary-color) 85%, black);
+}
+
+/* 全局基础样式 */
+html {
+    font-size: var(--font-size-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* 标题样式 */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-base);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-tight);
+    color: #1a202c;
+}
+
+h1 { font-size: 2rem; }    /* 32px */
+h2 { font-size: 1.75rem; } /* 28px */
+h3 { font-size: 1.5rem; }  /* 24px */
+h4 { font-size: 1.25rem; } /* 20px */
+h5 { font-size: 1.125rem; }/* 18px */
+h6 { font-size: 1rem; }    /* 16px */
+
+/* 段落和文本样式 */
+p {
+    margin-bottom: 1rem;
+    line-height: var(--line-height-base);
+}
+
+/* 代码样式 */
+code, pre {
+    font-family: var(--font-family-code);
+    font-size: 0.9375rem; /* 15px */
+    letter-spacing: var(--letter-spacing-tight);
+}
+
+/* 按钮和输入框样式 */
+button, input, textarea, select {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+}
+
+/* 列表样式 */
+ul, ol {
+    line-height: var(--line-height-relaxed);
+    padding-left: 1.5rem;
+}
+
+/* 表格样式 */
+table {
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-base);
+}
+
+/* 小号文本 */
+.text-sm {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-tight);
+}
+
+/* 大号文本 */
+.text-lg {
+    font-size: var(--font-size-lg);
+    line-height: var(--line-height-relaxed);
+}
+
+/* 超大号文本 */
+.text-xl {
+    font-size: var(--font-size-xl);
+    line-height: var(--line-height-tight);
+}
+
+/* 粗体文本 */
+.font-medium {
+    font-weight: var(--font-weight-medium);
+}
+
+.font-semibold {
+    font-weight: var(--font-weight-semibold);
+}
+
+.font-bold {
+    font-weight: var(--font-weight-bold);
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* 文本选择样式 */
+::selection {
+    background: var(--selection-bg);
+    color: var(--selection-text);
+}
+
+::-moz-selection {
+    background: var(--selection-bg);
+    color: var(--selection-text);
+}
+
+/* 代码块的选中样式 */
+pre ::selection {
+    background: rgba(255, 255, 255, 0.15);  /* 代码块中使用浅色背景 */
+    color: #ffffff;                         /* 代码块中使用白色文字 */
+}
+
+pre ::-moz-selection {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+} 

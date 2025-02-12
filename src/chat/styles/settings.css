@@ -1,0 +1,456 @@
+/* 修改设置页面的尺寸变量 */
+:root {
+    --settings-width: 600px;  /* 再增加一点宽度 */
+}
+
+.settings-page {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width);
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, #f5f7ff 0%, #ffffff 100%);
+    z-index: 1000;
+    overflow: hidden;
+    padding: 1rem;
+}
+
+.settings-container {
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.settings-wrapper {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    position: relative;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.settings-content {
+    flex: 0 0 var(--settings-width);
+    opacity: 0.6;
+    transform: scale(0.8);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    padding: 3rem;  /* 增加内边距使内容更加宽敞 */
+    border-radius: 2rem;  /* 增加圆角 */
+    max-height: 90vh;
+    background: white;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    height: fit-content;
+    overflow-y: auto;
+    z-index: 2; /* 确保内容在框前面 */
+}
+
+.settings-content.main-settings {
+    opacity: 1;
+    transform: scale(1);
+    padding: 2rem;
+    max-height: none;
+    height: auto;
+    overflow-y: visible;
+    margin: 0 auto;
+}
+
+.settings-content.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.settings-content h2 {
+    margin-bottom: 4rem;  /* 增加标题下方间距 */
+    font-size: 3rem;  /* 进一步增加标题大小 */
+    font-weight: 600;
+    background: var(--primary-color);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;  /* 添加渐变文字效果 */
+}
+
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;  /* 增加表单元素间距 */
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;  /* 增加标签和输入框的间距 */
+}
+
+.form-group label {
+    font-size: 1.2rem;  /* 增加标签字体大小 */
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input {
+    padding: 1.2rem 1.5rem;  /* 增加输入框内边距 */
+    font-size: 1.4rem;  /* 增加输入框字体大小 */
+    border-radius: 1rem;  /* 增加圆角 */
+    border: 2px solid rgba(0, 0, 0, 0.1);  /* 加粗边框 */
+    transition: all 0.2s ease;
+    background: white;
+    width: 100%;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+}
+
+/* 设置导航按钮 */
+.settings-nav-button {
+    position: fixed;
+    top: 90%;
+    transform: translateY(-50%);
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+.settings-nav-button:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.settings-nav-button.prev {
+    left: calc(50% - var(--settings-width) - 50px);
+}
+
+.settings-nav-button.next {
+    right: calc(50% - var(--settings-width) - 50px);
+}
+
+.settings-nav-button:disabled {
+    display: none;
+}
+
+/* 关闭按钮 */
+.close-settings {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-color);
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+}
+
+.close-settings:hover {
+    background: rgba(0, 0, 0, 0.1);
+    transform: scale(1.1);
+}
+
+/* 应用标题样式 */
+.app-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 3px solid rgba(0, 0, 0, 0.08);  /* 加粗底部边框 */
+}
+
+.app-title h3 {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 2rem;  /* 增加应用标题大小 */
+    font-weight: 700;
+    background: var(--primary-color);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+/* 删除按钮样式 */
+.remove-app {
+    background: none;
+    border: 1px solid #ff4d4d;
+    color: #ff4d4d;
+    cursor: pointer;
+    padding: 0.8rem 1.5rem;
+    border-radius: 1rem;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.remove-app:hover {
+    background: #ff4d4d;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 77, 77, 0.2);
+}
+
+.remove-app::before {
+    content: '×';
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+/* 主设置面板样式 */
+.main-settings .settings-form {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;  /* 增加网格间距 */
+}
+
+.main-settings .form-group:has(.theme-selector) {
+    grid-column: 1 / -1;
+}
+
+.main-settings .form-group:last-child {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* 移动端适配 */
+@media (max-width: 768px) {
+    :root {
+        --settings-width: 95vw;  /* 稍微增加移动端宽度 */
+    }
+
+    .settings-page {
+        left: 0;
+    }
+
+    .settings-container {
+        padding: 1rem;
+    }
+
+    .settings-wrapper {
+        gap: 30px;
+        padding: 0 50px;
+    }
+
+    .main-settings .settings-form {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-nav-button {
+        display: none;
+    }
+
+    #prevButton,
+    #nextButton {
+        width: 40px;
+        height: 40px;
+    }
+    
+    #prevButton {
+        left: 20px;
+    }
+    
+    #nextButton {
+        right: 20px;
+    }
+
+    .settings-content {
+        padding: 2rem;
+    }
+
+    .settings-content h2 {
+        font-size: 2.4rem;
+        margin-bottom: 3rem;
+    }
+
+    .form-group input {
+        font-size: 1.2rem;
+        padding: 1rem 1.2rem;
+    }
+
+    .app-title h3 {
+        font-size: 1.6rem;
+    }
+
+    #prevButton::before,
+    #nextButton::before {
+        width: 10px;
+        height: 10px;
+        border-width: 2px 2px 0 0;
+    }
+}
+
+.save-button {
+    background: var(--primary-color);
+    color: white;
+    padding: 1.2rem 2rem;
+    border: none;
+    border-radius: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 2rem;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.save-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(var(--primary-color-rgb), 0.2);
+}
+
+.settings-content.active-panel {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+    z-index: 3; /* 确保活动面板在最上层 */
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
+    background: white;
+}
+
+/* 非活动面板样式 */
+.settings-content:not(.active-panel) {
+    transform: scale(0.9);  /* 增加非活动面板的缩小效果 */
+    opacity: 0.9;
+    filter: brightness(0.98);
+}
+
+/* 优化导航按钮样式 */
+#prevButton,
+#nextButton {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    z-index: 4; /* 确保按钮在最上层 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    color: #666;
+}
+
+#prevButton {
+    left: 20px;
+}
+
+#nextButton {
+    right: 20px;
+}
+
+#prevButton::before,
+#nextButton::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-style: solid;
+    border-width: 3px 3px 0 0;  /* 增加箭头粗细 */
+    display: inline-block;
+    position: relative;
+}
+
+#prevButton::before {
+    transform: rotate(-135deg);
+    right: -2px;
+}
+
+#nextButton::before {
+    transform: rotate(45deg);
+    left: -2px;
+}
+
+#prevButton:hover,
+#nextButton:hover {
+    background: white;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    color: #333;
+}
+
+#prevButton:active,
+#nextButton:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+/* 禁用状态样式 */
+#prevButton:disabled,
+#nextButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: translateY(-50%) scale(1);
+    box-shadow: none;
+}
+
+/* 修改滚动条样式 */
+.settings-content::-webkit-scrollbar {
+    width: 8px;  /* 增加滚动条宽度 */
+}
+
+.settings-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.settings-content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+}
+
+.settings-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* 修改中心固定框样式 */
+.settings-center-frame {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: calc(var(--settings-width) + 40px); /* 比内容区域稍大一些 */
+    height: calc(90vh + 40px);
+    border-radius: 2rem;
+    background: none; /* 移除背景色 */
+    pointer-events: none;
+    z-index: 0; /* 放到内容后面 */
+}

@@ -1,0 +1,51 @@
+:root {
+    --theme-color-default: #111111;
+    --theme-color-blue: linear-gradient(to right, #0072ff, #1e3c72, #6a5acd);
+    --theme-color-purple: linear-gradient(to right, #6a5acd, #9b4dca, #f05485);
+    --theme-color-red: linear-gradient(to right, #f05485, #ff5e57, #f7a072);
+    --theme-color-orange: linear-gradient(to right, #ff5e57, #ff8e53, #ffbf00);
+    --theme-color-green: linear-gradient(to right, #00c6ff, #32e0c2, #28a745);
+    --theme-color-pink: linear-gradient(to right, #f7a072, #ff7eb9, #d946ef);
+    --theme-color-yellow: linear-gradient(to right, #ffbf00, #ffcc00, #f4d03f);
+    --theme-color-indigo: linear-gradient(to right, #6a5acd, #9b4dca, #4c3b5c);
+    --theme-color-cyan: linear-gradient(to right, #32e0c2, #00b4d8, #4f96b5);
+    --theme-color-sky: linear-gradient(to right, #00c6ff, #4c6ef5, #00d2b1);
+    --theme-color-lime: linear-gradient(to right, #84cc16, #28a745, #00ff9d);
+    --theme-color-amber: linear-gradient(to right, #ffbf00, #ff8e53, #f59e0b);
+    --theme-color-emerald: linear-gradient(to right, #10b981, #2d9a6b, #2db39e);
+    --theme-color-rose: linear-gradient(to right, #f43f5e, #ff6b81, #ee5e6c);
+    --theme-color-fuchsia: linear-gradient(to right, #d946ef, #b56ef2, #9c50b3);
+    --current-theme: var(--theme-color-default);
+}
+
+.theme-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(2.5rem, 1fr));
+    gap: 0.8rem;
+    padding: 0.8rem;
+    margin: 0.8rem 0;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 1rem;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.theme-option {
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.theme-option:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.theme-option.active {
+    border-color: white;
+    transform: scale(1.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}

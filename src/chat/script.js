@@ -9,7 +9,7 @@ class ChatApp {
         this.uploadButton = document.getElementById('uploadButton');
         this.attachmentPreview = document.getElementById('attachmentPreview');
         this.currentUploadedFile = null;
-        this.lastMessageId = null; 
+        this.lastMessageId = null;
         this.conversationItems = document.getElementById('conversationItems');
         this.currentConversationId = '';
         this.firstMessageId = null;
@@ -50,7 +50,7 @@ class ChatApp {
         this.voiceContainer = document.getElementById('voiceContainer');
         this.mediaRecorder = null;
         this.audioChunks = [];
-        this.currentAudioFile = null; 
+        this.currentAudioFile = null;
         this.audioStatus = false;
         this.appName = 'DifyWebUI';
         //弹窗
@@ -82,28 +82,26 @@ class ChatApp {
             e.preventDefault();
             this.addNewAppSettings();
         });
-        
+
         this.closeSettingsButton.addEventListener('click', () => {
             this.toggleSettingsPage();
         });
 
         // 修改导航按钮事件绑定
         this.prevButton.addEventListener('click', () => {
-            const currentPanel = this.getCurrentPanel();
-            const prevPanel = currentPanel.previousElementSibling;
-            if (prevPanel) {
-                this.scrollToPanel(prevPanel);
-            }
+            const panels = Array.from(this.settingsWrapper.children);
+            const currentIndex = panels.findIndex(panel => panel.classList.contains('active-panel'));
+            const prevIndex = currentIndex <= 0 ? panels.length - 1 : currentIndex - 1;
+            this.scrollToPanel(panels[prevIndex]);
         });
 
         this.nextButton.addEventListener('click', () => {
-            const currentPanel = this.getCurrentPanel();
-            const nextPanel = currentPanel.nextElementSibling;
-            if (nextPanel) {
-                this.scrollToPanel(nextPanel);
-            }
+            const panels = Array.from(this.settingsWrapper.children);
+            const currentIndex = panels.findIndex(panel => panel.classList.contains('active-panel'));
+            const nextIndex = currentIndex >= panels.length - 1 ? 0 : currentIndex + 1;
+            this.scrollToPanel(panels[nextIndex]);
         });
-        
+
         // 初始化按钮状态
         this.updateNavigationButtons();
 
@@ -111,54 +109,70 @@ class ChatApp {
         this.newChatButton.addEventListener('click', () => {
             this.showAppSelector();
         });
+
+        // 创建中心框
+        const centerFrame = document.createElement('div');
+        centerFrame.className = 'settings-center-frame';
+        this.settingsContainer.appendChild(centerFrame);
     }
 
-    // 添加获取当前面板的方法
-    getCurrentPanel() {
-        const container = this.settingsContainer;
+    // 修改导航按钮状态更新方法
+    updateNavigationButtons() {
         const panels = Array.from(this.settingsWrapper.children);
-        const containerCenter = container.scrollLeft + container.offsetWidth / 2;
-        
-        // 找到最接近容器中心的面板
-        return panels.reduce((closest, panel) => {
-            const panelCenter = panel.offsetLeft + panel.offsetWidth / 2;
-            const currentDistance = Math.abs(containerCenter - panelCenter);
-            const closestDistance = Math.abs(containerCenter - (closest.offsetLeft + closest.offsetWidth / 2));
-            return currentDistance < closestDistance ? panel : closest;
-        }, panels[0]);
+        if (panels.length <= 1) {
+            // 如果只有一个面板，隐藏导航按钮
+            this.prevButton.style.display = 'none';
+            this.nextButton.style.display = 'none';
+            return;
+        }
+
+        // 始终显示按钮，因为现在支持循环切换
+        this.prevButton.style.display = 'flex';
+        this.nextButton.style.display = 'flex';
+        this.prevButton.style.opacity = '1';
+        this.nextButton.style.opacity = '1';
     }
 
     // 修改滚动方法
     scrollToPanel(panel) {
-        const container = this.settingsContainer;
-        const scrollLeft = panel.offsetLeft - (container.offsetWidth - panel.offsetWidth) / 2;
-        container.scrollTo({
-            left: scrollLeft,
-            behavior: 'smooth'
+        const wrapper = this.settingsWrapper;
+        const containerWidth = this.settingsContainer.offsetWidth;
+        const panelWidth = panel.offsetWidth;
+        
+        // 计算需要移动的距离，使选中的面板居中
+        const panelIndex = Array.from(wrapper.children).indexOf(panel);
+        const offset = panelIndex * (panelWidth + 40); // 40是gap值
+        const centerOffset = (containerWidth - panelWidth) / 2;
+        
+        // 使用transform来移动整个wrapper
+        wrapper.style.transform = `translateX(${centerOffset - offset}px)`;
+
+        // 更新面板状态
+        const panels = Array.from(wrapper.children);
+        panels.forEach(p => {
+            p.classList.remove('active-panel');
+            p.style.transform = 'scale(0.8)';
+            p.style.opacity = '0.6';
         });
+        
+        // 添加动画效果
+        requestAnimationFrame(() => {
+            panel.classList.add('active-panel');
+            panel.style.transform = 'scale(1)';
+            panel.style.opacity = '1';
+        });
+
         // 更新导航按钮状态
         setTimeout(() => {
             this.updateNavigationButtons();
         }, 300);
     }
 
-    // 修改导航按钮状态更新方法
-    updateNavigationButtons() {
-        const currentPanel = this.getCurrentPanel();
-        // 检查是否有前一个面板
-        this.prevButton.disabled = !currentPanel.previousElementSibling;
-        // 检查是否有下一个面板
-        this.nextButton.disabled = !currentPanel.nextElementSibling;
-        // 更新按钮可见性
-        this.prevButton.style.display = this.prevButton.disabled ? 'none' : 'flex';
-        this.nextButton.style.display = this.nextButton.disabled ? 'none' : 'flex';
-    }
-
     showInfoPage(message, confirmBtn = "确定", cancelBtn = "取消") {
         return new Promise((resolve) => {
             this.tipPage.style.display = "flex";
             this.modalMessage.innerText = message;
-            
+
             // 根据按钮文本决定是否显示按钮
             const showButtons = confirmBtn !== "" || cancelBtn !== "";
             const buttonContainer = this.tipPage.querySelector('.modal-buttons');
@@ -167,7 +181,7 @@ class ChatApp {
             if (showButtons) {
                 this.confirmBtn.value = confirmBtn;
                 this.cancelBtn.value = cancelBtn;
-                
+
                 // 根据是否提供按钮文本来显示/隐藏按钮
                 this.confirmBtn.style.display = confirmBtn ? 'block' : 'none';
                 this.cancelBtn.style.display = cancelBtn ? 'block' : 'none';
@@ -368,53 +382,53 @@ class ChatApp {
         }
     }
 
-        configureMarked() {
-            // 配置常量定义
-            const MARKED_DEFAULTS = {
-                breaks: true,
-                gfm: true,
-                headerIds: false,
-                mangle: false,
-                pedantic: false,
-                sanitize: false,
-                smartLists: true,
-                smartypants: false,
-                xhtml: false
-            };
-        
-            // 高亮处理函数
-            const highlightCode = (code, lang = 'plaintext') => {
-                try {
-                    const validLang = hljs.getLanguage(lang) ? lang : null;
-                    return validLang 
-                        ? hljs.highlight(code, { language: validLang, ignoreIllegals: true }).value
-                        : hljs.highlightAuto(code).value;
-                } catch (error) {
-                    console.warn('Code highlighting failed:', error);
-                    return hljs.highlightAuto(code).value || code;
-                }
-            };
-        
+    configureMarked() {
+        // 配置常量定义
+        const MARKED_DEFAULTS = {
+            breaks: true,
+            gfm: true,
+            headerIds: false,
+            mangle: false,
+            pedantic: false,
+            sanitize: false,
+            smartLists: true,
+            smartypants: false,
+            xhtml: false
+        };
+
+        // 高亮处理函数
+        const highlightCode = (code, lang = 'plaintext') => {
             try {
-                // 配置 marked 基础选项
-                marked.setOptions(MARKED_DEFAULTS);
-        
-                // 自定义渲染器
-                const renderer = new marked.Renderer();
-                
-                // 保留原始代码块处理逻辑
-                renderer.code = (code, lang) => {
-                    const highlighted = highlightCode(code, lang);
-                    const numbered = this.addLineNumbers(highlighted);
-                    return this.createCollapsibleCode(numbered, lang);
-                };
-        
-                                const preprocess = (text) => {
-                    return text.replace(/<think>([\s\S]*?)<\/think>/g, (match, content) => {
-                        if (!content.trim()) return '';
-                        const tableContent = content.trim();
-                
-                        return `
+                const validLang = hljs.getLanguage(lang) ? lang : null;
+                return validLang
+                    ? hljs.highlight(code, { language: validLang, ignoreIllegals: true }).value
+                    : hljs.highlightAuto(code).value;
+            } catch (error) {
+                console.warn('Code highlighting failed:', error);
+                return hljs.highlightAuto(code).value || code;
+            }
+        };
+
+        try {
+            // 配置 marked 基础选项
+            marked.setOptions(MARKED_DEFAULTS);
+
+            // 自定义渲染器
+            const renderer = new marked.Renderer();
+
+            // 保留原始代码块处理逻辑
+            renderer.code = (code, lang) => {
+                const highlighted = highlightCode(code, lang);
+                const numbered = this.addLineNumbers(highlighted);
+                return this.createCollapsibleCode(numbered, lang);
+            };
+
+            const preprocess = (text) => {
+                return text.replace(/<think>([\s\S]*?)<\/think>/g, (match, content) => {
+                    if (!content.trim()) return '';
+                    const tableContent = content.trim();
+
+                    return `
                             <details style="border: 1px solid #ddd; padding: 10px; border-radius: 8px; background-color: #f9f9f9; margin-bottom: 10px;">
                                 <summary style="font-size: 1.2em; font-weight: bold; color: #333; cursor: pointer;">
                                     🧠 思考过程
@@ -428,32 +442,32 @@ class ChatApp {
                                 📌 正式回答
                             </span>
                             <div style="color: #000; padding: 10px; background-color: #f4f4f4; border-radius: 5px; line-height: 1.5;">`.trim();
-                                });
-                            };
-                // 重写 marked 的解析方法
-                const originalParse = marked.parse;
-                marked.parse = (text, options) => {
-                    const preprocessed = preprocess(text);
-                    return originalParse.call(marked, preprocessed, {
-                        ...options,
-                        // 确保不会重复处理已转换的内容
-                        sanitize: false,
-                        silent: true
-                    });
-                };
-        
-                // 应用配置
-                marked.use({ renderer });
-        
-            } catch (error) {
-                console.error('Marked configuration failed:', error);
-                marked.setOptions({
-                    breaks: true,
-                    gfm: true,
-                    sanitize: true
                 });
-            }
+            };
+            // 重写 marked 的解析方法
+            const originalParse = marked.parse;
+            marked.parse = (text, options) => {
+                const preprocessed = preprocess(text);
+                return originalParse.call(marked, preprocessed, {
+                    ...options,
+                    // 确保不会重复处理已转换的内容
+                    sanitize: false,
+                    silent: true
+                });
+            };
+
+            // 应用配置
+            marked.use({ renderer });
+
+        } catch (error) {
+            console.error('Marked configuration failed:', error);
+            marked.setOptions({
+                breaks: true,
+                gfm: true,
+                sanitize: true
+            });
         }
+    }
     addLineNumbers(code) {
         try {
             const lines = code.split('\n');
@@ -600,14 +614,14 @@ class ChatApp {
         this.initialized = true;
         //检查apikey
         if (!this.apiKey) {
-            const apiState = await this.showInfoPage("请输入apikey","确实","取消").then(result => {
+            const apiState = await this.showInfoPage("请输入apikey", "确实", "取消").then(result => {
                 if (result) {
                     this.toggleSettingsPage();
-                }else{
+                } else {
                     return;
                 }
             });
-        } 
+        }
     }
 
     bindEventListeners() {
@@ -681,7 +695,7 @@ class ChatApp {
             if (this.isBotReplying) return;
             if (!this.isRecording) {
                 await this.startRecording();
-                
+
             } else {
                 await this.stopRecording();
                 this.simulateBotReply();
@@ -697,12 +711,13 @@ class ChatApp {
 
     appendMessage(content, isUser = false, parent = null) {
         const messageDiv = document.createElement('div');
-        messageDiv.className = `message ${isUser ? 'user' : 'bot'} new`;
+        messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+        messageDiv.classList.add('show');
 
         // 添加头像
         const avatar = document.createElement('img');
         avatar.className = 'avatar';
-        avatar.src = isUser 
+        avatar.src = isUser
             ? `https://api.dicebear.com/7.x/adventurer/svg?seed=${this.userName}`
             : '../../rebot.svg';
         messageDiv.appendChild(avatar);
@@ -714,50 +729,13 @@ class ChatApp {
         // 创建消息内容
         const messageContent = document.createElement('div');
         messageContent.className = 'message-content';
-
-        // 创建复制按钮
-        const messageActions = document.createElement('div');
-        messageActions.className = 'message-actions';
-        const copyButton = document.createElement('button');
-        copyButton.className = 'message-action-btn copy-btn';
-        copyButton.innerHTML = '<i class="fas fa-copy"></i> 复制';
-        copyButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.copyMessage(messageContent);
-        });
-        messageActions.appendChild(copyButton);
-        document.body.appendChild(messageActions); // 将按钮添加到 body
-
-        // 添加点击事件监听器
-        messageContent.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.showMessageActions(messageActions, e.clientX, e.clientY, messageContent);
-        });
-
-        // 添加内容容器
-        const contentContainer = document.createElement('div');
-        contentContainer.className = 'content-container';
-
+        
         if (isUser) {
-            contentContainer.innerHTML = marked.parse(content);
-            messageContent.appendChild(contentContainer);
+            messageContent.innerHTML = marked.parse(content);
             messageContent.classList.add('show-content');
         } else {
-            const p = document.createElement('p');
-            if (content) {
-                const words = content.split('');
-                words.forEach(word => {
-                    const span = document.createElement('span');
-                    span.textContent = word;
-                    p.appendChild(span);
-                });
-            }
-            contentContainer.appendChild(p);
-            messageContent.appendChild(contentContainer);
-
-            const parsedContent = marked.parse(p.innerHTML);
-            p.innerHTML = parsedContent;
-            this.showContent(messageContent);
+            // 机器人消息初始化时只添加基本结构
+            messageContent.innerHTML = '<div class="content-container"></div>';
         }
 
         contentWrapper.appendChild(messageContent);
@@ -776,24 +754,21 @@ class ChatApp {
     showContent(messageContent) {
         const spans = messageContent.querySelectorAll('p span');
         let delay = 0;
-        
+        const delayIncrement = 10; // 减少延迟增量
+
         spans.forEach((span) => {
             setTimeout(() => {
                 span.style.opacity = 1;
             }, delay);
-            delay += 20;
+            delay += delayIncrement;
         });
 
-        setTimeout(() => {
-            messageContent.classList.add('show-content');
-            const messageActions = messageContent.querySelector('.message-actions');
-            if (messageActions) {
-                messageActions.style.opacity = '0';
-                requestAnimationFrame(() => {
-                    messageActions.style.opacity = '1';
-                });
-            }
-        }, delay + 100);
+        // 立即显示消息内容
+        messageContent.classList.add('show-content');
+        const messageActions = messageContent.querySelector('.message-actions');
+        if (messageActions) {
+            messageActions.style.opacity = '1';
+        }
     }
 
     async handleFileSelect(event) {
@@ -838,12 +813,15 @@ class ChatApp {
         const reader = new FileReader();
         reader.onload = (e) => {
             this.attachmentPreview.innerHTML = `
-                <div class="preview-image">
+                <div class="upload-preview show">
                     <img src="${e.target.result}" alt="预览">
-                    <button class="remove-button" onclick="chatApp.removeAttachment()">×</button>
+                    <div class="upload-progress">
+                        <div class="upload-progress-bar" style="width: 0%"></div>
+                    </div>
+                    <button class="upload-delete" onclick="chatApp.removeAttachment()">×</button>
                 </div>
             `;
-            this.attachmentPreview.style.display = 'block'; // 显示预览
+            this.attachmentPreview.style.display = 'block';
         };
         reader.readAsDataURL(file);
     }
@@ -942,10 +920,9 @@ class ChatApp {
         }
         // 创建机器人响应的消息容器
         const botMessageDiv = this.appendMessage('', false);
-        // 添加加载状态，但保持位置固定
-        botMessageDiv.classList.add('loading');
-        botMessageDiv.style.alignSelf = 'flex-start';
+        const messageContent = botMessageDiv.querySelector('.message-content');
         let fullResponse = '';
+        let isFirstMessage = true;
 
         try {
             const response = await fetch(`${this.baseUrl}/chat-messages`, {
@@ -956,36 +933,40 @@ class ChatApp {
                 },
                 body: JSON.stringify(sendData)
             });
+            
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
-            let messageFiles = [];
+            
             while (true) {
                 const { done, value } = await reader.read();
-                if (done) {
-                    // 移除加载状态，保持位置
-                    botMessageDiv.classList.remove('loading');
-                    const finalContent = marked.parse(fullResponse);
-                    botMessageDiv.querySelector('.message-content').innerHTML = finalContent;
-                    await this.loadSuggestions(botMessageDiv);
-                    break;
-                }
-                botMessageDiv.classList.add('show');
+                if (done) break;
+                
                 const chunk = decoder.decode(value);
                 const lines = chunk.split('\n');
+                
                 for (const line of lines) {
                     if (line.startsWith('data: ')) {
                         try {
                             const data = JSON.parse(line.slice(6));
                             switch (data.event) {
                                 case 'message':
+                                    if (isFirstMessage) {
+                                        messageContent.classList.add('typing');
+                                        isFirstMessage = false;
+                                    }
                                     fullResponse += data.answer;
-                                    const formattedContent = marked.parse(fullResponse);
-                                    botMessageDiv.querySelector('.message-content').innerHTML = formattedContent;
+                                    // 使用 requestAnimationFrame 来平滑更新内容
+                                    requestAnimationFrame(() => {
+                                        messageContent.innerHTML = marked.parse(fullResponse);
+                                    });
                                     this.lastMessageId = data.message_id;
                                     this.currentConversationId = data.conversation_id;
-                                    this.scrollToBottom();
+                                    // 使用平滑滚动
+                                    this.chatMessages.scrollTo({
+                                        top: this.chatMessages.scrollHeight,
+                                        behavior: 'smooth'
+                                    });
                                     break;
-        
                                 case 'agent_thought':
                                     if (data.thought) {
                                         thought = data.thought;
@@ -1001,14 +982,12 @@ class ChatApp {
                                         messageFiles = messageFiles.concat(data.message_files);
                                     }
                                     break;
-        
                                 case 'message_file':
                                     if (data.type === 'image') {
                                         const imageHtml = `\n\n![Generated Image](${data.url})\n\n`;
                                         fullResponse += imageHtml;
                                     }
                                     break;
-        
                                 case 'tts_message':
                                     if (data.audio) {
                                         // 处理文本转语音
@@ -1016,18 +995,9 @@ class ChatApp {
                                     }
                                     break;
                                 case 'message_end':
-                                     // 移除加载状态，保持位置
-                                    console.log('message_end');
-                                    botMessageDiv.classList.remove('loading');
-                                    const finalContent = marked.parse(fullResponse);
-                                    botMessageDiv.querySelector('.message-content').innerHTML = finalContent;
-                                    await this.loadSuggestions(botMessageDiv);
+                                    messageContent.classList.remove('typing');
                                     break;
                             }
-                            // 更新消息内容
-                            const formattedContent = marked.parse(fullResponse);
-                            botMessageDiv.querySelector('.message-content').innerHTML = formattedContent;
-                            this.scrollToBottom();
                         } catch (e) {
                             console.error('解析响应数据失败:', e);
                             continue;
@@ -1036,11 +1006,10 @@ class ChatApp {
                 }
             }
         } catch (error) {
-            botMessageDiv.classList.remove('loading');
             console.error('发送消息失败:', error);
-            botMessageDiv.querySelector('.message-content').textContent = '抱歉，发生了错误。请稍后重试。';
-        }        
-        if(this.audioStatus){
+            messageContent.textContent = '抱歉，发生了错误。请稍后重试。';
+        }
+        if (this.audioStatus) {
             this.textToAudio(this.lastMessageId);
         }
         await this.loadConversations();
@@ -1059,7 +1028,7 @@ class ChatApp {
         return btoa(binary);
     }
 
-    async getAppInfo(apiKey = this.apiKey){
+    async getAppInfo(apiKey = this.apiKey) {
         const response = await fetch(
             `${this.baseUrl}/info?user=${this.user}`,
             {
@@ -1071,9 +1040,9 @@ class ChatApp {
         );
         const data = await response.json();
         if (data) {
-            this.appNameForApiKey.set(apiKey,data.name)
-        }else{
-            this.appNameForApiKey.set(apiKey,"地址不对哦！！！")
+            this.appNameForApiKey.set(apiKey, data.name)
+        } else {
+            this.appNameForApiKey.set(apiKey, "地址不对哦！！！")
         }
     }
 
@@ -1171,7 +1140,7 @@ class ChatApp {
         } catch (error) {
             console.error('删除会话失败:', error);
             const userConfirmed = await this.showInfoPage('删除会话失败，请重试')
-            
+
         }
     }
 
@@ -1203,7 +1172,7 @@ class ChatApp {
     async textToAudio(messageId) {
         try {
             const requestBody = {
-                user: this.user, 
+                user: this.user,
                 message_id: messageId
             };
             const response = await fetch(
@@ -1227,12 +1196,12 @@ class ChatApp {
                 const reader = response.body.getReader();
                 // 读取流数据
                 while (true) {
-                    const {done, value} = await reader.read();
+                    const { done, value } = await reader.read();
                     if (done) break;
                     // 等待前一个数据添加完成
                     if (sourceBuffer.updating) {
                         await new Promise(resolve => {
-                            sourceBuffer.addEventListener('updateend', resolve, {once: true});
+                            sourceBuffer.addEventListener('updateend', resolve, { once: true });
                         });
                     }
                     // 添加新的音频数据
@@ -1255,12 +1224,12 @@ class ChatApp {
     playAudio(audioData) {
         try {
             // 如果是ArrayBuffer直接创建blob
-            if(audioData instanceof ArrayBuffer) {
-                const blob = new Blob([audioData], {type: 'audio/mpeg'});
+            if (audioData instanceof ArrayBuffer) {
+                const blob = new Blob([audioData], { type: 'audio/mpeg' });
                 const audio = new Audio(URL.createObjectURL(blob));
                 return audio.play();
             }
-            
+
             // 保留base64处理逻辑作为备用
             const base64String = this.arrayBufferToBase64(audioData);
             const audio = new Audio();
@@ -1300,11 +1269,11 @@ class ChatApp {
         this.chatContainer.style.display = 'flex';
     }
 
-    async loadWelcomeMessage(){
+    async loadWelcomeMessage() {
         await this.getAppInfo();
         const welcomeMessage = document.getElementsByTagName('h1')[0];
         welcomeMessage.innerText = '';
-        this.typeWriter(`Hi, ${this.userName}, I'm ${this.appNameForApiKey.get(this.apiKey)}. How can I help you?`,welcomeMessage);
+        this.typeWriter(`Hi, ${this.userName}, I'm ${this.appNameForApiKey.get(this.apiKey)}. How can I help you?`, welcomeMessage);
     }
 
     async loadMoreMessages() {
@@ -1459,11 +1428,11 @@ class ChatApp {
             this.appCount = maxAppIndex;
 
             // 恢复所有子应用设置面板
-            for(let i = 2; i <= this.appCount; i++) {
+            for (let i = 2; i <= this.appCount; i++) {
                 const apiKey = localStorage.getItem(`apiKey_${i}`);
                 const baseUrl = localStorage.getItem(`baseUrl_${i}`);
-                
-                if(apiKey || baseUrl) {
+
+                if (apiKey || baseUrl) {
                     const newSettingsContent = document.createElement('div');
                     newSettingsContent.className = 'settings-content';
                     if (i % 2 === 0) {
@@ -1623,14 +1592,14 @@ class ChatApp {
     typeWriter(text, element, speed = 50) {
         let i = 0;
         function type() {
-          if (i < text.length) {
-            element.innerHTML += text.charAt(i);
-            i++;
-            setTimeout(type, speed);
-          }
+            if (i < text.length) {
+                element.innerHTML += text.charAt(i);
+                i++;
+                setTimeout(type, speed);
+            }
         }
         type();
-      }
+    }
 
     toggleSettingsPage() {
         // 获取当前显示状态
@@ -1679,7 +1648,7 @@ class ChatApp {
 
         // 获取主应用面板
         const mainSettings = this.settingsWrapper.querySelector('.main-settings');
-        
+
         // 获取所有现有的子应用面板
         const appPanels = Array.from(this.settingsWrapper.children).filter(
             el => !el.classList.contains('main-settings')
@@ -1687,7 +1656,7 @@ class ChatApp {
 
         // 根据应用数量决定添加到左侧还是右侧
         const isEven = appPanels.length % 2 === 0;
-        
+
         if (isEven) {
             // 添加到右侧
             newSettingsContent.classList.add('right-app');
@@ -1743,21 +1712,21 @@ class ChatApp {
     removeAppSettings(button) {
         const settingsContent = button.closest('.settings-content');
         settingsContent.classList.remove('show');
-        
+
         setTimeout(() => {
             const isLastPanel = !settingsContent.nextElementSibling;
-            const targetPanel = isLastPanel ? 
-                settingsContent.previousElementSibling : 
+            const targetPanel = isLastPanel ?
+                settingsContent.previousElementSibling :
                 settingsContent.nextElementSibling;
-            
+
             settingsContent.remove();
             this.appCount--;
-            
+
             // 重新排列剩余的应用设置
             const appSettings = Array.from(this.settingsWrapper.children).filter(
                 el => !el.classList.contains('main-settings')
             );
-            
+
             appSettings.forEach((app, index) => {
                 app.classList.remove('left-app', 'right-app');
                 if (index % 2 === 0) {
@@ -1783,7 +1752,7 @@ class ChatApp {
         // 保存特定应用的设置
         const apiKey = form.querySelector(`#apiKey${appIndex}`).value;
         const baseUrl = form.querySelector(`#baseUrl${appIndex}`).value;
-        
+
         // 验证输入
         if (!apiKey || !baseUrl) {
             this.showInfoPage("API Key 和 Base URL 都不能为空");
@@ -1813,7 +1782,7 @@ class ChatApp {
         try {
             // 获取所有应用信息
             const apps = await this.getAllApps();
-            
+
             // 确保主应用名称已加载
             if (this.apiKey && !this.appNameForApiKey.has(this.apiKey)) {
                 await this.getAppInfo(this.apiKey);
@@ -1869,7 +1838,7 @@ class ChatApp {
         if (app.isMain) {
             div.classList.add('main-app');
         }
-        
+
         div.innerHTML = `
             <h4>${app.name || '未命名应用'}</h4>
             <div class="app-url">${app.baseUrl}</div>
@@ -1914,14 +1883,26 @@ class ChatApp {
 
     // 选择应用
     async selectApp(app) {
+        // 保存当前主应用的设置
         if (!app.isMain) {
+            const mainAppSettings = {
+                apiKey: localStorage.getItem('apiKey'),
+                baseUrl: localStorage.getItem('baseUrl')
+            };
             // 切换到选中的应用
             this.apiKey = app.apiKey;
             this.baseUrl = app.baseUrl;
-            // 保存到 localStorage
-            localStorage.setItem('lastUsedAppIndex', app.index);
+            // 将选中的应用设置保存为主应用
             localStorage.setItem('apiKey', app.apiKey);
             localStorage.setItem('baseUrl', app.baseUrl);
+            // 将原主应用设置保存到对应的子应用位置
+            localStorage.setItem(`apiKey_${app.index}`, mainAppSettings.apiKey);
+            localStorage.setItem(`baseUrl_${app.index}`, mainAppSettings.baseUrl);
+            // 更新应用名称映射
+            await this.getAppInfo(app.apiKey);
+            await this.getAppInfo(mainAppSettings.apiKey);
+            // 重新加载设置以更新UI
+            this.loadSettings();
         }
     }
 
@@ -1932,18 +1913,18 @@ class ChatApp {
             // 创建临时元素并复制HTML内容
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = contentContainer.innerHTML;
-            
+
             // 获取处理后的HTML内容
             const htmlContent = tempDiv.innerHTML;
-            
+
             // 创建一个blob对象
             const blob = new Blob([htmlContent], { type: 'text/html' });
-            
+
             // 创建ClipboardItem对象
             const data = new ClipboardItem({
                 'text/html': blob
             });
-            
+
             // 写入剪贴板
             navigator.clipboard.write([data]).then(() => {
                 const copyBtn = document.querySelector('.message-actions .copy-btn');
@@ -1977,11 +1958,11 @@ class ChatApp {
 
         // 获取消息内容的位置信息
         const rect = messageContent.getBoundingClientRect();
-        
+
         // 设置按钮位置在消息内容的右侧
         let posX = rect.right + 10; // 在消息右侧留出10px间距
         let posY = rect.top + (rect.height / 2); // 垂直居中对齐
-        
+
         // 如果按钮会超出右边界，则显示在左侧
         if (posX + messageActions.offsetWidth > window.innerWidth) {
             posX = rect.left - messageActions.offsetWidth - 10;
@@ -1999,7 +1980,7 @@ class ChatApp {
                 document.removeEventListener('click', hideActions);
             }
         };
-        
+
         setTimeout(() => {
             document.addEventListener('click', hideActions);
         }, 0);

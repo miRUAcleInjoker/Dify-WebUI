@@ -1,0 +1,872 @@
+.message {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0 2rem;
+    margin-bottom: 1rem;
+    max-width: 85%;
+    width: fit-content;
+    position: relative;
+    min-height: 60px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.message.bot {
+    align-self: flex-start;
+    margin-right: auto;
+}
+
+.message.user {
+    align-self: flex-end;
+    margin-left: auto;
+    flex-direction: row-reverse;
+}
+
+.avatar {
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    border-radius: 50%;
+    margin: 0 var(--avatar-margin);
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    transition: transform 0.3s ease;
+}
+
+.avatar:hover {
+    transform: scale(1.05);
+}
+
+.message-content-wrapper {
+    flex: 0 1 auto;
+    min-width: 200px;
+    max-width: calc(100% - var(--avatar-size) - (var(--avatar-margin) * 2));
+}
+
+.message-content {
+    max-width: 100%;
+    padding: 1.2rem 1.4rem;
+    line-height: 1.8;
+    font-size: 15px;
+    letter-spacing: 0.2px;
+    color: #2c3e50;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.98));
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.message-content.show-content {
+    transform: none;
+    opacity: 1;
+}
+
+.message-content p {
+    margin: 0.8rem 0;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow: hidden;
+    width: 100%;
+    display: block;
+    opacity: 1;
+    transform: none;
+    animation: none;
+    transition: none;
+    font-size: 16px;
+    color: #2c3e50;
+}
+/* .language-css{
+    background-color: #eef0f5;
+} */
+
+.message.user .message-content {
+    border-radius: var(--message-radius) var(--message-radius) 0 var(--message-radius);
+    background: linear-gradient(135deg, var(--user-message-bg), #ffffff);
+    color: rgba(0, 0, 0, 0.85);
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.6;
+    padding: 12px 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    display: block;
+}
+
+.message.bot .message-content {
+    border-radius: var(--message-radius) var(--message-radius) var(--message-radius) 0;
+    background: linear-gradient(135deg, #ffffff, var(--bot-message-bg));
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    opacity: 1;
+    transform: none;
+}
+
+.message.bot .message-content p {
+    opacity: 1;
+    transform: none;
+    animation: none;
+    transition: none;
+}
+
+.message-content pre {
+    position: relative;
+    padding: 1.5rem 1.4rem 1.4rem;
+    font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+    border-radius: 8px;
+    margin: 1.2rem 0;
+}
+
+.message-content pre:hover {
+    transform: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.code-toolbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 1;
+    height: 2.5rem;
+}
+
+.message-content pre:hover .code-toolbar {
+    opacity: 1;
+}
+
+.code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.language-badge {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 0.75rem;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+}
+
+.code-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 0px;
+}
+
+.code-actions button,
+.toggle-button,
+.copy-button {
+    height: 24px;
+    padding: 0 0.75rem;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.fas.fa-chevron-down,
+.code-actions i {
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.copy-button {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    background: transparent;
+    color: #a9b7c6;
+    border: 1px solid rgba(169, 183, 198, 0.4);
+}
+
+.copy-button:hover {
+    background: rgba(169, 183, 198, 0.1);
+    color: #fff;
+    border-color: rgba(169, 183, 198, 0.6);
+}
+
+.copy-button.copied {
+    background: #2cbb5d;
+    color: white;
+    border-color: transparent;
+}
+
+.toggle-button {
+    background: transparent;
+    color: #a9b7c6;
+    border: 1px solid rgba(169, 183, 198, 0.4);
+}
+
+.toggle-button:hover {
+    background: rgba(169, 183, 198, 0.1);
+    color: #0a0a0a;
+    border-color: rgba(169, 183, 198, 0.6);
+}
+
+.message-actions {
+    position: fixed;
+    display: flex;
+    gap: 0.5rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    z-index: 1000;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    padding: 4px;
+    transform: translateY(-50%);
+}
+
+.message-actions.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.message-action-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.message-action-btn:hover {
+    opacity: 0.9;
+}
+
+.copy-success {
+    background: #28a745 !important;
+}
+
+/* 消息时间戳样式 */
+.message::after {
+    content: attr(data-time);
+    position: absolute;
+    bottom: -1.2rem;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    opacity: 0.7;
+    align-self: flex-end;
+}
+
+.message.bot::after {
+    color: #666;
+    left: calc(var(--avatar-size) + var(--avatar-margin) * 2);
+}
+
+.message.user::after {
+    color: var(--user-message-color);
+    right: calc(var(--avatar-size) + var(--avatar-margin) * 2);
+}
+
+/* 消息内容格式化样式 */
+.message-content h1,
+.message-content h2,
+.message-content h3,
+.message-content h4 {
+    font-weight: 600;
+    color: #1a202c;
+    margin: 1.5em 0 0.8em;
+    line-height: 1.4;
+}
+
+.message-content ul,
+.message-content ol {
+    padding-left: 1.5em;
+    margin: 1em 0;
+}
+
+.message-content li {
+    margin: 0.5em 0;
+    line-height: 1.6;
+}
+
+.message-content code:not(pre code) {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.9em;
+    padding: 0.2em 0.4em;
+    background: rgba(0, 0, 0, 0.04);
+    border-radius: 4px;
+    color: #e83e8c;
+    word-break: break-word;
+}
+
+.message-content table {
+    width: 100%;
+    margin: 1.2em 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.message-content th,
+.message-content td {
+    padding: 0.8em 1em;
+    border: 1px solid #e2e8f0;
+    background: white;
+}
+
+.message-content th {
+    background: #f8fafc;
+    font-weight: 600;
+}
+
+.message-content blockquote {
+    margin: 1.2em 0;
+    padding: 0.8em 1.2em;
+    border-left: 4px solid #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+    border-radius: 0 4px 4px 0;
+    color: #4a5568;
+}
+
+.message-content a {
+    color: #3b82f6;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.message-content a:hover {
+    border-bottom-color: #3b82f6;
+    color: #2563eb;
+}
+
+/* 代码块样式 */
+.code-block {
+    position: relative;
+    margin: 1em 0;
+    background: #f5f5f5;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.code-actions button {
+    padding: 4px 8px;
+    border: none;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.code-actions button:hover {
+    background: color-mix(in srgb, var(--primary-color) 85%, white);
+}
+
+.line {
+    display: flex;
+    padding: 0 0.5em;
+}
+
+.line-number {
+    font-family: "JetBrains Mono", "Fira Code", "Source Code Pro", monospace;
+    font-size: 14px;
+    color: #1c1d1d;
+    padding-right: 1.2em;
+    user-select: none;
+    min-width: 2.5em;
+    text-align: right;
+}
+
+.line-content {
+    /* 优化字体栈顺序并补充通用等宽字体 */
+    font-family: "JetBrains Mono", "Fira Code", "Source Code Pro", Menlo, Consolas, monospace;
+    
+    /* 改用相对单位并保留基准尺寸 */
+    font-size: 1em; /* 继承父元素设置 */
+    font-size: clamp(14px, 1.25vw, 16px); /* 添加响应式处理 */
+    
+    /* 增强排版可读性 */
+    line-height: 1.6; /* 增加行间距 */
+    letter-spacing: 0.02em; /* 微调字距 */
+    -webkit-font-smoothing: antialiased; /* Mac字体抗锯齿 */
+    -moz-osx-font-smoothing: grayscale; /* Firefox字体渲染 */
+
+    /* 智能空白处理 */
+    white-space: pre-wrap; /* 保留换行同时自动换行 */
+    overflow-wrap: break-word; /* 长内容换行策略 */
+    tab-size: 4; /* 规范制表符宽度 */
+
+    /* 间距优化 */
+    padding-left: 0.75em; /* 增加缩进可视性 */
+    padding-right: 0.5em; /* 添加右侧呼吸空间 */
+    
+    /* 可选深色模式适配 */
+    @media (prefers-color-scheme: dark) {
+        color-scheme: dark;
+        text-shadow: 0 0 0.5px currentColor; /* 提升暗色对比度 */
+    }
+}
+
+/* 消息状态样式 */
+.message.bot.typing .message-content {
+    animation: typingPulse 1.5s ease-in-out infinite;
+}
+
+.message.bot.loading {
+    align-self: flex-start;
+}
+
+.message.bot.loading .message-content {
+    background: linear-gradient(90deg,
+            #f7f7f8 0%,
+            #ffffff 50%,
+            #f7f7f8 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    position: relative;
+    overflow: hidden;
+    min-width: 200px;
+    min-height: 80px;
+}
+
+.message.bot.loading .message-content::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.6),
+            transparent);
+    animation: shimmerOverlay 1.5s infinite;
+}
+
+/* 输入指示器样式 */
+.typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 1rem;
+    margin: 0.5rem 0;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 4px;
+}
+
+.typing-dot {
+    width: 6px;
+    height: 6px;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: typingBounce 1.4s infinite;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+/* 添加代码高亮样式 */
+.message-content pre code {
+    font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #a9b7c6;
+    tab-size: 4;
+    display: block;
+    padding-top: 0.5rem;
+}
+
+/* 消息链接样式 */
+.message.user .message-content a {
+    color: var(--user-message-color);
+    text-decoration: underline;
+    opacity: 0.9;
+}
+
+/* 消息代码块样式 */
+.message.bot .message-content pre {
+    background: rgba(224, 233, 241, 0.8);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.message.user .message-content pre {
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+/* 新消息动画 */
+.message.new {
+    animation: slideIn 0.3s ease-out forwards;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 消息堆叠动画延迟 */
+.message:nth-child(n+1) {
+    animation-delay: calc(0.05s * var(--message-index, 0));
+}
+
+/* 修改消息容器样式 */
+.chat-messages {
+    scroll-behavior: smooth;
+    padding-bottom: 100px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+/* 消息内容过渡效果 */
+.message-content {
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.message-content.show-content {
+    transform: translateY(0);
+}
+
+/* 消息内容段落动画 */
+.message-content p {
+    animation: fadeIn 0.3s ease forwards;
+    animation-delay: calc(var(--index, 0) * 0.1s);
+}
+
+/* 文件上传相关样式 */
+.file-upload-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    margin: 0.5rem 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.file-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    flex: 1;
+}
+
+.file-name {
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.file-size {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.file-progress {
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 0.25rem;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.file-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.file-action-btn {
+    padding: 0.4rem;
+    border: none;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+    border-radius: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.file-action-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--text-color);
+}
+
+.file-action-btn.remove {
+    color: #ff4d4d;
+}
+
+.file-action-btn.remove:hover {
+    background: rgba(255, 77, 77, 0.1);
+}
+
+/* 文件类型图标样式 */
+.file-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 0.5rem;
+    color: var(--primary-color);
+}
+
+/* 上传完成动画 */
+.upload-complete {
+    animation: uploadComplete 0.5s ease forwards;
+}
+
+@keyframes uploadComplete {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* 拖拽上传区域样式 */
+.drag-upload-area {
+    border: 2px dashed rgba(0, 0, 0, 0.1);
+    border-radius: 1rem;
+    padding: 2rem;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+}
+
+.drag-upload-area.dragging {
+    background: rgba(var(--primary-color-rgb), 0.1);
+    border-color: var(--primary-color);
+}
+
+.drag-upload-area .upload-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.drag-upload-area .upload-text {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* 消息中的图片样式 */
+.message-content img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 1em 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.message-content img:hover {
+    transform: scale(1.02);
+}
+
+/* 图片上传预览样式 */
+.upload-preview {
+    display: none;  /* 默认隐藏 */
+    position: relative;
+    margin: 0.5rem 0;
+    max-width: 150px;  /* 改小预览容器的最大宽度 */
+    max-height: 100px; /* 改小预览容器的最大高度 */
+}
+
+/* 当有图片时显示预览 */
+.upload-preview.show {
+    display: inline-block;
+}
+
+.upload-preview img {
+    width: 100%;
+    height: 100%;
+    max-width: 150px;  /* 限制图片最大宽度 */
+    max-height: 100px; /* 限制图片最大高度 */
+    object-fit: contain;
+    border-radius: 6px;  /* 稍微调小圆角 */
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background: rgba(0, 0, 0, 0.03);
+}
+
+/* 上传进度条 */
+.upload-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 8px 8px;
+    overflow: hidden;
+}
+
+.upload-progress-bar {
+    height: 100%;
+    background: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+/* 删除按钮样式优化 */
+.upload-delete {
+    position: absolute;
+    top: 4px;         /* 调整位置 */
+    right: 4px;       /* 调整位置 */
+    width: 20px;      /* 调小按钮尺寸 */
+    height: 20px;     /* 调小按钮尺寸 */
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ff4d4d;
+    font-size: 14px;  /* 调小字体大小 */
+    opacity: 0;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    z-index: 10;  /* 确保按钮在最上层 */
+}
+
+.upload-preview:hover .upload-delete {
+    opacity: 1;
+}
+
+.upload-delete:hover {
+    background: #ff4d4d;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* 机器人消息滑入动画 */
+@keyframes botMessageSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 文本淡入动画 */
+@keyframes textFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(3px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 正在输入的消息样式 */
+.message.typing .message-content::after {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-left: 5px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    animation: typingDot 1s infinite;
+    opacity: 0.5;
+}
+
+/* 输入点动画 */
+@keyframes typingDot {
+    0%, 100% { transform: scale(0.3); }
+    50% { transform: scale(1); }
+}
+
+/* 添加打字机效果 */
+.message-content.typing::after {
+    content: '▋';
+    display: inline-block;
+    vertical-align: middle;
+    animation: cursor-blink 1s step-start infinite;
+    opacity: 0.7;
+    margin-left: 2px;
+}
+
+@keyframes cursor-blink {
+    50% { opacity: 0; }
+}
+
+/* 代码滚动条样式 */
+.message-content pre::-webkit-scrollbar {
+    height: 8px;
+}
+
+.message-content pre::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.message-content pre::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.message-content pre::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+} 
