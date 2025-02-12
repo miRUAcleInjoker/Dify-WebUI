@@ -401,7 +401,7 @@ textarea::-webkit-scrollbar-track {
     right: 0;
     display: flex;
     align-items: center;
-    padding: 1rem;
+    padding: 1.35rem;
     gap: 0.75rem;
     border-top: 1px solid #e5e5e5;
     background: var(--message-bg);
@@ -494,8 +494,8 @@ textarea::-webkit-scrollbar-track {
     z-index: 1001;
     background: var(--primary-color);
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    width: 70px;
+    height: 50px;
     justify-content: center;
     align-items: center;
     cursor: pointer;
