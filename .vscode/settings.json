@@ -1,4 +1,4 @@
 {
-    "codingcopilot.enableAutoCompletions": false,
+    "codingcopilot.enableAutoCompletions": true,
     "liveServer.settings.port": 5501
 }

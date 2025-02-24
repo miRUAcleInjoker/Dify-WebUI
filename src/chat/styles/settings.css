@@ -44,15 +44,14 @@
     opacity: 0.6;
     transform: scale(0.8);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    pointer-events: none;
-    padding: 3rem;  /* 增加内边距使内容更加宽敞 */
-    border-radius: 2rem;  /* 增加圆角 */
+    padding: 3rem;
+    border-radius: 2rem;
     max-height: 90vh;
     background: white;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
     height: fit-content;
     overflow-y: auto;
-    z-index: 2; /* 确保内容在框前面 */
+    z-index: 2;
 }
 
 .settings-content.main-settings {
@@ -63,6 +62,7 @@
     height: auto;
     overflow-y: visible;
     margin: 0 auto;
+    pointer-events: auto;
 }
 
 .settings-content.show {
@@ -339,7 +339,7 @@
     opacity: 1;
     transform: scale(1);
     pointer-events: auto;
-    z-index: 3; /* 确保活动面板在最上层 */
+    z-index: 3;
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
     background: white;
 }
