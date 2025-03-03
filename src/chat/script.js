@@ -1009,7 +1009,7 @@ class ChatApp {
 
     async getAppInfo(apiKey) {
         try {
-            if (!apiKey) return null;
+            if (!apiKey) apiKey = this.apiKey;
             
             // 如果已经缓存了应用信息，直接返回
             if (this.appNameForApiKey.has(apiKey)) {
