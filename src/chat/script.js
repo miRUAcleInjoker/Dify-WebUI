@@ -77,43 +77,19 @@ class ChatApp {
         this.loadWelcomeMessage();
         this.appSelectModal = document.getElementById('appSelectModal');
 
-        // 绑定新的事件处理器
-        this.addAppButton.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.addNewAppSettings();
+        // 修改应用标签相关元素的初始化
+        this.appTags = document.querySelectorAll('.current-app-tag'); // 获取所有的应用标签
+        this.appNameElements = document.querySelectorAll('.current-app-tag .app-name');
+        
+        // 为所有的切换按钮绑定事件
+        document.querySelectorAll('.current-app-tag .switch-app').forEach(button => {
+            button.addEventListener('click', () => {
+                this.showAppSelector();
+            });
         });
 
-        this.closeSettingsButton.addEventListener('click', () => {
-            this.toggleSettingsPage();
-        });
-
-        // 修改导航按钮事件绑定
-        this.prevButton.addEventListener('click', () => {
-            const panels = Array.from(this.settingsWrapper.children);
-            const currentIndex = panels.findIndex(panel => panel.classList.contains('active-panel'));
-            const prevIndex = currentIndex <= 0 ? panels.length - 1 : currentIndex - 1;
-            this.scrollToPanel(panels[prevIndex]);
-        });
-
-        this.nextButton.addEventListener('click', () => {
-            const panels = Array.from(this.settingsWrapper.children);
-            const currentIndex = panels.findIndex(panel => panel.classList.contains('active-panel'));
-            const nextIndex = currentIndex >= panels.length - 1 ? 0 : currentIndex + 1;
-            this.scrollToPanel(panels[nextIndex]);
-        });
-
-        // 初始化按钮状态
-        this.updateNavigationButtons();
-
-        // 修改新对话按钮的事件监听
-        this.newChatButton.addEventListener('click', () => {
-            this.showAppSelector();
-        });
-
-        // 创建中心框
-        const centerFrame = document.createElement('div');
-        centerFrame.className = 'settings-center-frame';
-        this.settingsContainer.appendChild(centerFrame);
+        // 初始化时更新应用名称
+        this.updateAppName();
     }
 
     // 修改导航按钮状态更新方法
@@ -615,7 +591,7 @@ class ChatApp {
         //检查apikey
         if (!this.apiKey) {
             const apiState = await this.showInfoPage("请输入apikey", "确实", "取消").then(result => {
-                if (result) {
+                if (apiState) {
                     this.toggleSettingsPage();
                 } else {
                     return;
@@ -701,6 +677,9 @@ class ChatApp {
                 this.simulateBotReply();
                 this.isRecording = false;
             }
+        });
+        this.closeSettingsButton.addEventListener('click', () => {
+            this.toggleSettingsPage();
         });
     }
 
@@ -1028,21 +1007,47 @@ class ChatApp {
         return btoa(binary);
     }
 
-    async getAppInfo(apiKey = this.apiKey) {
-        const response = await fetch(
-            `${this.baseUrl}/info?user=${this.user}`,
-            {
+    async getAppInfo(apiKey) {
+        try {
+            if (!apiKey) return null;
+            
+            // 如果已经缓存了应用信息，直接返回
+            if (this.appNameForApiKey.has(apiKey)) {
+                return {
+                    name: this.appNameForApiKey.get(apiKey)
+                };
+            }
+
+            // 修改请求路径为正确的API endpoint
+            const response = await fetch(`${this.baseUrl}/info?user=${this.user}`, {
                 headers: {
                     'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json'
                 }
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch app info');
             }
-        );
-        const data = await response.json();
-        if (data) {
-            this.appNameForApiKey.set(apiKey, data.name)
-        } else {
-            this.appNameForApiKey.set(apiKey, "地址不对哦！！！")
+
+            const data = await response.json();
+            
+            // 缓存应用信息
+            if (data && data.name) {
+                this.appNameForApiKey.set(apiKey, data.name);
+            } else {
+                // 如果没有获取到名称，设置一个默认值
+                this.appNameForApiKey.set(apiKey, "未命名应用");
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Error fetching app info:', error);
+            // 发生错误时也设置一个默认值
+            this.appNameForApiKey.set(apiKey, "未命名应用");
+            return {
+                name: "未命名应用"
+            };
         }
     }
 
@@ -1816,15 +1821,6 @@ class ChatApp {
 
             // 显示弹窗
             this.appSelectModal.style.display = 'flex';
-
-            // 添加点击遮罩层关闭弹窗的功能
-            const closeHandler = (e) => {
-                if (e.target === this.appSelectModal) {
-                    this.appSelectModal.style.display = 'none';
-                    this.appSelectModal.removeEventListener('click', closeHandler);
-                }
-            };
-            this.appSelectModal.addEventListener('click', closeHandler);
         } catch (error) {
             console.error('Error showing app selector:', error);
             await this.showInfoPage("加载应用列表失败，请重试");
@@ -1849,7 +1845,6 @@ class ChatApp {
             try {
                 await this.selectApp(app);
                 this.appSelectModal.style.display = 'none';
-                await this.startNewChat();
             } catch (error) {
                 console.error('Error selecting app:', error);
                 await this.showInfoPage("切换应用失败，请重试");
@@ -1883,26 +1878,37 @@ class ChatApp {
 
     // 选择应用
     async selectApp(app) {
-        // 保存当前主应用的设置
-        if (!app.isMain) {
-            const mainAppSettings = {
-                apiKey: localStorage.getItem('apiKey'),
-                baseUrl: localStorage.getItem('baseUrl')
-            };
-            // 切换到选中的应用
-            this.apiKey = app.apiKey;
-            this.baseUrl = app.baseUrl;
-            // 将选中的应用设置保存为主应用
-            localStorage.setItem('apiKey', app.apiKey);
-            localStorage.setItem('baseUrl', app.baseUrl);
-            // 将原主应用设置保存到对应的子应用位置
-            localStorage.setItem(`apiKey_${app.index}`, mainAppSettings.apiKey);
-            localStorage.setItem(`baseUrl_${app.index}`, mainAppSettings.baseUrl);
-            // 更新应用名称映射
-            await this.getAppInfo(app.apiKey);
-            await this.getAppInfo(mainAppSettings.apiKey);
-            // 重新加载设置以更新UI
-            this.loadSettings();
+        try {
+            if (!app.isMain) {
+                const mainAppSettings = {
+                    apiKey: localStorage.getItem('apiKey'),
+                    baseUrl: localStorage.getItem('baseUrl')
+                };
+                
+                this.apiKey = app.apiKey;
+                this.baseUrl = app.baseUrl;
+                
+                localStorage.setItem('apiKey', app.apiKey);
+                localStorage.setItem('baseUrl', app.baseUrl);
+                localStorage.setItem(`apiKey_${app.index}`, mainAppSettings.apiKey);
+                localStorage.setItem(`baseUrl_${app.index}`, mainAppSettings.baseUrl);
+                
+                await this.getAppInfo(app.apiKey);
+                await this.getAppInfo(mainAppSettings.apiKey);
+                this.loadSettings();
+            }
+            
+            // 更新应用名称显示
+            await this.updateAppName();
+            
+            // 关闭应用选择器
+            this.appSelectModal.style.display = 'none';
+            
+            // 开始新对话
+            await this.startNewChat();
+        } catch (error) {
+            console.error('Error selecting app:', error);
+            await this.showInfoPage("切换应用失败，请重试");
         }
     }
 
@@ -1984,6 +1990,29 @@ class ChatApp {
         setTimeout(() => {
             document.addEventListener('click', hideActions);
         }, 0);
+    }
+
+    // 修改 updateAppName 方法
+    async updateAppName() {
+        try {
+            const appInfo = await this.getAppInfo(this.apiKey);
+            // 无论是否获取到应用信息，都显示标签
+            this.appNameElements.forEach(element => {
+                element.textContent = (appInfo && appInfo.name) || "未命名应用";
+            });
+            this.appTags.forEach(tag => {
+                tag.style.display = 'flex';
+            });
+        } catch (error) {
+            console.error('Error updating app name:', error);
+            // 发生错误时显示默认名称
+            this.appNameElements.forEach(element => {
+                element.textContent = "未命名应用";
+            });
+            this.appTags.forEach(tag => {
+                tag.style.display = 'flex';
+            });
+        }
     }
 }
 

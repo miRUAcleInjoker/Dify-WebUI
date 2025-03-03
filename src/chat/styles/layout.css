@@ -601,3 +601,52 @@ textarea::-webkit-scrollbar-track {
     transform: scaleX(1.1);
     transition: transform 0.3s ease;
 }
+
+/* 添加应用标签样式 */
+.current-app-tag {
+    position: absolute;
+    bottom: calc(100% + 8px);  /* 位于输入框上方8px */
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary-color);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.current-app-tag:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.current-app-tag .app-icon {
+    width: 16px;
+    height: 16px;
+    opacity: 0.9;
+}
+
+.current-app-tag .switch-app {
+    margin-left: 8px;
+    padding: 2px 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.current-app-tag .switch-app:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
