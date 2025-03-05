@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://unpkg.com/marked@4.3.0/marked.min.js"></script>
 </head>
 
 <body>
@@ -151,8 +151,8 @@
                                             d="M21 15v3h3v2h-3v3h-2v-3h-3v-2h3v-3h2zm-10 3H5v-3H3v3a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-3h-2v3zm-7-9h12V7H4v2zm14-6H4a2 2 0 0 0-2 2h16a2 2 0 0 0-2-2z" />
                                     </svg>
                                 </button>
-                                <input type="file" id="welcomeFileInput"
-                                    accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" multiple style="display: none">
+                                <input type="file" id="welcomeFileInput" accept=".txt, .md, .pdf, .docx"
+                                 multiple style="display: none">
 
                                 <textarea id="welcomeUserInput" placeholder="输入消息..." rows="1"></textarea>
                                 <button id="welcomeSendButton">
@@ -193,8 +193,8 @@
                                     d="M21 15v3h3v2h-3v3h-2v-3h-3v-2h3v-3h2zm-10 3H5v-3H3v3a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-3h-2v3zm-7-9h12V7H4v2zm14-6H4a2 2 0 0 0-2 2h16a2 2 0 0 0-2-2z" />
                             </svg>
                         </button>
-                        <input type="file" id="fileInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
-                           multiple style="display: none">
+                        <input type="file" id="fileInput" multiple style="display: none">
+                        <input type="radio" id="onlineSearchNo" name="onlineSearch" value="no">
                         <textarea id="userInput" placeholder="输入消息..." rows="1"></textarea>
                         <button id="sendButton">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
@@ -302,7 +302,7 @@
     </div>
     
     <!-- 添加必要的库 -->
-    <script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
     <script src="script.js"></script>
 </body>

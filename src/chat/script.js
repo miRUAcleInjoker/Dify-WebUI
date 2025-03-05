@@ -791,9 +791,28 @@ class ChatApp {
     showPreview(file) {
         const reader = new FileReader();
         reader.onload = (e) => {
+            const fileType = file.name.split('.').pop().toLowerCase();
+            let fileIcon = '';
+    
+            switch (fileType) {
+                case 'doc':
+                case 'docx':
+                    fileIcon = '📄'; // 你可以使用实际的图标路径或字体图标
+                    break;
+                case 'pdf':
+                    fileIcon = '📕';
+                    break;
+                case 'txt':
+                    fileIcon = '📃';
+                    break;
+                default:
+                    fileIcon = '📁';
+            }
+
             this.attachmentPreview.innerHTML = `
                 <div class="upload-preview show">
-                    <img src="${e.target.result}" alt="预览">
+                    <div class="file-icon">${fileIcon}</div>
+                    <div class="file-name">${file.name}</div>
                     <div class="upload-progress">
                         <div class="upload-progress-bar" style="width: 0%"></div>
                     </div>
@@ -876,7 +895,6 @@ class ChatApp {
         this.userInput.value = '';
         this.userInput.style.height = 'auto'; // 发送消息后重置高度
         this.welcomeUserInput.style.height = 'auto'; // 发送消息后重置高度
-        this.removeAttachment(); // 发送消息后移除附件预览
         if (this.audioStatus) {
             message = `你好GPT，我正在进行语音对话。请以友善的态度简要回答我的问题，并保持回答精炼。
                         以下是我的问题：${message}`;
@@ -891,11 +909,11 @@ class ChatApp {
         // 如果有附件，添加到发送数据中
         if (this.currentUploadedFile) {
             sendData.files = [{
-                type: 'image',
+                type: 'document',
                 transfer_method: 'local_file',
                 upload_file_id: this.currentUploadedFile.id
             }];
-            this.removeAttachment();
+            this.removeAttachment(); // 发送消息后移除附件预览
         }
         // 创建机器人响应的消息容器
         const botMessageDiv = this.appendMessage('', false);
