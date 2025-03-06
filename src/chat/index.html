@@ -144,7 +144,7 @@
                             </div>
                             <div class="attachment-preview" id="welcomeAttachmentPreview"></div>
                             <div class="input-group">
-                                <button id="welcomeUploadButton" class="upload-button">
+                                <button id="welcomeUploadButton" class="upload-button" title="上传文件(仅识别文字)">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                                         <path fill="none" d="M0 0h24v24H0z" />
                                         <path fill="currentColor"
@@ -153,6 +153,11 @@
                                 </button>
                                 <input type="file" id="welcomeFileInput" accept=".txt, .md, .pdf, .docx"
                                  multiple style="display: none">
+                                 
+                                <div id="welcomeOnlineSearchToggle"
+                                    style="width: 150px; height: 60px; background-color: lightgray; color: white; text-align: center; line-height: 60px; cursor: pointer; border-radius: 5px;">
+                                    🌏联网搜索
+                                </div>
 
                                 <textarea id="welcomeUserInput" placeholder="输入消息..." rows="1"></textarea>
                                 <button id="welcomeSendButton">
@@ -186,7 +191,7 @@
                     </div>
                     <div class="attachment-preview" id="attachmentPreview"></div>
                     <div class="input-group">
-                        <button id="uploadButton" class="upload-button">
+                        <button id="uploadButton" class="upload-button" title="上传文件(仅识别文字)">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                                 <path fill="none" d="M0 0h24v24H0z" />
                                 <path fill="currentColor"
@@ -194,7 +199,12 @@
                             </svg>
                         </button>
                         <input type="file" id="fileInput" multiple style="display: none">
-                        <input type="radio" id="onlineSearchNo" name="onlineSearch" value="no">
+
+                        <div id="onlineSearchToggle"
+                            style="width: 150px; height: 60px; background-color: lightgray; color: white; text-align: center; line-height: 60px; cursor: pointer; border-radius: 5px;">
+                            🌏联网搜索
+                        </div>
+
                         <textarea id="userInput" placeholder="输入消息..." rows="1"></textarea>
                         <button id="sendButton">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">

@@ -1,5 +1,8 @@
 class ChatApp {
     constructor() {
+        this.welcomeOnlineSearchToggle = document.getElementById('welcomeOnlineSearchToggle');
+        this.onlineSearchToggle = document.getElementById('onlineSearchToggle');
+        this.onlineSearch = false;
         this.chatMessages = document.getElementById('chatMessages');
         this.userInput = document.getElementById('userInput');
         this.sendButton = document.getElementById('sendButton');
@@ -609,7 +612,13 @@ class ChatApp {
                 this.sendMessage();
             }
         });
-        this.uploadButton.addEventListener('click', () => this.fileInput.click());
+        this.uploadButton.addEventListener('click', () => {
+            if (this.onlineSearch) {
+                this.showInfoPage("在线搜索模式下无法上传文件", "", "");
+                return;
+            }
+            this.fileInput.click()
+        });
         this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
 
         this.userInput.addEventListener('input', () => this.adjustTextareaHeight(this.userInput));
@@ -656,7 +665,13 @@ class ChatApp {
                 this.sendWelcomeMessage();
             }
         });
-        this.welcomeUploadButton.addEventListener('click', () => this.welcomeFileInput.click());
+        this.welcomeUploadButton.addEventListener('click', () => {
+            if (this.onlineSearch) {
+                this.showInfoPage("在线搜索模式下无法上传文件", "", "");
+                return;
+            }
+            this.welcomeFileInput.click()
+        });
         this.welcomeFileInput.addEventListener('change', (e) => this.handleWelcomeFileSelect(e));
 
         const micButtons = document.getElementsByClassName('mic-p-button');
@@ -681,6 +696,27 @@ class ChatApp {
         this.closeSettingsButton.addEventListener('click', () => {
             this.toggleSettingsPage();
         });
+
+        // 联网搜索切换按钮
+        this.welcomeOnlineSearchToggle.addEventListener('click', () => this.toggleOnlineSearch());
+        this.onlineSearchToggle.addEventListener('click', () => this.toggleOnlineSearch());
+    }
+
+    toggleOnlineSearch() {
+        // 有附件时不允许切换
+        if (this.currentUploadedFile) {
+            this.showInfoPage("请先删除文件后再开启联网搜索", "", "");
+            return;
+        }
+
+        this.onlineSearch = !this.onlineSearch;
+        if (this.onlineSearch) {
+            this.welcomeOnlineSearchToggle.style.backgroundColor = '#5bacfd';
+            this.onlineSearchToggle.style.backgroundColor = '#5bacfd';
+        } else {
+            this.welcomeOnlineSearchToggle.style.backgroundColor = '#ccc';
+            this.onlineSearchToggle.style.backgroundColor = '#ccc';
+        }
     }
 
     adjustTextareaHeight(textarea) {
