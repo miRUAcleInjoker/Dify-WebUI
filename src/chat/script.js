@@ -903,7 +903,7 @@ class ChatApp {
                 transfer_method: 'local_file',
                 upload_file_id: this.currentUploadedFile.id
             }];
-            this.removeAttachment();
+            this.removeAttachment(); // 发送消息后移除附件预览
         }
         // 创建机器人响应的消息容器
         const botMessageDiv = this.appendMessage('', false);
