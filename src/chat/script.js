@@ -730,6 +730,30 @@ class ChatApp {
         }
     }
 
+     // 搜索引擎
+     async searchSearxng(query) {
+        const url = `http://localhost:8080/search?q=${encodeURIComponent(query)}&format=json&engines=duckduckgo`;
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            const data = await response.json();
+            // 处理返回值，只保留搜索结果的标题、URL和摘要
+            const short_result = data.results.map(r => {
+                return {
+                    title: r.title,
+                    url: r.url,
+                    content: r.content
+                };
+            });
+            console.log('搜索结果:', short_result);
+            return short_result;
+        } catch (error) {
+            console.error('There has been a problem with your fetch operation:', error);
+        }
+    }
+
     adjustTextareaHeight(textarea) {
         textarea.style.height = 'auto'; // 重置高度
         textarea.style.height = `${textarea.scrollHeight}px`; // 根据内容调整高度
@@ -943,6 +967,13 @@ class ChatApp {
         if (this.audioStatus) {
             message = `你好GPT，我正在进行语音对话。请以友善的态度简要回答我的问题，并保持回答精炼。
                         以下是我的问题：${message}`;
+        }
+        if (this.onlineSearch) {
+            const searchResults = await this.searchSearxng(message);
+            if (searchResults && searchResults.length) {
+                const searchResultsJson = JSON.stringify(searchResults);
+                message = `使用我提供的网页搜索结果，回答我的问题。确保使用markdown链接语法引用结果。我的问题是:${message}, 搜索结果是:${searchResultsJson}`;
+            }
         }
         const sendData = {
             query: message,

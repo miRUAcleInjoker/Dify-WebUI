@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "electron .",
+    "start-in-wsl2": "electron . --no-sandbox --disable-dev-shm-usage",
     "build": "electron-builder -mwl",
     "build:win": "electron-builder --win",
     "build:mac": "electron-builder --mac",
