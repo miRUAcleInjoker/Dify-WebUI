@@ -361,13 +361,14 @@ textarea::-webkit-scrollbar-track {
 }
 
 .welcome-suggestion-items button {
-    background: var(--bg-color);
+    background: rgba(255, 255, 255, 0.9);
     border: 1px solid #e5e5e5;
     color: var(--text-color);
     padding: 1rem;
     border-radius: 0.75rem;
     cursor: pointer;
-    transition: all 0.2s;
+    backdrop-filter: blur(8px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: left;
     font-size: 0.95rem;
 }
@@ -534,7 +535,7 @@ textarea::-webkit-scrollbar-track {
 .welcome-content h1 {
     font-size: 2.5rem;
     margin-bottom: 2rem;
-    background: var(--primary-color);  /* 使用与主题相同的渐变色 */
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #ec4899 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -544,7 +545,7 @@ textarea::-webkit-scrollbar-track {
     font-weight: 700;
     letter-spacing: -0.02em;
     line-height: 1.2;
-    animation: titleFadeIn 0.8s ease-out;
+    animation: titleFadeIn 0.8s ease-out, gradientShift 6s ease infinite;
     text-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
 }
 
@@ -586,9 +587,15 @@ textarea::-webkit-scrollbar-track {
 /* 移动端适配 */
 @media (max-width: 768px) {
     .welcome-content h1 {
-        font-size: 2rem;
-        margin-bottom: 1.5rem;
+        font-size: clamp(1.5rem, 6vw, 2rem);
+        margin-bottom: 1.2rem;
     }
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
 }
 
 /* 悬停效果 */
