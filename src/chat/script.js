@@ -681,6 +681,17 @@ class ChatApp {
         this.closeSettingsButton.addEventListener('click', () => {
             this.toggleSettingsPage();
         });
+
+        // 添加导航按钮点击事件
+        this.prevButton.addEventListener('click', () => {
+            this.currentSettingsIndex = Math.max(0, this.currentSettingsIndex - 1);
+            this.scrollToPanel(this.settingsWrapper.children[this.currentSettingsIndex]);
+        });
+
+        this.nextButton.addEventListener('click', () => {
+            this.currentSettingsIndex = Math.min(this.settingsWrapper.children.length - 1, this.currentSettingsIndex + 1);
+            this.scrollToPanel(this.settingsWrapper.children[this.currentSettingsIndex]);
+        });
     }
 
     adjustTextareaHeight(textarea) {
@@ -753,7 +764,6 @@ class ChatApp {
     async handleFileSelect(event) {
         const file = event.target.files[0];
         if (!file) return;
-
         try {
             const formData = new FormData();
             formData.append('file', file);
@@ -766,7 +776,6 @@ class ChatApp {
                 },
                 body: formData
             });
-
             const result = await response.json();
             if (result.id) {
                 this.currentUploadedFile = {
@@ -876,7 +885,6 @@ class ChatApp {
         this.userInput.value = '';
         this.userInput.style.height = 'auto'; // 发送消息后重置高度
         this.welcomeUserInput.style.height = 'auto'; // 发送消息后重置高度
-        this.removeAttachment(); // 发送消息后移除附件预览
         if (this.audioStatus) {
             message = `你好GPT，我正在进行语音对话。请以友善的态度简要回答我的问题，并保持回答精炼。
                         以下是我的问题：${message}`;
@@ -991,6 +999,7 @@ class ChatApp {
         if (this.audioStatus) {
             this.textToAudio(this.lastMessageId);
         }
+        this.removeAttachment(); // 发送消息后移除附件预览
         await this.loadConversations();
         // 在消息发送时隐藏欢迎页面
         this.welcomePage.style.display = 'none';
@@ -1420,7 +1429,7 @@ class ChatApp {
         if (!this.settingsInitialized) {
             // 获取所有存储的子应用数量
             let maxAppIndex = 1;
-            for (let i = 2; i <= 100; i++) {
+            for (let i = 2; ; i++) { // 移除应用数量限制条件
                 const apiKey = localStorage.getItem(`apiKey_${i}`);
                 const baseUrl = localStorage.getItem(`baseUrl_${i}`);
                 if (!apiKey && !baseUrl) {
@@ -1491,6 +1500,11 @@ class ChatApp {
     }
 
     initSettingsHandlers() {
+        // 添加'添加应用'按钮事件监听
+        this.addAppButton.addEventListener('click', () => {
+            this.addNewAppSettings();
+        });
+
         // 设置按钮点击事件
         this.settingsButton.addEventListener('click', () => {
             this.toggleSettingsPage();
