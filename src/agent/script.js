@@ -8,13 +8,13 @@ class AgentChat {
         this.firstMessageId = null;
         this.lastMessageId = null;
         this.loadConversations();
-        this.apiKey = localStorage.getItem('openai_api_key') || 'sk-FbolJ5R3UQXHkMwjvEuxE98GbpaDcTerk0OOOKd3tosjD000';
-        this.baseUrl = localStorage.getItem('openai_base_url') || 'https://api.deepbricks.ai';
-        this.model = localStorage.getItem('openai_model') || 'gpt-4o-mini';
-        this.maxTokens = parseInt(localStorage.getItem('openai_max_tokens')) || 2000;
-        this.temperature = parseFloat(localStorage.getItem('openai_temperature')) || 0.7;
+        this.apiKey = localStorage.getItem('openai_api_key') || '';
+        this.baseUrl = localStorage.getItem('openai_base_url') || 'https://api.openai.com/v1';
+        this.model = localStorage.getItem('openai_model') || 'gpt-3.5-turbo';
+        this.maxTokens = parseInt(localStorage.getItem('openai_max_tokens') || '2000');
+        this.temperature = parseFloat(localStorage.getItem('openai_temperature') || '0.7');
         this.messages = [];
-        this.thinkingRounds = parseInt(localStorage.getItem('thinking_rounds')) || 3;
+        this.thinkingRounds = parseInt(localStorage.getItem('thinking_rounds') || '3');
         this.currentRound = 0;
         
         // 初始化输入框高度
@@ -25,6 +25,9 @@ class AgentChat {
         
         // 配置Markdown解析
         this.configureMarked();
+        
+        // 初始化代码高亮
+        this.initializeCodeHighlighting();
         
         console.log('AgentChat初始化完成');
     }
@@ -64,11 +67,19 @@ class AgentChat {
     }
 
     initializeEventListeners() {
-        // 发送消息事件
-        this.sendButton.addEventListener('click', this.sendMessage.bind(this));
-        this.welcomeSendButton.addEventListener('click', this.sendMessage.bind(this));
+        // 发送按钮点击事件
+        this.sendButton.addEventListener('click', () => this.sendMessage());
+        this.welcomeSendButton.addEventListener('click', () => {
+            const welcomeInput = this.welcomeUserInput.value.trim();
+            if (welcomeInput) {
+                this.welcomePage.style.display = 'none';
+                this.chatContainer.style.display = 'flex';
+                this.userInput.value = welcomeInput;
+                this.sendMessage();
+            }
+        });
 
-        // 输入框事件
+        // 输入框键盘事件
         this.userInput.addEventListener('keydown', (e) => this.handleInputKeydown(e));
         this.welcomeUserInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -84,25 +95,19 @@ class AgentChat {
                 this.autoResizeTextarea(e);
             }
         });
-        
-        // 添加输入框自动调整高度
-        this.userInput.addEventListener('input', this.autoResizeTextarea.bind(this));
-        this.welcomeUserInput.addEventListener('input', this.autoResizeTextarea.bind(this));
 
-        // 新对话按钮事件
+        // 新对话按钮点击事件
         this.newChatButton.addEventListener('click', () => {
             // 清除当前会话ID
             this.currentConversationId = null;
-            
-            // 创建新会话
+            // 创建新对话
             this.startNewChat();
-            
-            // 切换到聊天页面
+            // 切换到聊天界面
             this.welcomePage.style.display = 'none';
             this.chatContainer.style.display = 'flex';
         });
 
-        // 侧边栏切换事件
+        // 侧边栏切换按钮点击事件
         this.menuButton.addEventListener('click', () => this.toggleSidebar());
         this.showSidebarButton.addEventListener('click', () => this.toggleSidebar());
         this.toggleSidebarButton.addEventListener('click', () => this.toggleSidebar());
@@ -319,20 +324,16 @@ class AgentChat {
                 const blockId = 'code-block-' + Math.random().toString(36).substr(2, 9);
                 
                 return `
-                    <div class="code-block" id="${blockId}">
-                        <div class="code-header">
-                            <span class="language-badge">${language}</span>
-                            <div class="code-actions">
-                                <button class="toggle-button" title="折叠/展开" onclick="document.getElementById('${blockId}-content').style.display = document.getElementById('${blockId}-content').style.display === 'none' ? 'block' : 'none'; this.querySelector('i').className = this.querySelector('i').className.includes('down') ? 'fas fa-chevron-up' : 'fas fa-chevron-down';">
-                                    <i class="fas fa-chevron-down"></i>
-                                </button>
-                                <button class="copy-button" title="复制代码" onclick="navigator.clipboard.writeText(document.getElementById('${blockId}-code').textContent).then(() => { this.innerHTML = '<i class=\\'fas fa-check\\'></i> 已复制'; setTimeout(() => { this.innerHTML = '<i class=\\'fas fa-copy\\'></i> 复制'; }, 2000); })">
-                                    <i class="fas fa-copy"></i> 复制
-                                </button>
+                    <div style="margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background-color: #f5f5f5; border-bottom: 1px solid #ddd;">
+                            <span style="font-size: 0.9rem; color: #555;">${language}</span>
+                            <div>
+                                <button onclick="document.getElementById('${blockId}').style.display = document.getElementById('${blockId}').style.display === 'none' ? 'block' : 'none'; this.textContent = this.textContent === '折叠 ▼' ? '展开 ▶' : '折叠 ▼';" style="background: #e9e9e9; border: none; border-radius: 4px; padding: 4px 8px; margin-right: 8px; cursor: pointer; font-size: 12px;">折叠 ▼</button>
+                                <button onclick="navigator.clipboard.writeText(document.getElementById('${blockId}-code').textContent); this.textContent = '已复制 ✓'; setTimeout(() => { this.textContent = '复制 📋'; }, 2000);" style="background: #e9e9e9; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px;">复制 📋</button>
                             </div>
                         </div>
-                        <div class="code-content" id="${blockId}-content">
-                            <pre><code id="${blockId}-code" class="language-${language}">${escapedCode}</code></pre>
+                        <div id="${blockId}" style="display: block;">
+                            <pre style="margin: 0; padding: 12px; overflow-x: auto; background-color: #f8f8f8;"><code id="${blockId}-code" class="language-${language}">${escapedCode}</code></pre>
                         </div>
                     </div>
                 `;
@@ -1071,6 +1072,12 @@ class AgentChat {
     }
     
     showSettingsModal() {
+        // 检查是否已存在设置模态框，如果存在则先移除
+        const existingModal = document.querySelector('.settings-modal');
+        if (existingModal) {
+            document.body.removeChild(existingModal);
+        }
+        
         // 创建设置面板
         const settingsModal = document.createElement('div');
         settingsModal.className = 'settings-modal';
@@ -1133,9 +1140,28 @@ class AgentChat {
         const saveButton = settingsModal.querySelector('.save-button');
         const cancelButton = settingsModal.querySelector('.cancel-button');
         const themeToggle = settingsModal.querySelector('#themeToggle');
+        const settingsContent = settingsModal.querySelector('.settings-content');
+        
+        // 点击模态框外部区域关闭设置面板
+        settingsModal.addEventListener('click', (e) => {
+            if (!settingsContent.contains(e.target)) {
+                document.body.removeChild(settingsModal);
+                document.removeEventListener('keydown', handleKeyDown);
+            }
+        });
+        
+        // 按ESC键关闭设置面板
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape') {
+                document.body.removeChild(settingsModal);
+                document.removeEventListener('keydown', handleKeyDown);
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
         
         closeButton.addEventListener('click', () => {
             document.body.removeChild(settingsModal);
+            document.removeEventListener('keydown', handleKeyDown);
         });
         
         saveButton.addEventListener('click', () => {
@@ -1161,10 +1187,12 @@ class AgentChat {
             this.applyTheme();
             
             document.body.removeChild(settingsModal);
+            document.removeEventListener('keydown', handleKeyDown);
         });
         
         cancelButton.addEventListener('click', () => {
             document.body.removeChild(settingsModal);
+            document.removeEventListener('keydown', handleKeyDown);
         });
         
         // 主题切换事件
@@ -1267,6 +1295,15 @@ class AgentChat {
         }
     }
 
+    // 查找祖先元素
+    findAncestor(element, selector) {
+        while (element && element.parentElement) {
+            element = element.parentElement;
+            if (element.matches(selector)) return element;
+        }
+        return null;
+    }
+    
     // 创建可折叠代码块
     createCollapsibleCode(code, language) {
         try {
@@ -1278,23 +1315,62 @@ class AgentChat {
                 code = String(code);
             }
             
-            // 简单返回预格式化的代码
-            return `<pre><code>${code}</code></pre>`;
+            // 生成唯一ID
+            const blockId = 'code-block-' + Math.random().toString(36).substr(2, 9);
+            
+            return `
+                <div style="margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background-color: #f5f5f5; border-bottom: 1px solid #ddd;">
+                        <span style="font-size: 0.9rem; color: #555;">${language}</span>
+                        <div>
+                            <button onclick="document.getElementById('${blockId}').style.display = document.getElementById('${blockId}').style.display === 'none' ? 'block' : 'none'; this.textContent = this.textContent === '折叠 ▼' ? '展开 ▶' : '折叠 ▼';" style="background: #e9e9e9; border: none; border-radius: 4px; padding: 4px 8px; margin-right: 8px; cursor: pointer; font-size: 12px;">折叠 ▼</button>
+                            <button onclick="navigator.clipboard.writeText(document.getElementById('${blockId}-code').textContent); this.textContent = '已复制 ✓'; setTimeout(() => { this.textContent = '复制 📋'; }, 2000);" style="background: #e9e9e9; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px;">复制 📋</button>
+                        </div>
+                    </div>
+                    <div id="${blockId}" style="display: block;">
+                        <pre style="margin: 0; padding: 12px; overflow-x: auto; background-color: #f8f8f8;"><code id="${blockId}-code" class="language-${language}">${code}</code></pre>
+                    </div>
+                </div>
+            `;
         } catch (error) {
             console.error('创建可折叠代码块失败:', error);
             return `<pre><code>${code}</code></pre>`;
         }
     }
-
-    // 查找祖先元素
-    findAncestor(element, selector) {
-        while (element && element.parentElement) {
-            element = element.parentElement;
-            if (element.matches(selector)) return element;
+    
+    // 初始化代码高亮
+    initializeCodeHighlighting() {
+        if (window.hljs) {
+            // 监听DOM变化，自动应用代码高亮
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                        // 查找新添加的代码块
+                        const codeBlocks = document.querySelectorAll('pre code:not(.hljs)');
+                        if (codeBlocks.length > 0) {
+                            console.log(`发现${codeBlocks.length}个未高亮的代码块，应用高亮...`);
+                            codeBlocks.forEach(block => {
+                                hljs.highlightElement(block);
+                            });
+                        }
+                    }
+                });
+            });
+            
+            // 开始观察聊天消息容器
+            observer.observe(this.chatMessages, {
+                childList: true,
+                subtree: true
+            });
+            
+            console.log('代码高亮监听器已初始化');
+        } else {
+            console.warn('highlight.js未加载，无法初始化代码高亮');
         }
-        return null;
     }
 }
 
-// 初始化应用
-const chatApp = new AgentChat();
+// 初始化全局实例
+window.onload = () => {
+    window.agentChatInstance = new AgentChat();
+};
