@@ -1,0 +1,1063 @@
+.message {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    padding: 0 2rem;
+    margin-bottom: 1rem;
+    max-width: 85%;
+    width: fit-content;
+    position: relative;
+    min-height: 60px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform, opacity;
+    contain: content;
+}
+
+.message.show {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.message.bot {
+    align-self: flex-start;
+    margin-right: auto;
+}
+
+.message.user {
+    align-self: flex-end;
+    margin-left: auto;
+    flex-direction: row-reverse;
+}
+
+.avatar {
+    width: var(--avatar-size);
+    height: var(--avatar-size);
+    border-radius: 50%;
+    margin: 0 var(--avatar-margin);
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    transition: transform 0.3s ease;
+}
+
+.avatar:hover {
+    transform: scale(1.05);
+}
+
+.message-content-wrapper {
+    flex: 0 1 auto;
+    min-width: 200px;
+    max-width: calc(100% - var(--avatar-size) - (var(--avatar-margin) * 2));
+}
+
+.message-content {
+    max-width: 100%;
+    padding: 1.2rem 1.4rem;
+    line-height: 1.8;
+    font-size: 15px;
+    letter-spacing: 0.2px;
+    color: #2c3e50;
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.85),
+        rgba(255, 255, 255, 0.78)
+    );
+    backdrop-filter: blur(15px) saturate(180%);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+    backface-visibility: hidden;
+    transform: translateZ(0);
+}
+
+.message-content.show-content {
+    transform: none;
+    opacity: 1;
+}
+
+.message-content p {
+    margin: 0.8rem 0;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow: hidden;
+    width: 100%;
+    display: block;
+    opacity: 1;
+    transform: none;
+    animation: none;
+    transition: none;
+    font-size: 16px;
+    color: #2c3e50;
+}
+
+.message.user .message-content {
+    border-radius: var(--message-radius) var(--message-radius) 0 var(--message-radius);
+    background: linear-gradient(135deg, var(--user-message-bg), #ffffff);
+    color: rgba(0, 0, 0, 0.85);
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.6;
+    padding: 12px 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    display: block;
+}
+
+.message.bot .message-content {
+    border-radius: var(--message-radius) var(--message-radius) var(--message-radius) 0;
+    background: linear-gradient(135deg, #ffffff, var(--bot-message-bg));
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    opacity: 1;
+    transform: none;
+}
+
+.message.bot .message-content p {
+    opacity: 1;
+    transform: none;
+    animation: none;
+    transition: none;
+}
+
+.message-content pre {
+    position: relative;
+    padding: 1.5rem 1.4rem 1.4rem;
+    font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+    border-radius: 8px;
+    margin: 1.2rem 0;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+.message-content pre:hover {
+    transform: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.code-toolbar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    opacity: 1;
+    height: 2.5rem;
+}
+
+.message-content pre:hover .code-toolbar {
+    opacity: 1;
+}
+
+.code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.language-badge {
+    font-family: 'JetBrains Mono', Consolas, monospace;
+    font-size: 0.75rem;
+    color: var(--primary-color);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+    margin-right: auto;
+    display: flex;
+    align-items: center;
+}
+
+.code-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 0px;
+}
+
+.code-actions button,
+.toggle-button,
+.copy-button {
+    height: 24px;
+    padding: 0 0.75rem;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.message.team-member {
+    align-self: flex-start;
+    margin-right: auto;
+    margin-bottom: 1.5rem;
+    max-width: 90%;
+}
+
+.member-title {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 0.3rem;
+    color: var(--primary-color);
+}
+
+.member-description {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 0.8rem;
+    font-style: italic;
+}
+
+.team-discussion-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 1rem auto;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.team-discussion-toggle:hover {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-icon {
+    margin-right: 0.5rem;
+    font-size: 0.8em;
+}
+
+/* 为每个角色设置不同的颜色主题 */
+.message.team-member.product_manager .member-title {
+    color: #2563eb;
+}
+
+.message.team-member.designer .member-title {
+    color: #7c3aed;
+}
+
+.message.team-member.tech_expert .member-title {
+    color: #059669;
+}
+
+.message.team-member.qa_engineer .member-title {
+    color: #d97706;
+}
+
+.message.team-member.validation_expert .member-title {
+    color: #dc2626;
+}
+
+/* 添加角色特定的背景渐变 */
+.message.team-member.product_manager .message-content {
+    background: linear-gradient(to right, rgba(219, 234, 254, 0.8), rgba(219, 234, 254, 0.6));
+}
+
+.message.team-member.designer .message-content {
+    background: linear-gradient(to right, rgba(237, 233, 254, 0.8), rgba(237, 233, 254, 0.6));
+}
+
+.message.team-member.tech_expert .message-content {
+    background: linear-gradient(to right, rgba(209, 250, 229, 0.8), rgba(209, 250, 229, 0.6));
+}
+
+.message.team-member.qa_engineer .message-content {
+    background: linear-gradient(to right, rgba(254, 243, 199, 0.8), rgba(254, 243, 199, 0.6));
+}
+
+.message.team-member.validation_expert .message-content {
+    background: linear-gradient(to right, rgba(254, 226, 226, 0.8), rgba(254, 226, 226, 0.6));
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .message.team-member {
+        max-width: 95%;
+    }
+    
+    .member-title {
+        font-size: 1em;
+    }
+    
+    .member-description {
+        font-size: 0.8em;
+    }
+}
+
+.team-discussion-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin: 1rem 2rem;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.team-discussion-header {
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+    color: white;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.team-avatars {
+    display: flex;
+    align-items: center;
+}
+
+.team-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid white;
+    margin-right: -10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.team-avatar:hover {
+    transform: scale(1.1) translateY(-2px);
+    z-index: 1;
+}
+
+.team-discussion-content {
+    padding: 1rem;
+    max-height: 600px;
+    overflow-y: auto;
+    transition: max-height 0.3s ease;
+}
+
+.team-discussion-content.collapsed {
+    max-height: 100px;
+    overflow: hidden;
+}
+
+.role-message {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeInUp 0.3s forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.role-message:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.role-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.role-title {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.role-content {
+    font-size: 0.95em;
+    line-height: 1.6;
+    color: #333;
+}
+
+.team-discussion-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    cursor: pointer;
+    font-size: 0.9em;
+    color: #666;
+    transition: all 0.3s ease;
+}
+
+.team-discussion-toggle:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.toggle-icon {
+    margin-right: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.error-message {
+    color: #dc2626;
+    padding: 1rem;
+    background: rgba(220, 38, 38, 0.1);
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .team-discussion-container {
+        margin: 1rem;
+    }
+    
+    .team-avatar {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .role-message {
+        padding: 0.8rem;
+    }
+    
+    .role-title {
+        font-size: 1em;
+    }
+    
+    .role-content {
+        font-size: 0.9em;
+    }
+}
+
+.loading-message {
+    padding: 1rem;
+    color: #666;
+    text-align: center;
+    font-style: italic;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.6;
+    }
+}
+
+/* 代码块样式 */
+.code-block {
+    margin: 1rem 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background-color: #f8f9fa;
+    border: 1px solid #e5e5e5;
+    font-family: 'Fira Code', monospace;
+}
+
+.code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: #f1f3f5;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.language-badge {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.code-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.toggle-button,
+.copy-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.toggle-button:hover,
+.copy-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #333;
+}
+
+.code-content {
+    padding: 1rem;
+    overflow-x: auto;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.code-content pre {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    overflow-x: auto;
+}
+
+.code-content code {
+    display: block;
+    padding: 0;
+    background: transparent;
+    border: none;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    tab-size: 4;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+/* 深色主题下的代码块样式 */
+.theme-dark .code-block {
+    background-color: #2d2d2d;
+    border-color: #444;
+}
+
+.theme-dark .code-header {
+    background-color: #333;
+    border-color: #444;
+}
+
+.theme-dark .language-badge {
+    color: #aaa;
+}
+
+.theme-dark .toggle-button,
+.theme-dark .copy-button {
+    color: #aaa;
+}
+
+.theme-dark .toggle-button:hover,
+.theme-dark .copy-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #eee;
+}
+
+/* 代码高亮样式 */
+.hljs {
+    display: block;
+    overflow-x: auto;
+    padding: 0.5em;
+    background: transparent;
+    color: #333;
+}
+
+.hljs-comment,
+.hljs-quote {
+    color: #998;
+    font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+    color: #333;
+    font-weight: bold;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag .hljs-attr {
+    color: #008080;
+}
+
+.hljs-string,
+.hljs-doctag {
+    color: #d14;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-selector-id {
+    color: #900;
+    font-weight: bold;
+}
+
+.hljs-subst {
+    font-weight: normal;
+}
+
+.hljs-type,
+.hljs-class .hljs-title {
+    color: #458;
+    font-weight: bold;
+}
+
+.hljs-tag,
+.hljs-name,
+.hljs-attribute {
+    color: #000080;
+    font-weight: normal;
+}
+
+.hljs-regexp,
+.hljs-link {
+    color: #009926;
+}
+
+.hljs-symbol,
+.hljs-bullet {
+    color: #990073;
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+    color: #0086b3;
+}
+
+.hljs-meta {
+    color: #999;
+    font-weight: bold;
+}
+
+.hljs-deletion {
+    background: #fdd;
+}
+
+.hljs-addition {
+    background: #dfd;
+}
+
+.hljs-emphasis {
+    font-style: italic;
+}
+
+.hljs-strong {
+    font-weight: bold;
+}
+
+/* 深色主题下的代码高亮样式 */
+.theme-dark .hljs {
+    color: #f8f8f2;
+}
+
+.theme-dark .hljs-comment,
+.theme-dark .hljs-quote {
+    color: #998;
+}
+
+.theme-dark .hljs-keyword,
+.theme-dark .hljs-selector-tag,
+.theme-dark .hljs-subst {
+    color: #f92672;
+}
+
+.theme-dark .hljs-number,
+.theme-dark .hljs-literal,
+.theme-dark .hljs-variable,
+.theme-dark .hljs-template-variable,
+.theme-dark .hljs-tag .hljs-attr {
+    color: #ae81ff;
+}
+
+.theme-dark .hljs-string,
+.theme-dark .hljs-doctag {
+    color: #e6db74;
+}
+
+.theme-dark .hljs-title,
+.theme-dark .hljs-section,
+.theme-dark .hljs-selector-id {
+    color: #a6e22e;
+}
+
+.theme-dark .hljs-type,
+.theme-dark .hljs-class .hljs-title {
+    color: #66d9ef;
+}
+
+.theme-dark .hljs-tag,
+.theme-dark .hljs-name,
+.theme-dark .hljs-attribute {
+    color: #f92672;
+}
+
+.theme-dark .hljs-regexp,
+.theme-dark .hljs-link {
+    color: #a6e22e;
+}
+
+.theme-dark .hljs-symbol,
+.theme-dark .hljs-bullet {
+    color: #66d9ef;
+}
+
+.theme-dark .hljs-built_in,
+.theme-dark .hljs-builtin-name {
+    color: #66d9ef;
+}
+
+.theme-dark .hljs-meta {
+    color: #75715e;
+}
+
+/* 思考过程和正式回答样式 */
+details {
+    margin-bottom: 1rem;
+}
+
+details summary {
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0.5rem;
+}
+
+details summary:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+.theme-dark details summary:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* 消息操作按钮样式 */
+.message-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.message:hover .message-actions {
+    opacity: 1;
+}
+
+.copy-message-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.copy-message-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #333;
+}
+
+.theme-dark .copy-message-button {
+    color: #aaa;
+}
+
+.theme-dark .copy-message-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #eee;
+}
+
+/* Markdown样式 */
+.message-content h1,
+.message-content h2,
+.message-content h3,
+.message-content h4,
+.message-content h5,
+.message-content h6 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--text-color);
+}
+
+.message-content h1 {
+    font-size: 1.75rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.3rem;
+}
+
+.message-content h2 {
+    font-size: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.3rem;
+}
+
+.message-content h3 {
+    font-size: 1.25rem;
+}
+
+.message-content h4 {
+    font-size: 1rem;
+}
+
+.message-content h5 {
+    font-size: 0.875rem;
+}
+
+.message-content h6 {
+    font-size: 0.85rem;
+    color: var(--secondary-color);
+}
+
+.message-content p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+}
+
+.message-content a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.message-content a:hover {
+    text-decoration: underline;
+}
+
+.message-content ul,
+.message-content ol {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+}
+
+.message-content li {
+    margin-bottom: 0.5rem;
+}
+
+.message-content blockquote {
+    margin: 0 0 1rem;
+    padding: 0.5rem 1rem;
+    border-left: 4px solid var(--primary-color);
+    background-color: rgba(0, 0, 0, 0.03);
+    color: var(--secondary-color);
+}
+
+.message-content table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.message-content table th,
+.message-content table td {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.message-content table th {
+    background-color: rgba(0, 0, 0, 0.03);
+    font-weight: 600;
+}
+
+.message-content table tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.01);
+}
+
+.message-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 1rem 0;
+}
+
+.message-content code {
+    font-family: 'Fira Code', monospace;
+    padding: 0.2rem 0.4rem;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 3px;
+    font-size: 0.85rem;
+}
+
+.message-content pre {
+    white-space: pre;
+    overflow-x: auto;
+    max-width: 100%;
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e5e5;
+}
+
+.message-content pre code {
+    white-space: pre;
+    overflow-x: visible;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* 深色主题下的Markdown样式 */
+.theme-dark .message-content blockquote {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-dark .message-content table th {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-dark .message-content table tr:nth-child(even) {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.theme-dark .message-content code {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-dark .message-content pre {
+    background-color: #2d2d2d;
+    border-color: #444;
+}
+
+/* 会话列表样式 */
+.conversation-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+    background: transparent;
+    border: 1px solid transparent;
+    position: relative;
+}
+
+.conversation-item:hover {
+    background: var(--sidebar-hover);
+    border-color: var(--sidebar-border);
+}
+
+.conversation-item.active {
+    background: var(--sidebar-active);
+    border-color: var(--sidebar-border);
+    font-weight: 500;
+}
+
+.conversation-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.9rem;
+}
+
+.conversation-time {
+    font-size: 0.75rem;
+    color: var(--text-color-secondary);
+    margin-left: 0.5rem;
+    white-space: nowrap;
+}
+
+.delete-conversation-button {
+    opacity: 0;
+    background: none;
+    border: none;
+    color: var(--text-color-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    margin-left: 0.5rem;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.conversation-item:hover .delete-conversation-button {
+    opacity: 1;
+}
+
+.delete-conversation-button:hover {
+    color: var(--danger-color);
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.empty-conversations {
+    padding: 1rem;
+    text-align: center;
+    color: var(--text-color-secondary);
+    font-style: italic;
+}
+
+/* 思考过程样式 */
+.thinking-round {
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.round-header {
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-color);
+    border-bottom: 1px solid var(--border-color);
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+}
+
+.round-content {
+    padding: 1rem;
+}
+
+.toggle-thinking-button {
+    display: inline-block;
+    margin: 0.5rem 0;
+    padding: 0.5rem 1rem;
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    transition: all 0.2s ease;
+}
+
+.toggle-thinking-button:hover {
+    background-color: var(--sidebar-hover);
+}
+
+.theme-dark .toggle-thinking-button {
+    background-color: var(--sidebar-bg);
+}
+
+.theme-dark .toggle-thinking-button:hover {
+    background-color: var(--sidebar-hover);
+}
