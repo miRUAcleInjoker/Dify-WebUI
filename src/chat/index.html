@@ -71,8 +71,11 @@
                     新对话
                 </button>
                 <button id="toggleSidebarButton" class="toggle-sidebar-button">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
-                        <path fill="currentColor" d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
                     </svg>
                 </button>
             </div>
@@ -141,6 +144,7 @@
                                 </svg>
                                 <span class="app-name">当前应用名称</span>
                                 <span class="switch-app">切换</span>
+                                <span class="think-mode" id="think-mode" onclick="window.location.href='../agent/index.html'">思考模式</span>
                             </div>
                             <div class="attachment-preview" id="welcomeAttachmentPreview"></div>
                             <div class="input-group">
@@ -183,6 +187,7 @@
                         </svg>
                         <span class="app-name">当前应用名称</span>
                         <span class="switch-app">切换</span>
+                        <span class="think-mode" id="chat-think-mode" onclick="window.location.href='../agent/index.html'">思考模式</span>
                     </div>
                     <div class="attachment-preview" id="attachmentPreview"></div>
                     <div class="input-group">

@@ -1,0 +1,151 @@
+/* 代码块样式 */
+.code-block {
+    margin: 15px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: #f8f8f8;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.code-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.language-badge {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    background-color: #e0e0e0;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: lowercase;
+}
+
+.code-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.toggle-button,
+.copy-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #555;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    background-color: rgba(0, 0, 0, 0.05);
+    user-select: none;
+}
+
+.toggle-button:hover,
+.copy-button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #333;
+}
+
+.toggle-button span,
+.copy-button span {
+    display: inline-block;
+    pointer-events: none;
+}
+
+.code-content {
+    max-height: 500px;
+    overflow: auto;
+}
+
+.code-content pre {
+    margin: 0;
+    padding: 0;
+}
+
+.code-content code {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    padding: 12px;
+    display: block;
+    overflow-x: auto;
+}
+
+/* 深色模式样式 */
+.theme-dark .code-block {
+    background-color: #1e1e1e;
+    border-color: #333;
+}
+
+.theme-dark .code-header {
+    background-color: #252525;
+    border-color: #333;
+}
+
+.theme-dark .language-badge {
+    background-color: #333;
+    color: #ccc;
+}
+
+.theme-dark .toggle-button,
+.theme-dark .copy-button {
+    color: #ccc;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.theme-dark .toggle-button:hover,
+.theme-dark .copy-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* 代码高亮样式优化 */
+.hljs {
+    background: transparent !important;
+}
+
+/* 行号样式 */
+.line-numbers {
+    counter-reset: line;
+    padding-left: 3.5em;
+    position: relative;
+}
+
+.line-numbers .line {
+    position: relative;
+    counter-increment: line;
+}
+
+.line-numbers .line::before {
+    content: counter(line);
+    position: absolute;
+    left: -3em;
+    width: 2.5em;
+    text-align: right;
+    color: #999;
+    font-size: 0.85em;
+    user-select: none;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .code-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .code-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+} 

@@ -66,6 +66,8 @@ class ChatApp {
         this.settingsWrapper = document.getElementById('settingsWrapper');
         this.prevButton = document.getElementById('prevButton');
         this.nextButton = document.getElementById('nextButton');
+        this.thinkMode = document.getElementById('think-mode');
+        this.chatThinkMode = document.getElementById('chat-think-mode');
         this.currentSettingsIndex = 0;
         this.appNameForApiKey = new Map();
         this.settingsInitialized = false;
@@ -90,6 +92,9 @@ class ChatApp {
 
         // 初始化时更新应用名称
         this.updateAppName();
+
+        console.log("思考模式按钮元素:", this.thinkMode);
+        console.log("聊天页思考模式按钮元素:", this.chatThinkMode);
     }
 
     // 修改导航按钮状态更新方法
@@ -692,6 +697,34 @@ class ChatApp {
             this.currentSettingsIndex = Math.min(this.settingsWrapper.children.length - 1, this.currentSettingsIndex + 1);
             this.scrollToPanel(this.settingsWrapper.children[this.currentSettingsIndex]);
         });
+
+        // 确保元素存在
+        if(this.thinkMode) {
+            console.log("找到欢迎页思考模式按钮");
+            this.thinkMode.addEventListener('click', (e) => {
+                console.log("点击欢迎页思考模式按钮");
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("准备跳转到:", '../agent/index.html');
+                window.location.href = '../agent/index.html';
+            });
+        } else {
+            console.error("找不到欢迎页思考模式按钮元素");
+        }
+        
+        // 聊天界面思考模式按钮
+        if(this.chatThinkMode) {
+            console.log("找到聊天页思考模式按钮");
+            this.chatThinkMode.addEventListener('click', (e) => {
+                console.log("点击聊天页思考模式按钮");
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("准备跳转到:", '../agent/index.html');
+                window.location.href = '../agent/index.html';
+            });
+        } else {
+            console.error("找不到聊天页思考模式按钮元素");
+        }
     }
 
     adjustTextareaHeight(textarea) {

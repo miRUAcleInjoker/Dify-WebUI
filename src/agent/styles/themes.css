@@ -1,0 +1,97 @@
+/* 主题变量 */
+:root {
+    /* 亮色主题（默认） */
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --text-color-secondary: #666666;
+    --border-color: #e0e0e0;
+    --primary-color: #4a6cf7;
+    --primary-color-dark: #3a5ce5;
+    --hover-color: #f5f5f5;
+    --input-bg: #f9f9f9;
+    --message-user-bg: #f0f7ff;
+    --message-bot-bg: #f9f9f9;
+}
+
+/* 暗色主题 */
+.dark-theme {
+    --bg-color: #1e1e2e;
+    --text-color: #e0e0e0;
+    --text-color-secondary: #a0a0a0;
+    --border-color: #3a3a4a;
+    --primary-color: #7289da;
+    --primary-color-dark: #5e77d4;
+    --hover-color: #2a2a3a;
+    --input-bg: #2a2a3a;
+    --message-user-bg: #2d3748;
+    --message-bot-bg: #2a2a3a;
+}
+
+/* 亮色主题 */
+.theme-light {
+    --primary-color: #4a90e2;
+    --secondary-color: #6c757d;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-color: #f8f9fa;
+    --dark-color: #343a40;
+    --bg-color: #ffffff;
+    --text-color: #333333;
+    --border-color: #e5e5e5;
+    --user-message-bg: #e3f2fd;
+    --bot-message-bg: #f5f5f5;
+    --sidebar-bg: #f8f9fa;
+    --sidebar-hover: rgba(74, 144, 226, 0.1);
+    --sidebar-active: rgba(74, 144, 226, 0.15);
+    --sidebar-border: #e5e5e5;
+    --input-bg: rgba(255, 255, 255, 0.8);
+    --input-border: #e5e5e5;
+    --input-focus-border: #4a90e2;
+    --input-bg-focus: rgba(255, 255, 255, 0.95);
+}
+
+/* 深色主题 */
+.theme-dark {
+    --primary-color: #4a90e2;
+    --secondary-color: #adb5bd;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --info-color: #17a2b8;
+    --light-color: #343a40;
+    --dark-color: #f8f9fa;
+    --bg-color: #1e1e1e;
+    --text-color: #f0f0f0;
+    --border-color: #444444;
+    --user-message-bg: #2c3e50;
+    --bot-message-bg: #2d2d2d;
+    --sidebar-bg: #252525;
+    --sidebar-hover: rgba(74, 144, 226, 0.2);
+    --sidebar-active: rgba(74, 144, 226, 0.3);
+    --sidebar-border: #444444;
+    --input-bg: rgba(45, 45, 45, 0.8);
+    --input-border: #444444;
+    --input-focus-border: #4a90e2;
+    --input-bg-focus: rgba(45, 45, 45, 0.95);
+}
+
+/* 应用主题变量 */
+.sidebar {
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-border);
+}
+
+.conversation-item:hover {
+    background: var(--sidebar-hover);
+}
+
+.conversation-item.active {
+    background: var(--sidebar-active);
+}
+
+.user-info {
+    background: var(--sidebar-bg);
+    border-top: 1px solid var(--sidebar-border);
+}
