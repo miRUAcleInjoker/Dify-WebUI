@@ -1164,6 +1164,9 @@ class AgentChat {
         return new Promise((resolve) => {
             this.tipPage.style.display = "flex";
             this.modalMessage.innerText = message;
+            
+            // 激活遮罩层
+            this.overlay.classList.add('active');
 
             // 根据按钮文本决定是否显示按钮
             const showButtons = confirmBtn !== "" || cancelBtn !== "";
@@ -1179,15 +1182,21 @@ class AgentChat {
                 this.cancelBtn.style.display = cancelBtn ? 'block' : 'none';
             }
 
-            const confirmHandler = () => {
+            // 清理函数，用于关闭提示并移除遮罩层
+            const cleanup = () => {
                 this.tipPage.style.display = "none";
+                this.overlay.classList.remove('active');
+            };
+
+            const confirmHandler = () => {
+                cleanup();
                 this.confirmBtn.removeEventListener("click", confirmHandler);
                 this.cancelBtn.removeEventListener("click", cancelHandler);
                 resolve(true);
             };
 
             const cancelHandler = () => {
-                this.tipPage.style.display = "none";
+                cleanup();
                 this.confirmBtn.removeEventListener("click", confirmHandler);
                 this.cancelBtn.removeEventListener("click", cancelHandler);
                 resolve(false);
@@ -1199,18 +1208,10 @@ class AgentChat {
             // 如果没有按钮文本，3秒后自动关闭
             if (!showButtons) {
                 setTimeout(() => {
-                    this.tipPage.style.display = "none";
+                    cleanup();
                     resolve(true);
                 }, 3000);
             }
-
-            // 点击遮罩层关闭弹窗
-            this.tipPage.addEventListener('click', (e) => {
-                if (e.target === this.tipPage) {
-                    this.tipPage.style.display = "none";
-                    resolve(false);
-                }
-            });
         });
     }
 
@@ -1263,7 +1264,8 @@ class AgentChat {
         try {
             this.apiKey = app.apiKey;
             this.baseUrl = app.baseUrl;
-            this.showInfoPage("应用切换成功")
+            // 不再显示成功提示，避免遮罩层问题
+            // this.showInfoPage("应用切换成功")
             this.model_type = true;
         } catch (error) {
             console.error('Error selecting app:', error);
@@ -1278,25 +1280,23 @@ class AgentChat {
         if (app.isMain) {
             div.classList.add('main-app');
         }
+        
         div.innerHTML = `
             <div class="app-item-content">
                 <div class="app-icon">
-                    ${app.isMain 
-                        ? '<i class="fas fa-star"></i>' 
-                        : '<i class="fas fa-cube"></i>'}
+                    ${app.isMain ? '<i class="fas fa-star"></i>' : '<i class="fas fa-square"></i>'}
                 </div>
                 <div class="app-info">
-                    <h4 class="app-name">${app.name || '未命名应用'}</h4>
+                    <div class="app-name">${app.name || '未命名应用'}</div>
                     <div class="app-url">
-                        <i class="fas fa-link"></i>
-                        ${app.baseUrl}
+                        <i class="fas fa-link"></i> ${app.baseUrl || '默认URL'}
                     </div>
-                    ${app.isMain 
-                        ? '<div class="app-badge">主应用</div>' 
-                        : '<div class="app-badge secondary">子应用</div>'}
+                </div>
+                <div class="app-type">
+                    <span class="app-badge ${app.isMain ? 'main' : 'sub'}">${app.isMain ? '主应用' : '子应用'}</span>
                 </div>
                 <div class="app-actions">
-                    <button class="app-select-btn" title="选择应用">
+                    <button class="select-app-btn">
                         <i class="fas fa-check"></i>
                     </button>
                 </div>
@@ -1312,11 +1312,14 @@ class AgentChat {
                 });
                 div.classList.add('selected');
                 
+                // 只切换应用，不显示提示
                 await this.selectApp(app);
-                // 显示成功提示
-                await this.showInfoPage("应用切换成功");
+                
+                // 不再显示成功提示，避免遮罩层问题
+                // await this.showInfoPage("应用切换成功");
             } catch (error) {
                 console.error('Error selecting app:', error);
+                // 错误时仍然显示提示
                 await this.showInfoPage("切换应用失败，请重试");
             }
         });
@@ -1456,34 +1459,46 @@ class AgentChat {
         
         document.body.appendChild(settingsModal);
         
+        // 激活遮罩层
+        this.overlay.classList.add('active');
+        
         // 添加事件监听
         const closeButton = settingsModal.querySelector('.close-button');
         const saveButton = settingsModal.querySelector('.save-button');
         const cancelButton = settingsModal.querySelector('.cancel-button');
         const themeToggle = settingsModal.querySelector('#themeToggle');
         const settingsContent = settingsModal.querySelector('.settings-content');
+
+        // 清理函数
+        const cleanup = () => {
+            if (settingsModal && settingsModal.parentNode) {
+                document.body.removeChild(settingsModal);
+            }
+            document.removeEventListener('keydown', handleKeyDown);
+            
+            // 确保遮罩层被移除
+            this.overlay.classList.remove('active');
+            
+            // 重新启用页面交互
+            document.body.style.overflow = 'auto';
+        };
         
         // 点击模态框外部区域关闭设置面板
         settingsModal.addEventListener('click', (e) => {
             if (!settingsContent.contains(e.target)) {
-                document.body.removeChild(settingsModal);
-                document.removeEventListener('keydown', handleKeyDown);
+                cleanup();
             }
         });
         
         // 按ESC键关闭设置面板
         const handleKeyDown = (e) => {
             if (e.key === 'Escape') {
-                document.body.removeChild(settingsModal);
-                document.removeEventListener('keydown', handleKeyDown);
+                cleanup();
             }
         };
         document.addEventListener('keydown', handleKeyDown);
         
-        closeButton.addEventListener('click', () => {
-            document.body.removeChild(settingsModal);
-            document.removeEventListener('keydown', handleKeyDown);
-        });
+        closeButton.addEventListener('click', cleanup);
         
         saveButton.addEventListener('click', () => {
             // 保存API设置
@@ -1509,14 +1524,10 @@ class AgentChat {
             localStorage.setItem('theme', theme);
             this.applyTheme();
             
-            document.body.removeChild(settingsModal);
-            document.removeEventListener('keydown', handleKeyDown);
+            cleanup();
         });
         
-        cancelButton.addEventListener('click', () => {
-            document.body.removeChild(settingsModal);
-            document.removeEventListener('keydown', handleKeyDown);
-        });
+        cancelButton.addEventListener('click', cleanup);
         
         // 主题切换事件
         themeToggle.addEventListener('change', () => {
