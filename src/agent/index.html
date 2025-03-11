@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agent对话</title>
+    <title>深度思考助手 - 多轮思考模式</title>
     <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="icon" href="../../favicon.png" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/googlecode.min.css"/>
@@ -18,7 +19,7 @@
 <body class="theme-light">
     <button id="chatModeButton" class="chat-mode-button" onclick="window.location.href='../chat/index.html'">
         <i class="fas fa-comment"></i>
-        返回普通聊天
+        返回普通对话
     </button>
 
     <button id="menuButton" class="menu-button">
@@ -68,7 +69,7 @@
                 </button>
             </div>
             <div class="conversation-list" id="conversationList">
-                <div class="conversation-header">历史对话</div>
+                <div class="conversation-header">思考历程</div>
                 <div class="conversation-items" id="conversationItems">
                     <!-- 对话列表将在这里动态添加 -->
                 </div>
@@ -76,7 +77,7 @@
             <div class="user-info">
                 <img id="userAvatar" class="user-avatar" src="https://api.dicebear.com/7.x/adventurer/svg?seed=agent"
                     alt="用户头像">
-                <span id="userName" class="user-name">Agent</span>
+                <span id="userName" class="user-name">思考助手</span>
                 <button id="settingsButton" class="settings-button">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16">
                         <path fill="currentColor"
@@ -88,45 +89,45 @@
         <div class="main-content">
             <div id="welcomePage" class="welcome-page" style="display: flex;">
                 <div class="welcome-content">
-                    <h1>Agent助手，为您服务</h1>
+                    <h1>深度思考助手</h1>
                     <div class="welcome-suggestions">
                         <div class="suggestions-group">
-                            <h2>Agent功能</h2>
+                            <h2>思考模式</h2>
                             <div class="welcome-suggestion-items">
-                                <button>"创建新的Agent"</button>
-                                <button>"管理现有Agent"</button>
-                                <button>"Agent配置说明"</button>
+                                <button>"请帮我分析这个问题"</button>
+                                <button>"让我们深入探讨"</button>
+                                <button>"从多个角度思考"</button>
                             </div>
                         </div>
                         <div class="suggestions-group">
-                            <h2>Agent类型</h2>
+                            <h2>思维方式</h2>
                             <div class="welcome-suggestion-items">
-                                <button>通用Agent</button>
-                                <button>专业Agent</button>
-                                <button>自定义Agent</button>
+                                <button>系统思维</button>
+                                <button>批判性思维</button>
+                                <button>创造性思维</button>
                             </div>
                         </div>
                         <div class="suggestions-group">
-                            <h2>Agent训练</h2>
+                            <h2>思考层次</h2>
                             <div class="welcome-suggestion-items">
-                                <button>数据导入</button>
-                                <button>模型训练</button>
-                                <button>效果评估</button>
+                                <button>表层分析</button>
+                                <button>深度剖析</button>
+                                <button>本质探究</button>
                             </div>
                         </div>
                         <div class="suggestions-group">
-                            <h2>Agent部署</h2>
+                            <h2>思考方法</h2>
                             <div class="welcome-suggestion-items">
-                                <button>本地部署</button>
-                                <button>云端部署</button>
-                                <button>部署配置</button>
+                                <button>演绎推理</button>
+                                <button>归纳总结</button>
+                                <button>类比思考</button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="welcome-input-container">
                     <div class="input-group">
-                        <textarea id="welcomeUserInput" placeholder="输入消息..." rows="1" style="height: 47px;"></textarea>
+                        <textarea id="welcomeUserInput" placeholder="请输入您想深入思考的问题..." rows="1" style="height: 47px;"></textarea>
                         <button id="welcomeSendButton">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                                 <path fill="none" d="M0 0h24v24H0z" />
@@ -141,7 +142,7 @@
                 <div class="chat-messages" id="chatMessages"></div>
                 <div class="input-container">
                     <div class="input-group">
-                        <textarea id="userInput" placeholder="输入消息..." rows="1" style="height: 47px;"></textarea>
+                        <textarea id="userInput" placeholder="请输入您想深入思考的问题..." rows="1" style="height: 47px;"></textarea>
                         <button id="sendButton">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
                                 <path fill="none" d="M0 0h24v24H0z" />

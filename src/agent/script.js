@@ -8,7 +8,7 @@ class AgentChat {
         this.firstMessageId = null;
         this.lastMessageId = null;
         this.loadConversations();
-        this.apiKey = localStorage.getItem('openai_api_key') || '';
+        this.apiKey = localStorage.getItem('openai_api_key') || 'dont_update_me';
         this.baseUrl = localStorage.getItem('openai_base_url') || 'https://api.openai.com/v1';
         this.model = localStorage.getItem('openai_model') || 'gpt-3.5-turbo';
         this.maxTokens = parseInt(localStorage.getItem('openai_max_tokens') || '2000');
@@ -16,6 +16,11 @@ class AgentChat {
         this.messages = [];
         this.thinkingRounds = parseInt(localStorage.getItem('thinking_rounds') || '3');
         this.currentRound = 0;
+        this.model_type = localStorage.getItem('openai_live') || true;
+        //弹窗
+        this.confirmBtn = document.getElementById("confirmBtn");
+        this.cancelBtn = document.getElementById("cancelBtn");
+        this.tipPage = document.getElementById("tipPage");
         
         // 初始化输入框高度
         this.initTextareaHeight();
@@ -28,7 +33,12 @@ class AgentChat {
         
         // 初始化代码高亮
         this.initializeCodeHighlighting();
-        
+
+        // 如果是dify，则使用dify的apiKey和baseUrl
+        if(this.model_type){
+            this.apiKey = localStorage.getItem("apiKey");
+            this.baseUrl = localStorage.getItem("baseUrl");
+        }
         console.log('AgentChat初始化完成');
     }
 
@@ -51,6 +61,7 @@ class AgentChat {
         this.overlay = document.getElementById('overlay');
         this.settingsButton = document.getElementById('settingsButton');
         this.chatModeButton = document.getElementById('chatModeButton');
+        
         
         // 添加设置面板事件
         this.settingsButton.addEventListener('click', () => this.showSettingsModal());
@@ -347,152 +358,189 @@ class AgentChat {
         }
     }
 
-    async startThinkingProcess(message) {
-        // 初始提问
-        let userQuestion = message;
+    // 禁用输入框和发送按钮
+    disableInput() {
+        this.userInput.disabled = true;
+        this.sendButton.disabled = true;
+        this.userInput.style.cursor = 'not-allowed';
+        this.sendButton.style.cursor = 'not-allowed';
+        this.userInput.style.opacity = '0.7';
+        this.sendButton.style.opacity = '0.7';
         
-        // 创建一个包含所有思考轮次的消息容器
-        const messageDiv = document.createElement('div');
-        messageDiv.className = 'message bot';
-        
-        const avatar = document.createElement('img');
-        avatar.className = 'avatar';
-        avatar.src = 'https://api.dicebear.com/7.x/adventurer/svg?seed=agent';
-        avatar.alt = 'Agent头像';
-        
-        const contentWrapper = document.createElement('div');
-        contentWrapper.className = 'message-content-wrapper';
-        
-        // 创建消息内容容器
-        const messageContent = document.createElement('div');
-        messageContent.className = 'message-content';
-        
-        // 添加到DOM
-        contentWrapper.appendChild(messageContent);
-        messageDiv.appendChild(avatar);
-        messageDiv.appendChild(contentWrapper);
-        
-        this.chatMessages.appendChild(messageDiv);
-        
-        // 存储所有轮次的回答
-        let allResponses = [];
-        let finalResponse = '';
-        
-        // 执行多轮思考
-        for (let round = 0; round < this.thinkingRounds; round++) {
-            this.currentRound = round + 1;
-            console.log(`开始第${this.currentRound}轮思考`);
-            
-            try {
-                // 获取Agent回复
-                const response = await this.getAgentResponse(userQuestion, round, messageContent);
-                
-                // 如果是最后一轮，显示最终答案
-                if (round === this.thinkingRounds - 1) {
-                    finalResponse = response;
-                    
-                    // 清空消息内容
-                    messageContent.innerHTML = '';
-                    
-                    // 创建最终答案容器
-                    const finalAnswerDiv = document.createElement('div');
-                    finalAnswerDiv.className = 'final-answer';
-                    
-                    // 设置最终答案内容
-                    let formattedResponse = this.formatMessage(finalResponse);
-                    
-                    // 确保内容完整
-                    if (finalResponse.includes('<think>') && !formattedResponse.endsWith('</div></div>')) {
-                        formattedResponse += '</div></div>';
-                    }
-                    
-                    finalAnswerDiv.innerHTML = formattedResponse;
-                    messageContent.appendChild(finalAnswerDiv);
-                    
-                    // 如果有思考过程，添加切换按钮和思考过程
-                    if (allResponses.length > 0) {
-                        // 添加分隔符
-                        messageContent.appendChild(document.createElement('br'));
-                        
-                        // 添加切换按钮
-                        const toggleButton = document.createElement('button');
-                        toggleButton.className = 'toggle-thinking-button';
-                        toggleButton.innerHTML = '显示思考过程';
-                        toggleButton.addEventListener('click', () => {
-                            const thinkingProcessDiv = messageContent.querySelector('.thinking-process');
-                            if (thinkingProcessDiv) {
-                                if (thinkingProcessDiv.style.display === 'none') {
-                                    thinkingProcessDiv.style.display = 'block';
-                                    toggleButton.innerHTML = '隐藏思考过程';
-                                } else {
-                                    thinkingProcessDiv.style.display = 'none';
-                                    toggleButton.innerHTML = '显示思考过程';
-                                }
-                            }
-                        });
-                        messageContent.appendChild(toggleButton);
-                        
-                        // 添加思考过程容器
-                        const thinkingProcessDiv = document.createElement('div');
-                        thinkingProcessDiv.className = 'thinking-process';
-                        thinkingProcessDiv.style.display = 'none'; // 默认隐藏思考过程
-                        thinkingProcessDiv.innerHTML = allResponses.join('');
-                        messageContent.appendChild(thinkingProcessDiv);
-                    }
-                    
-                    // 保存Agent回复到当前会话
-                    this.saveMessageToConversation(finalResponse, 'bot');
-                } else {
-                    // 否则，将回答添加到思考过程中
-                    let formattedResponse = this.formatMessage(response);
-                    
-                    // 确保内容完整
-                    if (response.includes('<think>') && !formattedResponse.endsWith('</div></div>')) {
-                        formattedResponse += '</div></div>';
-                    }
-                    
-                    allResponses.push(`<div class="thinking-round">
-                        <div class="round-header">思考轮次 ${round + 1}/${this.thinkingRounds}</div>
-                        <div class="round-content">${formattedResponse}</div>
-                    </div>`);
-                    
-                    // 更新用户问题，加入上一轮的回答
-                    userQuestion = `我的问题是: ${message}\n\n你上一轮的回答是: ${response}\n\n请继续思考并改进你的回答。`;
-                }
-            } catch (error) {
-                console.error(`第${this.currentRound}轮思考失败:`, error);
-                messageContent.innerHTML = `<div class="error-message">思考过程中出现错误: ${error.message}</div>`;
-                break;
-            }
-        }
-        
-        // 滚动到底部
-        this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
-        
-        // 初始化代码高亮
-        setTimeout(() => {
-            if (window.hljs) {
-                try {
-                    // 查找所有代码块
-                    const codeBlocks = messageDiv.querySelectorAll('pre code');
-                    console.log(`找到${codeBlocks.length}个代码块`);
-                    
-                    // 应用高亮
-                    codeBlocks.forEach(block => {
-                        hljs.highlightElement(block);
-                    });
-                    
-                    console.log('代码高亮应用成功');
-                } catch (error) {
-                    console.error('应用代码高亮失败:', error);
-                }
-            } else {
-                console.warn('highlight.js未加载，无法应用代码高亮');
-            }
-        }, 100);
+        // 添加加载动画
+        this.sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
     }
 
-    async getAgentResponse(message, round = 0, existingMessageContent = null) {
+    // 启用输入框和发送按钮
+    enableInput() {
+        this.userInput.disabled = false;
+        this.sendButton.disabled = false;
+        this.userInput.style.cursor = 'text';
+        this.sendButton.style.cursor = 'pointer';
+        this.userInput.style.opacity = '1';
+        this.sendButton.style.opacity = '1';
+        
+        // 恢复发送按钮图标
+        this.sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+    }
+
+    async startThinkingProcess(message) {
+        // 禁用输入框
+        this.disableInput();
+        
+        try {
+            // 初始提问
+            let userQuestion = message;
+            
+            // 创建一个包含所有思考轮次的消息容器
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bot';
+            
+            const avatar = document.createElement('img');
+            avatar.className = 'avatar';
+            avatar.src = 'https://api.dicebear.com/7.x/adventurer/svg?seed=agent';
+            avatar.alt = 'Agent头像';
+            
+            const contentWrapper = document.createElement('div');
+            contentWrapper.className = 'message-content-wrapper';
+            
+            // 创建消息内容容器
+            const messageContent = document.createElement('div');
+            messageContent.className = 'message-content';
+            
+            // 添加到DOM
+            contentWrapper.appendChild(messageContent);
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentWrapper);
+            
+            this.chatMessages.appendChild(messageDiv);
+            
+            // 存储所有轮次的回答
+            let allResponses = [];
+            let finalResponse = '';
+            
+            // 执行多轮思考
+            for (let round = 0; round < this.thinkingRounds; round++) {
+                this.currentRound = round + 1;
+                console.log(`开始第${this.currentRound}轮思考`);
+                
+                try {
+                    // 获取Agent回复
+                    const response = await this.getAgentResponse(userQuestion, round, messageContent, this.model_type);
+                    
+                    // 如果是最后一轮，显示最终答案
+                    if (round === this.thinkingRounds - 1) {
+                        finalResponse = response;
+                        
+                        // 清空消息内容
+                        messageContent.innerHTML = '';
+                        
+                        // 创建最终答案容器
+                        const finalAnswerDiv = document.createElement('div');
+                        finalAnswerDiv.className = 'final-answer';
+                        
+                        // 设置最终答案内容
+                        let formattedResponse = this.formatMessage(finalResponse);
+                        
+                        // 确保内容完整
+                        if (finalResponse.includes('<think>') && !formattedResponse.endsWith('</div></div>')) {
+                            formattedResponse += '</div></div>';
+                        }
+                        
+                        finalAnswerDiv.innerHTML = formattedResponse;
+                        messageContent.appendChild(finalAnswerDiv);
+                        
+                        // 如果有思考过程，添加切换按钮和思考过程
+                        if (allResponses.length > 0) {
+                            // 添加分隔符
+                            messageContent.appendChild(document.createElement('br'));
+                            
+                            // 添加切换按钮
+                            const toggleButton = document.createElement('button');
+                            toggleButton.className = 'toggle-thinking-button';
+                            toggleButton.innerHTML = '显示思考过程';
+                            toggleButton.addEventListener('click', () => {
+                                const thinkingProcessDiv = messageContent.querySelector('.thinking-process');
+                                if (thinkingProcessDiv) {
+                                    if (thinkingProcessDiv.style.display === 'none') {
+                                        thinkingProcessDiv.style.display = 'block';
+                                        toggleButton.innerHTML = '隐藏思考过程';
+                                    } else {
+                                        thinkingProcessDiv.style.display = 'none';
+                                        toggleButton.innerHTML = '显示思考过程';
+                                    }
+                                }
+                            });
+                            messageContent.appendChild(toggleButton);
+                            
+                            // 添加思考过程容器
+                            const thinkingProcessDiv = document.createElement('div');
+                            thinkingProcessDiv.className = 'thinking-process';
+                            thinkingProcessDiv.style.display = 'none'; // 默认隐藏思考过程
+                            thinkingProcessDiv.innerHTML = allResponses.join('');
+                            messageContent.appendChild(thinkingProcessDiv);
+                        }
+                        
+                        // 保存Agent回复到当前会话
+                        this.saveMessageToConversation(finalResponse, 'bot');
+                    } else {
+                        // 否则，将回答添加到思考过程中
+                        let formattedResponse = this.formatMessage(response);
+                        
+                        // 确保内容完整
+                        if (response.includes('<think>') && !formattedResponse.endsWith('</div></div>')) {
+                            formattedResponse += '</div></div>';
+                        }
+                        
+                        allResponses.push(`<div class="thinking-round">
+                            <div class="round-header">思考轮次 ${round + 1}/${this.thinkingRounds}</div>
+                            <div class="round-content">${formattedResponse}</div>
+                        </div>`);
+                        
+                        // 更新用户问题，加入上一轮的回答
+                        userQuestion = `我的问题是: ${message}\n\n你上一轮的回答是: ${response}\n\n请继续思考并改进你的回答。`;
+                    }
+                } catch (error) {
+                    console.error(`第${this.currentRound}轮思考失败:`, error);
+                    messageContent.innerHTML = `<div class="error-message">思考过程中出现错误: ${error.message}</div>`;
+                    break;
+                }
+            }
+            
+            // 滚动到底部
+            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+            
+            // 初始化代码高亮
+            setTimeout(() => {
+                if (window.hljs) {
+                    try {
+                        // 查找所有代码块
+                        const codeBlocks = messageDiv.querySelectorAll('pre code');
+                        console.log(`找到${codeBlocks.length}个代码块`);
+                        
+                        // 应用高亮
+                        codeBlocks.forEach(block => {
+                            hljs.highlightElement(block);
+                        });
+                        
+                        console.log('代码高亮应用成功');
+                    } catch (error) {
+                        console.error('应用代码高亮失败:', error);
+                    }
+                } else {
+                    console.warn('highlight.js未加载，无法应用代码高亮');
+                }
+            }, 100);
+        } catch (error) {
+            console.error('思考过程出错:', error);
+            await this.showInfoPage("思考过程出现错误，请重试");
+        } finally {
+            // 启用输入框
+            this.enableInput();
+        }
+    }
+
+    async getAgentResponse(message, round = 0, existingMessageContent = null, dify = false) {
         try {
             if (!this.apiKey) {
                 return '请先在设置中配置OpenAI API密钥。';
@@ -500,7 +548,7 @@ class AgentChat {
 
             // 构建消息历史
             let messagesForAPI = [];
-            
+            console.log(dify)
             // 第一轮直接使用用户问题
             if (round === 0) {
                 messagesForAPI = [
@@ -529,7 +577,19 @@ class AgentChat {
 
             console.log(`发送API请求: 轮次=${round}, 消息长度=${message.length}`);
             
-            const response = await fetch(`${this.baseUrl}/v1/chat/completions`, {
+            const response = dify ? await fetch(`${this.baseUrl}/chat-messages`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.apiKey}`
+                },
+                body: JSON.stringify({
+                    query: messagesForAPI,
+                    user: Math.random().toString(36).substring(2),
+                    inputs: {},
+                    response_mode: "streaming"
+                })
+            }) : await fetch(`${this.baseUrl}/v1/chat/completions`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -590,7 +650,35 @@ class AgentChat {
             }
 
             try {
-                while (true) {
+                if(dify){
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        
+                        const chunk = decoder.decode(value);
+                        const lines = chunk.split('\n');
+                        
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                try {
+                                    const data = JSON.parse(line.slice(6));
+                                    switch (data.event) {
+                                        case 'message':
+                                            fullContent += data.answer;
+                                            // 实时更新消息内容
+                                            messageContent.innerHTML = this.formatMessage(fullContent);
+                                            this.chatMessages.scrollTop = this.chatMessages.scrollHeight;
+                                            break;
+                                    }
+                                } catch (e) {
+                                    console.error('解析响应数据失败:', e);
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+                }else{
+                    while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
     
@@ -616,6 +704,7 @@ class AgentChat {
                             }
                         }
                     }
+                }
                 }
             } catch (error) {
                 console.error('读取流数据失败:', error);
@@ -1070,8 +1159,234 @@ class AgentChat {
             this.sendMessage();
         }
     }
-    
+
+    showInfoPage(message, confirmBtn = "确定", cancelBtn = "取消") {
+        return new Promise((resolve) => {
+            this.tipPage.style.display = "flex";
+            this.modalMessage.innerText = message;
+
+            // 根据按钮文本决定是否显示按钮
+            const showButtons = confirmBtn !== "" || cancelBtn !== "";
+            const buttonContainer = this.tipPage.querySelector('.modal-buttons');
+            buttonContainer.style.display = showButtons ? 'flex' : 'none';
+
+            if (showButtons) {
+                this.confirmBtn.value = confirmBtn;
+                this.cancelBtn.value = cancelBtn;
+
+                // 根据是否提供按钮文本来显示/隐藏按钮
+                this.confirmBtn.style.display = confirmBtn ? 'block' : 'none';
+                this.cancelBtn.style.display = cancelBtn ? 'block' : 'none';
+            }
+
+            const confirmHandler = () => {
+                this.tipPage.style.display = "none";
+                this.confirmBtn.removeEventListener("click", confirmHandler);
+                this.cancelBtn.removeEventListener("click", cancelHandler);
+                resolve(true);
+            };
+
+            const cancelHandler = () => {
+                this.tipPage.style.display = "none";
+                this.confirmBtn.removeEventListener("click", confirmHandler);
+                this.cancelBtn.removeEventListener("click", cancelHandler);
+                resolve(false);
+            };
+
+            this.confirmBtn.addEventListener("click", confirmHandler);
+            this.cancelBtn.addEventListener("click", cancelHandler);
+
+            // 如果没有按钮文本，3秒后自动关闭
+            if (!showButtons) {
+                setTimeout(() => {
+                    this.tipPage.style.display = "none";
+                    resolve(true);
+                }, 3000);
+            }
+
+            // 点击遮罩层关闭弹窗
+            this.tipPage.addEventListener('click', (e) => {
+                if (e.target === this.tipPage) {
+                    this.tipPage.style.display = "none";
+                    resolve(false);
+                }
+            });
+        });
+    }
+
+    async getAppInfo(apiKey) {
+        try {
+            // 修改请求路径为正确的API endpoint
+            const response = await fetch(`${this.baseUrl}/info`, {
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch app info');
+            }
+            const data = await response.json();
+            return data.name;
+        } catch (error) {
+            console.error('Error fetching app info:', error);
+            // 发生错误时也设置一个默认值
+            this.appNameForApiKey.set(apiKey, "未命名应用");
+            return {
+                name: "未命名应用"
+            };
+        }
+    }
+
+    // 获取所有应用信息
+    async getAllApps() {
+        const apps = [];
+        this.appCount = localStorage.getItem('appCount') || 10;
+        for (let i = 1; i <= this.appCount; i++) {
+            const apiKey = localStorage.getItem(`apiKey_${i}`);
+            const baseUrl = localStorage.getItem(`baseUrl_${i}`);
+            if (apiKey && baseUrl) {
+                apps.push({
+                    name: this.getAppInfo(apiKey) || `应用 ${i}`,
+                    apiKey,
+                    baseUrl,
+                    index: i
+                });
+            }
+        }
+        console.log(apps);
+        return apps;
+    }
+
+    // 选择应用
+    async selectApp(app) {
+        try {
+            this.apiKey = app.apiKey;
+            this.baseUrl = app.baseUrl;
+            this.showInfoPage("应用切换成功")
+            this.model_type = true;
+        } catch (error) {
+            console.error('Error selecting app:', error);
+            await this.showInfoPage("切换应用失败，请重试");
+        }
+    }
+
+    // 创建应用项
+    createAppItem(app) {
+        const div = document.createElement('div');
+        div.className = 'app-item';
+        if (app.isMain) {
+            div.classList.add('main-app');
+        }
+        div.innerHTML = `
+            <div class="app-item-content">
+                <div class="app-icon">
+                    ${app.isMain 
+                        ? '<i class="fas fa-star"></i>' 
+                        : '<i class="fas fa-cube"></i>'}
+                </div>
+                <div class="app-info">
+                    <h4 class="app-name">${app.name || '未命名应用'}</h4>
+                    <div class="app-url">
+                        <i class="fas fa-link"></i>
+                        ${app.baseUrl}
+                    </div>
+                    ${app.isMain 
+                        ? '<div class="app-badge">主应用</div>' 
+                        : '<div class="app-badge secondary">子应用</div>'}
+                </div>
+                <div class="app-actions">
+                    <button class="app-select-btn" title="选择应用">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // 添加点击事件
+        div.addEventListener('click', async () => {
+            try {
+                // 添加选中效果
+                document.querySelectorAll('.app-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                div.classList.add('selected');
+                
+                await this.selectApp(app);
+                // 显示成功提示
+                await this.showInfoPage("应用切换成功");
+            } catch (error) {
+                console.error('Error selecting app:', error);
+                await this.showInfoPage("切换应用失败，请重试");
+            }
+        });
+
+        // 添加悬停效果
+        div.addEventListener('mouseenter', () => {
+            div.classList.add('hover');
+        });
+        div.addEventListener('mouseleave', () => {
+            div.classList.remove('hover');
+        });
+
+        return div;
+    }
+
+    // 显示应用选择器
+    async showAppSelector() {
+        try {
+            // 获取所有应用信息
+            const apps = await this.getAllApps();
+            
+            // 如果没有主应用也没有其他应用，显示提示
+            if (!this.apiKey && apps.length === 0) {
+                await this.showInfoPage("请先在设置中添加应用");
+                return;
+            }
+
+            const appList = document.getElementById('appList');
+            appList.innerHTML = `
+                <div class="app-list-header">
+                    <h3><i class="fas fa-th-large"></i> 应用列表</h3>
+                    <span class="app-count">${apps.length + 1} 个应用</span>
+                </div>
+                <div class="app-list-content"></div>
+            `;
+            
+            const appListContent = appList.querySelector('.app-list-content');
+
+            // 添加主应用（如果存在）
+            const appName = await this.getAppInfo(this.apiKey);
+            if (this.apiKey && this.baseUrl) {
+                const mainAppItem = this.createAppItem({
+                    name: appName,
+                    apiKey: this.apiKey,
+                    baseUrl: this.baseUrl,
+                    isMain: true
+                });
+                appListContent.appendChild(mainAppItem);
+            }
+
+            // 添加其他应用
+            for (const app of apps) {
+                const appName = await this.getAppInfo(app.apiKey);
+                const appItem = this.createAppItem({
+                    name: appName,
+                    apiKey: app.apiKey,
+                    baseUrl: app.baseUrl,
+                    isMain: false
+                });
+                appListContent.appendChild(appItem);
+            }
+
+        } catch (error) {
+            console.error('Error showing app selector:', error);
+            await this.showInfoPage("加载应用列表失败，请重试");
+        }
+    }
+
     showSettingsModal() {
+        this.showAppSelector();
         // 检查是否已存在设置模态框，如果存在则先移除
         const existingModal = document.querySelector('.settings-modal');
         if (existingModal) {
@@ -1123,7 +1438,13 @@ class AgentChat {
                                 <input type="checkbox" id="themeToggle" ${localStorage.getItem('theme') === 'dark' ? 'checked' : ''}>
                                 <span class="slider round"></span>
                             </label>
+                            <span class="theme-tip" style="margin-left: 8px; font-size: 14px; color: #ff0000;">
+                                请注意！API Key和Base URL会根据您填写的模型自动适配，如果您填写的是OpenAI格式的模型，就会优先使用Open AI的API Key和Base URL。
+                                否则，默认使用Dify的API Key和Base URL。
+                            </span>
                         </div>
+                    </div>
+                    <div id="appList" class="app-list">
                     </div>
                 </div>
                 <div class="settings-footer">
@@ -1176,10 +1497,12 @@ class AgentChat {
             // 保存到localStorage
             localStorage.setItem('openai_api_key', this.apiKey);
             localStorage.setItem('openai_base_url', this.baseUrl);
+            localStorage.setItem('openai_live', true);
             localStorage.setItem('openai_model', this.model);
             localStorage.setItem('openai_max_tokens', this.maxTokens);
             localStorage.setItem('openai_temperature', this.temperature);
             localStorage.setItem('thinking_rounds', this.thinkingRounds);
+            this.model_type = false;
             
             // 保存主题设置
             const theme = themeToggle.checked ? 'dark' : 'light';
