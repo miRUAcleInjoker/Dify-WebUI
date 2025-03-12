@@ -69,6 +69,8 @@ class ChatApp {
         this.settingsWrapper = document.getElementById('settingsWrapper');
         this.prevButton = document.getElementById('prevButton');
         this.nextButton = document.getElementById('nextButton');
+        this.thinkMode = document.getElementById('think-mode');
+        this.chatThinkMode = document.getElementById('chat-think-mode');
         this.currentSettingsIndex = 0;
         this.appNameForApiKey = new Map();
         this.settingsInitialized = false;
@@ -93,6 +95,9 @@ class ChatApp {
 
         // 初始化时更新应用名称
         this.updateAppName();
+
+        console.log("思考模式按钮元素:", this.thinkMode);
+        console.log("聊天页思考模式按钮元素:", this.chatThinkMode);
     }
 
     // 修改导航按钮状态更新方法
@@ -707,6 +712,34 @@ class ChatApp {
             this.currentSettingsIndex = Math.min(this.settingsWrapper.children.length - 1, this.currentSettingsIndex + 1);
             this.scrollToPanel(this.settingsWrapper.children[this.currentSettingsIndex]);
         });
+
+        // 确保元素存在
+        if(this.thinkMode) {
+            console.log("找到欢迎页思考模式按钮");
+            this.thinkMode.addEventListener('click', (e) => {
+                console.log("点击欢迎页思考模式按钮");
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("准备跳转到:", '../agent/index.html');
+                window.location.href = '../agent/index.html';
+            });
+        } else {
+            console.error("找不到欢迎页思考模式按钮元素");
+        }
+        
+        // 聊天界面思考模式按钮
+        if(this.chatThinkMode) {
+            console.log("找到聊天页思考模式按钮");
+            this.chatThinkMode.addEventListener('click', (e) => {
+                console.log("点击聊天页思考模式按钮");
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("准备跳转到:", '../agent/index.html');
+                window.location.href = '../agent/index.html';
+            });
+        } else {
+            console.error("找不到聊天页思考模式按钮元素");
+        }
 
         // 联网搜索切换按钮
         this.welcomeOnlineSearchToggle.addEventListener('click', () => this.toggleOnlineSearch());
@@ -1499,7 +1532,7 @@ class ChatApp {
 
     loadSettings() {
         // 从 localStorage 加载配置，如果没有则使用默认值
-        this.apiKey = localStorage.getItem('apiKey') || '';
+        this.apiKey = localStorage.getItem('apiKey') || 'dont_update_me';
         this.baseUrl = localStorage.getItem('baseUrl') || 'https://api.dify.ai';
         this.user = localStorage.getItem('userId') || '';
         document.getElementById('userNameInput').value = this.userName;
@@ -1530,6 +1563,7 @@ class ChatApp {
 
             // 更新应用计数
             this.appCount = maxAppIndex;
+            localStorage.setItem(`appCount`, this.appCount);
 
             // 恢复所有子应用设置面板
             for (let i = 2; i <= this.appCount; i++) {
@@ -1752,6 +1786,7 @@ class ChatApp {
 
     addNewAppSettings() {
         this.appCount++;
+        localStorage.setItem(`appCount`, this.appCount);
         const newSettingsContent = document.createElement('div');
         newSettingsContent.className = 'settings-content';
 
@@ -1830,6 +1865,7 @@ class ChatApp {
 
             settingsContent.remove();
             this.appCount--;
+            localStorage.setItem(`appCount`, this.appCount);
 
             // 重新排列剩余的应用设置
             const appSettings = Array.from(this.settingsWrapper.children).filter(
@@ -1871,6 +1907,7 @@ class ChatApp {
         // 保存到 localStorage
         localStorage.setItem(`apiKey_${appIndex}`, apiKey);
         localStorage.setItem(`baseUrl_${appIndex}`, baseUrl);
+        localStorage.setItem(`modelType_${appIndex}`, "dify");
 
         // 获取应用名称并更新标题
         this.getAppInfo(apiKey).then(() => {

@@ -9,6 +9,102 @@
     }
 }
 
+@keyframes slideInFromTop {
+    0% {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInFromBottom {
+    0% {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.page-enter {
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+.header-enter {
+    animation: slideInFromTop 0.8s ease-out forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+.content-enter {
+    animation: slideInFromBottom 0.8s ease-out forwards;
+    animation-delay: 0.4s;
+    opacity: 0;
+}
+
+.button-enter {
+    animation: scaleIn 0.6s ease-out forwards;
+    animation-delay: 0.6s;
+    opacity: 0;
+}
+
+@keyframes messageSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.message {
+    animation: messageSlideIn 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+.message:nth-child(n) {
+    animation-delay: calc(0.1s * var(--message-index, 0));
+}
+
+@keyframes typingEffect {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+.typing-effect {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typingEffect 2s steps(40, end);
+}
+
+@keyframes pulseEffect {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.pulse {
+    animation: pulseEffect 2s infinite ease-in-out;
+}
+
 @keyframes typing {
     from {
         opacity: 0;
@@ -103,9 +199,36 @@
         opacity: 0;
     }
     100% {
-        transform: scale(2);
-        opacity: 0;
+        transform: scale(1);
+        opacity: 0.5;
     }
+}
+
+.message-typing {
+    animation: typing 0.3s ease-out forwards;
+}
+
+.message-loading {
+    animation: typingPulse 1.5s infinite;
+}
+
+.message-send {
+    animation: sendPulse 0.3s ease-out;
+}
+
+.message-copy {
+    animation: copiedPulse 0.3s ease-out;
+}
+
+.message-shimmer {
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
 }
 
 @keyframes waveform {
