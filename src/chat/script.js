@@ -968,19 +968,23 @@ class ChatApp {
             message = `你好GPT，我正在进行语音对话。请以友善的态度简要回答我的问题，并保持回答精炼。
                         以下是我的问题：${message}`;
         }
+        let inputs = {};
         if (this.onlineSearch) {
-            const searchResults = await this.searchSearxng(message);
-            if (searchResults && searchResults.length) {
-                const searchResultsJson = JSON.stringify(searchResults);
-                message = `使用我提供的网页搜索结果，回答我的问题。确保使用markdown链接语法引用结果。我的问题是:${message}, 搜索结果是:${searchResultsJson}`;
-            }
+            // const searchResults = await this.searchSearxng(message);
+            // if (searchResults && searchResults.length) {
+            //     const searchResultsJson = JSON.stringify(searchResults);
+            //     message = `使用我提供的网页搜索结果，回答我的问题。确保使用markdown链接语法引用结果。我的问题是:${message}, 搜索结果是:${searchResultsJson}`;
+            // }
+            inputs = {
+                enable_search: "true"
+            };
         }
         const sendData = {
             query: message,
             response_mode: 'streaming',
             conversation_id: this.currentConversationId,
             user: this.user,
-            inputs: {}
+            inputs: inputs
         };
         // 如果有附件，添加到发送数据中
         if (this.currentUploadedFile) {
