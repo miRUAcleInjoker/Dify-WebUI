@@ -61,7 +61,7 @@ class ChatApp {
         this.audioChunks = [];
         this.currentAudioFile = null;
         this.audioStatus = false;
-        this.appName = 'DifyWebUI';
+        this.appName = 'ChatJsrg';
         //弹窗
         this.confirmBtn = document.getElementById("confirmBtn");
         this.cancelBtn = document.getElementById("cancelBtn");
@@ -102,8 +102,6 @@ class ChatApp {
         // 初始化时更新应用名称
         this.updateAppName();
 
-        console.log("思考模式按钮元素:", this.thinkMode);
-        console.log("聊天页思考模式按钮元素:", this.chatThinkMode);
     }
 
     // 修改导航按钮状态更新方法
@@ -729,12 +727,9 @@ class ChatApp {
 
         // 确保元素存在
         if(this.thinkMode) {
-            console.log("找到欢迎页思考模式按钮");
             this.thinkMode.addEventListener('click', (e) => {
-                console.log("点击欢迎页思考模式按钮");
                 e.preventDefault();
                 e.stopPropagation();
-                console.log("准备跳转到:", '../agent/index.html');
                 window.location.href = '../agent/index.html';
             });
         } else {
@@ -743,12 +738,9 @@ class ChatApp {
         
         // 聊天界面思考模式按钮
         if(this.chatThinkMode) {
-            console.log("找到聊天页思考模式按钮");
             this.chatThinkMode.addEventListener('click', (e) => {
-                console.log("点击聊天页思考模式按钮");
                 e.preventDefault();
                 e.stopPropagation();
-                console.log("准备跳转到:", '../agent/index.html');
                 window.location.href = '../agent/index.html';
             });
         } else {
@@ -1485,7 +1477,7 @@ class ChatApp {
         await this.getAppInfo();
         const welcomeMessage = document.getElementsByTagName('h1')[0];
         welcomeMessage.innerText = '';
-        this.typeWriter(`Hi, ${this.userName}, I'm ${this.appNameForApiKey.get(this.apiKey)}. How can I help you?`, welcomeMessage);
+        this.typeWriter(`你好，${this.userName}，我是 ${this.appNameForApiKey.get(this.apiKey)}。有什么可以帮助你的吗？`, welcomeMessage);
     }
 
     async loadMoreMessages() {

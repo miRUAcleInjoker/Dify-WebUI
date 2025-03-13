@@ -438,12 +438,6 @@
     /* 间距优化 */
     padding-left: 0.75em; /* 增加缩进可视性 */
     padding-right: 0.5em; /* 添加右侧呼吸空间 */
-    
-    /* 可选深色模式适配 */
-    @media (prefers-color-scheme: dark) {
-        color-scheme: dark;
-        text-shadow: 0 0 0.5px currentColor; /* 提升暗色对比度 */
-    }
 }
 
 /* 消息状态样式 */
@@ -940,32 +934,6 @@
     
     .message-content-wrapper {
         min-width: 160px;
-    }
-}
-
-/* 优化暗色模式 */
-@media (prefers-color-scheme: dark) {
-    .message-content {
-        background: linear-gradient(
-            to right,
-            rgba(30, 30, 30, 0.95),
-            rgba(30, 30, 30, 0.98)
-        );
-        color: #e0e0e0;
-    }
-    
-    .message.user .message-content {
-        background: linear-gradient(
-            135deg,
-            var(--user-message-bg-dark, #2a2a2a),
-            #1a1a1a
-        );
-        color: rgba(255, 255, 255, 0.9);
-    }
-    
-    .message-content code:not(pre code) {
-        background: rgba(255, 255, 255, 0.1);
-        color: #ff69b4;
     }
 }
 
