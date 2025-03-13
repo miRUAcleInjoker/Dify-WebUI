@@ -1,8 +1,14 @@
 class ChatApp {
     constructor() {
+        // 添加联网搜索相关元素和状态
         this.welcomeOnlineSearchToggle = document.getElementById('welcomeOnlineSearchToggle');
         this.onlineSearchToggle = document.getElementById('onlineSearchToggle');
         this.onlineSearch = false;
+        // 添加知识库相关元素和状态
+        this.welcomeKnowledgeBaseToggle = document.getElementById('welcomeKnowledgeBaseToggle');
+        this.knowledgeBaseToggle = document.getElementById('knowledgeBaseToggle');
+        this.useKnowledgeBase = false;
+
         this.chatMessages = document.getElementById('chatMessages');
         this.userInput = document.getElementById('userInput');
         this.sendButton = document.getElementById('sendButton');
@@ -622,6 +628,10 @@ class ChatApp {
                 this.showInfoPage("在线搜索模式下无法上传文件", "", "");
                 return;
             }
+            if (this.useKnowledgeBase) {
+                this.showInfoPage("知识库检索模式下无法上传文件", "", "");
+                return;
+            }
             this.fileInput.click()
         });
         this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
@@ -673,6 +683,10 @@ class ChatApp {
         this.welcomeUploadButton.addEventListener('click', () => {
             if (this.onlineSearch) {
                 this.showInfoPage("在线搜索模式下无法上传文件", "", "");
+                return;
+            }
+            if (this.useKnowledgeBase) {
+                this.showInfoPage("知识库检索模式下无法上传文件", "", "");
                 return;
             }
             this.welcomeFileInput.click()
@@ -744,12 +758,21 @@ class ChatApp {
         // 联网搜索切换按钮
         this.welcomeOnlineSearchToggle.addEventListener('click', () => this.toggleOnlineSearch());
         this.onlineSearchToggle.addEventListener('click', () => this.toggleOnlineSearch());
+
+        // 知识库切换按钮
+        this.welcomeKnowledgeBaseToggle.addEventListener('click', () => this.toggleKnowledgeBase());
+        this.knowledgeBaseToggle.addEventListener('click', () => this.toggleKnowledgeBase());
     }
 
     toggleOnlineSearch() {
         // 有附件时不允许切换
         if (this.currentUploadedFile) {
             this.showInfoPage("请先删除文件后再开启联网搜索", "", "");
+            return;
+        }
+        // 启动知识库时不允许切换
+        if (this.useKnowledgeBase) {
+            this.showInfoPage("请先关闭知识库后再开启联网搜索", "", "");
             return;
         }
 
@@ -763,27 +786,25 @@ class ChatApp {
         }
     }
 
-     // 搜索引擎
-     async searchSearxng(query) {
-        const url = `http://localhost:8080/search?q=${encodeURIComponent(query)}&format=json&engines=duckduckgo`;
-        try {
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            const data = await response.json();
-            // 处理返回值，只保留搜索结果的标题、URL和摘要
-            const short_result = data.results.map(r => {
-                return {
-                    title: r.title,
-                    url: r.url,
-                    content: r.content
-                };
-            });
-            console.log('搜索结果:', short_result);
-            return short_result;
-        } catch (error) {
-            console.error('There has been a problem with your fetch operation:', error);
+    toggleKnowledgeBase() {
+        // 有附件时不允许切换
+        if (this.currentUploadedFile) {
+            this.showInfoPage("请先删除文件后再开启知识库", "", "");
+            return;
+        }
+        // 联网搜索时不允许切换
+        if (this.onlineSearch) {
+            this.showInfoPage("请先关闭联网搜索后再开启知识库", "", "");
+            return;
+        }
+
+        this.useKnowledgeBase = !this.useKnowledgeBase;
+        if (this.useKnowledgeBase) {
+            this.welcomeKnowledgeBaseToggle.style.backgroundColor = '#5bacfd';
+            this.knowledgeBaseToggle.style.backgroundColor = '#5bacfd';
+        } else {
+            this.welcomeKnowledgeBaseToggle.style.backgroundColor = '#ccc';
+            this.knowledgeBaseToggle.style.backgroundColor = '#ccc';
         }
     }
 
@@ -1029,6 +1050,12 @@ class ChatApp {
         if (this.onlineSearch) {
             sendData.inputs = {
                 enable_search: "true"
+            }
+        }
+        // 如果开启知识库，添加到发送数据中
+        if (this.useKnowledgeBase) {
+            sendData.inputs = {
+                enable_knowledge: "true"
             }
         }
         // 创建机器人响应的消息容器

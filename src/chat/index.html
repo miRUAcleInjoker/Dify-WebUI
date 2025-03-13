@@ -155,12 +155,17 @@
                                             d="M21 15v3h3v2h-3v3h-2v-3h-3v-2h3v-3h2zm-10 3H5v-3H3v3a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-3h-2v3zm-7-9h12V7H4v2zm14-6H4a2 2 0 0 0-2 2h16a2 2 0 0 0-2-2z" />
                                     </svg>
                                 </button>
-                                <input type="file" id="welcomeFileInput" accept=".txt, .md, .pdf, .docx"
-                                 multiple style="display: none">
+                                <input type="file" id="welcomeFileInput" accept=".txt, .md, .pdf, .docx" multiple style="display: none">
                                  
                                 <div id="welcomeOnlineSearchToggle"
-                                    style="width: 150px; height: 60px; background-color: lightgray; color: white; text-align: center; line-height: 60px; cursor: pointer; border-radius: 5px;">
+                                    style="width: 100px; height: 60px; background-color: lightgray; color: white; text-align: center; line-height: 60px; cursor: pointer; border-radius: 5px;">
                                     🌏联网搜索
+                                </div>
+                                
+                                <!-- 添加知识库开关按钮 -->
+                                <div id="welcomeKnowledgeBaseToggle"
+                                    style="width: 100px; height: 60px; background-color: lightgray; color: white; text-align: center; line-height: 60px; cursor: pointer; border-radius: 5px; margin-left: 10px;">
+                                    📚知识库
                                 </div>
 
                                 <textarea id="welcomeUserInput" placeholder="输入消息..." rows="1"></textarea>
@@ -203,11 +208,17 @@
                                     d="M21 15v3h3v2h-3v3h-2v-3h-3v-2h3v-3h2zm-10 3H5v-3H3v3a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-3h-2v3zm-7-9h12V7H4v2zm14-6H4a2 2 0 0 0-2 2h16a2 2 0 0 0-2-2z" />
                             </svg>
                         </button>
-                        <input type="file" id="fileInput" multiple style="display: none">
+                        <input type="file" id="fileInput" accept=".txt, .md, .pdf, .docx" multiple style="display: none">
 
                         <div id="onlineSearchToggle"
-                            style="width: 150px; height: 60px; background-color: lightgray; color: white; text-align: center; line-height: 60px; cursor: pointer; border-radius: 5px;">
+                            style="width: 100px; height: 60px; background-color: lightgray; color: white; text-align: center; line-height: 60px; cursor: pointer; border-radius: 5px;">
                             🌏联网搜索
+                        </div>
+                        
+                        <!-- 添加知识库开关按钮 -->
+                        <div id="knowledgeBaseToggle"
+                            style="width: 100px; height: 60px; background-color: lightgray; color: white; text-align: center; line-height: 60px; cursor: pointer; border-radius: 5px; margin-left: 10px;">
+                            📚知识库
                         </div>
 
                         <textarea id="userInput" placeholder="输入消息..." rows="1"></textarea>
