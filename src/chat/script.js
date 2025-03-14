@@ -957,6 +957,9 @@ class ChatApp {
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
             
+            // 标记这是否是新对话的第一条消息
+            const isNewConversation = !this.currentConversationId;
+
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
@@ -1025,6 +1028,12 @@ class ChatApp {
                     }
                 }
             }
+
+            // 在消息接收完成后，如果是新会话的第一条消息，自动重命名会话
+            if (isNewConversation && this.currentConversationId) {
+                // 自动生成会话名称
+                await this.renameConversation(this.currentConversationId, '', true);
+            }
         } catch (error) {
             console.error('发送消息失败:', error);
             messageContent.textContent = '抱歉，发生了错误。请稍后重试。';
@@ -1090,6 +1099,42 @@ class ChatApp {
             return {
                 name: "未命名应用"
             };
+        }
+    }
+
+    /**
+     * 重命名对话。
+     *
+     * @param {string} conversationId - 要重命名的对话ID。
+     * @param {string} [newName] - 对话的新名称。若 auto_generate 为 true 时，该参数可不传。
+     * @param {boolean} [auto_generate] - 是否自动生成名称的标志。
+     * @returns {Promise<string|undefined>} 如果成功，返回对话的新名称。
+     * @throws 如果重命名过程失败，将抛出错误。
+     */
+    async renameConversation(conversationId, newName, auto_generate) {
+        try {
+            const response = await fetch(`${this.baseUrl}/conversations/${conversationId}/name`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user: this.user,
+                    name: newName,
+                    auto_generate: auto_generate
+                })
+            }
+            );
+            const data = await response.json();
+            if (data.name) {
+                console.log('会话重命名成功');
+                return data.name;
+            } else {
+                console.log('会话重命名失败');
+            }
+        } catch (error) {
+            console.error('重命名会话失败:', error);
         }
     }
 
